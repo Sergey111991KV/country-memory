@@ -53,7 +53,7 @@ npm run cap:open:ios
 
 1. **Activity** — статус *Processing* (15–60 мин).
 2. **TestFlight → Builds** — билд **1.0.1 (2)** → *Ready to Test*.
-3. **Export Compliance** — если жёлтый значок: обычно «No» для стандартного HTTPS.
+3. **Export Compliance** — в Connect: **None of the algorithms mentioned above** (только HTTPS через iOS). В `Info.plist` уже есть `ITSAppUsesNonExemptEncryption = false` для следующих билдов.
 4. **INTERNAL TESTING → My** — включить билд для группы.
 5. **Distribution → iOS App 1.0 → Build** — выбрать билд 1.0.1 (2).
 

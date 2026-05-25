@@ -27,36 +27,36 @@
         <filter [attr.id]="windFilterId" x="-12%" y="-12%" width="124%" height="124%">
           <feTurbulence
             type="fractalNoise"
-            baseFrequency="0.011 0.028"
-            numOctaves="1"
+            baseFrequency="0.014 0.038"
+            numOctaves="2"
             seed="3"
             result="noise"
           >
             <animate
               attributeName="baseFrequency"
-              dur="7s"
+              dur="5.5s"
               calcMode="spline"
-              keyTimes="0;0.4;0.75;1"
-              keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1"
-              values="0.010 0.026;0.013 0.034;0.009 0.030;0.010 0.026"
+              keyTimes="0;0.35;0.7;1"
+              keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1"
+              values="0.012 0.032;0.018 0.048;0.014 0.042;0.012 0.032"
               repeatCount="indefinite"
             />
           </feTurbulence>
-          <feGaussianBlur in="noise" stdDeviation="1.8" result="smoothNoise" />
+          <feGaussianBlur in="noise" stdDeviation="2.2" result="smoothNoise" />
           <feDisplacementMap
             in="SourceGraphic"
             in2="smoothNoise"
-            scale="5"
+            scale="8"
             xChannelSelector="R"
             yChannelSelector="G"
           >
             <animate
               attributeName="scale"
-              dur="7s"
+              dur="5.5s"
               calcMode="spline"
               keyTimes="0;0.5;1"
               keySplines="0.42 0 0.58 1;0.42 0 0.58 1"
-              values="3.5;6.5;3.5"
+              values="6;13;6"
               repeatCount="indefinite"
             />
           </feDisplacementMap>

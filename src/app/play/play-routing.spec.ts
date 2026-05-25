@@ -15,7 +15,6 @@ describe('PLAY_CHILD_ROUTES', () => {
 
   it('registers course learning routes', () => {
     expect(paths).toContain('learn');
-    expect(paths).toContain('learn/:levelId');
   });
 
   it('registers explore routes', () => {

@@ -38,6 +38,7 @@ import { PlaySessionCompleteService } from '../../core/services/play-session-com
 import { PlaySessionService } from '../../core/services/play-session.service';
 import { SessionAccessService } from '../../core/services/session-access.service';
 import { ensurePlaySessionAccess } from '../../core/utils/play-access';
+import { ensureThreeGlobal } from '../../core/utils/three-global';
 import { buildSoloSessionResult } from '../../core/utils/play-session-result-builders';
 import { GlobeRenderLoop } from '../../core/utils/globe-render-loop';
 
@@ -346,7 +347,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private getThree(): ThreeNamespace {
     const w = window as Window & { THREE?: ThreeNamespace };
     if (!w.THREE) {
-      throw new Error('THREE is not initialized (main.ts)');
+      throw new Error('THREE is not initialized');
     }
     return w.THREE;
   }
@@ -366,7 +367,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       return;
     }
 
-    const THREE = this.getThree();
+    const THREE = await ensureThreeGlobal();
     this.threeLib = THREE;
     this.raycaster = new THREE.Raycaster();
     this.pointerNdc = new THREE.Vector2();

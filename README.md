@@ -55,7 +55,7 @@ Free tier: **10 completed games** total, then subscription required. Premium unl
 
 ## Data
 
-- Country catalog: `src/assets/data/countries.json`
+- Country catalog: `src/assets/data/countries.json` (localized names via `i18n-iso-countries`, capitals via Wikidata — regenerate with `npm run data:localize-countries`)
 - GeoJSON for globe: `src/assets/geo/countries.geojson`
 - Flag images: [FlagCDN](https://flagcdn.com) via `FlagAssetsService`
 

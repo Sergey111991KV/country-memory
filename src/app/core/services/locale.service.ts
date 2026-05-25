@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable, inject } from '@angular/core';
+import { ApplicationRef, Injectable, inject, signal } from '@angular/core';
 
 import type { AppLang } from '../i18n/messages';
 import { MESSAGES } from '../i18n/messages';
@@ -64,6 +64,9 @@ export class LocaleService {
   private lang: AppLang = 'en';
   private hydrated = false;
 
+  /** Bumped on hydrate/setLanguage so pure i18n pipes can invalidate. */
+  readonly langSig = signal<AppLang>('en');
+
   /** Call once at startup before first translated UI. */
   async hydrate(): Promise<void> {
     if (this.hydrated) {
@@ -76,6 +79,7 @@ export class LocaleService {
       this.lang = detectLangFromNavigator();
     }
     this.applyDocumentLang();
+    this.langSig.set(this.lang);
     this.hydrated = true;
   }
 
@@ -95,6 +99,7 @@ export class LocaleService {
       return;
     }
     this.lang = code;
+    this.langSig.set(code);
     await this.storage.set(KEY, code);
     this.applyDocumentLang();
     this.appRef.tick();

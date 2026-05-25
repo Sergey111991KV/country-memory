@@ -53,5 +53,7 @@
 	<string>Flagfield may save an image to your photo library only when you choose to export or share.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Flagfield may use the camera only if you choose to take a photo to share from the app.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

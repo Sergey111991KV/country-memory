@@ -1,10 +1,13 @@
 .play-hub {
   --play-tab-bar-offset: calc(56px + env(safe-area-inset-bottom, 0px));
-  --play-arc-radius: 220px;
-  --play-arc-sink: 210px;
-  --play-arc-window: 176px;
-  --play-dock-height: calc(var(--play-arc-window) + 20px);
-  --play-dock-height-modes: calc(var(--play-arc-window) + 56px);
+  --play-dock-card-width: 96px;
+  --play-dock-card-height: 112px;
+  --play-dock-strip-height: 124px;
+  --play-dock-nav-height: 44px;
+  --play-dock-height: calc(var(--play-dock-strip-height) + 12px);
+  --play-dock-height-modes: calc(
+    var(--play-dock-nav-height) + var(--play-dock-strip-height) + 12px
+  );
   --background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--ion-color-primary) 10%, var(--ion-background-color)) 0%,
@@ -216,18 +219,45 @@ html.ion-palette-dark .play-daily {
   font-size: 1.95rem;
 }
 
-/* —— Bottom mode dock (circular wheel) —— */
+/* —— Bottom mode dock (horizontal strip) —— */
 .play-mode-dock {
   position: fixed;
   left: 0;
   right: 0;
   bottom: var(--play-tab-bar-offset);
   z-index: 20;
-  padding: 0 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 0 8px;
   pointer-events: none;
+  background: linear-gradient(
+    to top,
+    var(--ion-background-color) 72%,
+    color-mix(in srgb, var(--ion-background-color) 88%, transparent) 100%
+  );
 
   &--modes {
     --play-dock-height: var(--play-dock-height-modes);
+  }
+
+  &--exit .play-mode-dock__strip {
+    opacity: 0;
+  }
+
+  &--enter .play-mode-dock__strip {
+    opacity: 0;
+    animation: play-dock-strip-in 0.28s ease forwards;
+  }
+}
+
+@keyframes play-dock-strip-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
@@ -237,7 +267,7 @@ html.ion-palette-dark .play-daily {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px 4px;
+  padding: 6px 12px 0;
   pointer-events: auto;
 }
 
@@ -267,158 +297,86 @@ html.ion-palette-dark .play-daily {
   color: color-mix(in srgb, #a78bfa 85%, #ffffff);
 }
 
-.play-mode-dock__row {
+.play-mode-dock__strip {
   display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  pointer-events: none;
-}
-
-.play-mode-dock__arc {
-  --play-arc-radius: 220px;
-  --play-arc-sink: 210px;
-  --play-arc-window: 176px;
-  flex: 1;
-  min-width: 0;
-  z-index: 1;
-  height: var(--play-arc-window);
-  margin-top: 0;
-  overflow: hidden;
-  touch-action: pan-y;
+  align-items: stretch;
+  gap: 10px;
+  height: var(--play-dock-strip-height);
+  padding: 0 max(12px, calc((100% - var(--play-dock-card-width)) / 2));
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: max(12px, calc((100% - var(--play-dock-card-width)) / 2));
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
   pointer-events: auto;
   transition: opacity 0.28s ease;
+  contain: layout style;
 
-  &--exit {
-    opacity: 0;
-  }
-
-  &--enter {
-    opacity: 0;
-    animation: play-dock-arc-in 0.28s ease forwards;
-  }
-}
-
-@keyframes play-dock-arc-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.play-mode-dock__wheel {
-  position: absolute;
-  left: 50%;
-  bottom: calc(-1 * var(--play-arc-sink));
-  width: 0;
-  height: 0;
-  transform-origin: center bottom;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-
-  &--dragging {
-    transition: none;
-  }
-}
-
-.play-mode-dock__arc-mask {
-  position: absolute;
-  left: -6%;
-  right: -6%;
-  bottom: 0;
-  height: 40px;
-  pointer-events: none;
-  z-index: 6;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    color-mix(in srgb, var(--ion-background-color) 40%, transparent) 45%,
-    var(--ion-background-color) 100%
-  );
-}
-
-.play-mode-dock__spoke {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 0;
-  height: 0;
-  transform-origin: center bottom;
-  z-index: 2;
-
-  &--active {
-    z-index: 80;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
 .play-mode-dock__card {
-  --play-dock-card-width: 108px;
-  position: absolute;
-  left: 50%;
-  bottom: 0;
+  position: relative;
+  flex: 0 0 var(--play-dock-card-width);
+  width: var(--play-dock-card-width);
+  height: var(--play-dock-card-height);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: var(--play-dock-card-width);
-  height: var(--play-dock-card-width);
-  margin-left: calc(-0.5 * var(--play-dock-card-width));
-  padding: 10px 8px;
+  gap: 4px;
+  padding: 8px 6px;
   border: 2px solid color-mix(in srgb, #a78bfa 28%, transparent);
-  border-radius: 50%;
+  border-radius: 18px;
   background: color-mix(in srgb, #1e1835 92%, #000000);
   color: inherit;
   text-align: center;
   cursor: pointer;
-  transform-origin: center bottom;
-  pointer-events: auto;
   box-sizing: border-box;
-  opacity: 0.52;
-  filter: saturate(0.72) brightness(0.88) blur(2.5px);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  contain: layout paint style;
+  opacity: 0.72;
+  filter: saturate(0.82) brightness(0.92);
   box-shadow: 0 4px 14px color-mix(in srgb, #000000 28%, transparent);
   transition:
-    opacity 0.3s ease,
-    filter 0.3s ease,
-    box-shadow 0.3s ease,
-    border-color 0.3s ease,
-    width 0.35s ease,
-    height 0.35s ease,
-    margin 0.35s ease;
+    opacity 0.25s ease,
+    filter 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
 
   &--active {
-    --play-dock-card-width: 156px;
-    width: 156px;
-    height: 156px;
-    margin-left: -78px;
-    opacity: 1 !important;
-    filter: none !important;
-    z-index: 100;
-    border-width: 3px;
+    opacity: 1;
+    filter: none;
+    border-width: 2px;
     border-color: color-mix(in srgb, #ec4899 70%, transparent);
     box-shadow:
-      0 16px 36px color-mix(in srgb, #ec4899 32%, transparent),
-      0 0 0 3px color-mix(in srgb, #a78bfa 45%, transparent);
+      0 10px 24px color-mix(in srgb, #ec4899 28%, transparent),
+      0 0 0 2px color-mix(in srgb, #a78bfa 40%, transparent);
+    transform: scale(1.02);
   }
 
   &--locked {
-    opacity: 0.72 !important;
-    filter: saturate(0.85) brightness(0.95) blur(2px) !important;
+    opacity: 0.78;
+    filter: saturate(0.85) brightness(0.95);
     border-color: color-mix(in srgb, #fbbf24 55%, transparent);
     box-shadow:
-      0 8px 22px color-mix(in srgb, #fbbf24 22%, transparent),
-      0 0 0 2px color-mix(in srgb, #fbbf24 35%, transparent);
+      0 6px 18px color-mix(in srgb, #fbbf24 18%, transparent),
+      0 0 0 1px color-mix(in srgb, #fbbf24 30%, transparent);
   }
 
   &--active.play-mode-dock__card--locked {
-    opacity: 1 !important;
-    filter: none !important;
-    border-width: 3px;
+    opacity: 1;
+    filter: none;
     border-color: color-mix(in srgb, #fbbf24 75%, #ec4899);
     box-shadow:
-      0 16px 36px color-mix(in srgb, #fbbf24 28%, transparent),
-      0 0 0 3px color-mix(in srgb, #fbbf24 40%, transparent);
+      0 10px 24px color-mix(in srgb, #fbbf24 24%, transparent),
+      0 0 0 2px color-mix(in srgb, #fbbf24 38%, transparent);
   }
 }
 
@@ -435,8 +393,8 @@ html.ion-palette-dark .play-daily {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 4.85rem;
-  height: 4.85rem;
+  width: 3.35rem;
+  height: 3.35rem;
   border-radius: 50%;
   background: radial-gradient(
     circle at 35% 30%,
@@ -446,7 +404,7 @@ html.ion-palette-dark .play-daily {
   );
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, #ffffff 18%, transparent),
-    0 6px 16px color-mix(in srgb, #000000 22%, transparent);
+    0 4px 12px color-mix(in srgb, #000000 22%, transparent);
 }
 
 .play-mode-dock__icon {
@@ -455,18 +413,18 @@ html.ion-palette-dark .play-daily {
 }
 
 .play-mode-dock__card--active .play-mode-dock__icon-shell {
-  width: 5.65rem;
-  height: 5.65rem;
+  width: 3.65rem;
+  height: 3.65rem;
 }
 
 .play-mode-dock__card--active .play-mode-dock__icon ::ng-deep .app-icon--dock-lg {
-  width: 4.35rem;
-  height: 4.35rem;
+  width: 2.85rem;
+  height: 2.85rem;
 }
 
 .play-mode-dock__card:not(.play-mode-dock__card--active) .play-mode-dock__icon ::ng-deep .app-icon--dock-lg {
-  width: 3.4rem;
-  height: 3.4rem;
+  width: 2.55rem;
+  height: 2.55rem;
 }
 
 .play-mode-dock__title {
@@ -477,7 +435,7 @@ html.ion-palette-dark .play-daily {
   overflow: hidden;
   max-width: 100%;
   font-weight: 700;
-  font-size: 0.58rem;
+  font-size: 0.62rem;
   line-height: 1.15;
 }
 
@@ -486,66 +444,17 @@ html.ion-palette-dark .play-daily {
 }
 
 .play-mode-dock__count {
-  font-size: 0.52rem;
+  font-size: 0.54rem;
   font-weight: 600;
   color: var(--ion-color-medium);
   line-height: 1.1;
 }
 
-.play-mode-dock__recall-btn {
-  --recall-btn-size: 96px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: var(--recall-btn-size);
-  height: var(--recall-btn-size);
-  margin: 0 2px 36px 0;
-  padding: 10px 8px;
-  border: 2px solid color-mix(in srgb, #a78bfa 35%, transparent);
-  border-radius: 50%;
-  background: color-mix(in srgb, #1e1835 94%, #000000);
-  color: inherit;
-  text-align: center;
-  cursor: pointer;
-  pointer-events: auto;
-  box-shadow: 0 6px 18px color-mix(in srgb, #000000 30%, transparent);
-  transition:
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    transform 0.2s ease;
-
-  &:active {
-    transform: scale(0.96);
-  }
-
-  .play-mode-dock__icon-shell {
-    width: 4.15rem;
-    height: 4.15rem;
-  }
-
-  .play-mode-dock__icon ::ng-deep .app-icon--dock-lg {
-    width: 3.35rem;
-    height: 3.35rem;
-  }
-
-  .play-mode-dock__title {
-    font-size: 0.54rem;
-    -webkit-line-clamp: 2;
-  }
-
-  .play-mode-dock__count {
-    font-size: 0.5rem;
-  }
-}
-
 @media (min-width: 768px) {
-  .play-mode-dock__arc {
-    --play-arc-radius: 212px;
-    --play-arc-sink: 206px;
-    --play-arc-window: 166px;
+  .play-hub {
+    --play-dock-card-width: 104px;
+    --play-dock-card-height: 118px;
+    --play-dock-strip-height: 128px;
   }
 
   .play-shell {
@@ -558,29 +467,18 @@ html.ion-palette-dark .play-daily {
     width: min(100%, 40rem);
     transform: translateX(-50%);
   }
-
-  .play-mode-dock__card {
-    --play-dock-card-width: 100px;
-
-    &--active {
-      --play-dock-card-width: 140px;
-      width: 140px;
-      height: 140px;
-      margin-left: -70px;
-    }
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .play-daily__bar-fill,
-  .play-mode-dock__wheel,
-  .play-mode-dock__arc {
+  .play-mode-dock__strip,
+  .play-mode-dock__card {
     transition: none;
     animation: none;
   }
 
-  .play-mode-dock__arc--exit,
-  .play-mode-dock__arc--enter {
+  .play-mode-dock--exit .play-mode-dock__strip,
+  .play-mode-dock--enter .play-mode-dock__strip {
     opacity: 1;
   }
 }

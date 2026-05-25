@@ -40,11 +40,11 @@
       >
         <span class="play-daily__bar-fill" [style.width.%]="dailyProgressPercent"></span>
       </div>
-      <div class="play-daily__meta" *ngIf="!sub.isSubscribed()">
+      <div class="play-daily__meta" *ngIf="!sub.isSubscribedSig()">
         <p class="play-daily__meta-line">{{ 'paywall.freeGamesLine' | i18n: { n: freeGamesLeft, limit: freeGamesLimit } }}</p>
         <p class="play-daily__meta-line">{{ 'play.dailyPoolLine' | i18n: { n: freeCountryCount } }}</p>
       </div>
-      <p *ngIf="sub.isSubscribed()" class="play-daily__meta play-daily__premium">{{ 'home.premiumActive' | i18n }}</p>
+      <p *ngIf="sub.isSubscribedSig()" class="play-daily__meta play-daily__premium">{{ 'home.premiumActive' | i18n }}</p>
     </section>
 
     <ion-card *ngIf="atGameLimit" class="play-limit-card mem-surface">
@@ -57,7 +57,7 @@
       </ion-card-content>
     </ion-card>
 
-    <div *ngIf="!sub.isSubscribed() && !atGameLimit" class="play-premium-row">
+    <div *ngIf="!sub.isSubscribedSig() && !atGameLimit" class="play-premium-row">
       <ion-button expand="block" fill="clear" color="warning" (click)="openPaywall()">
         <app-icon slot="start" icon="ui-premium" size="sm"></app-icon>
         {{ 'home.getPremiumCta' | i18n }}
@@ -67,8 +67,10 @@
 
   <aside
     class="play-mode-dock"
-    *ngIf="playCategories.length || recallCategory"
+    *ngIf="dockItemCount > 0"
     [class.play-mode-dock--modes]="dockLevel === 'modes'"
+    [class.play-mode-dock--exit]="dockPhase === 'exit'"
+    [class.play-mode-dock--enter]="dockPhase === 'enter'"
   >
     <div class="play-mode-dock__nav" *ngIf="dockLevel === 'modes' && selectedCategory">
       <button
@@ -83,81 +85,63 @@
       <p class="play-mode-dock__nav-title">{{ selectedCategory.titleKey | i18n }}</p>
     </div>
 
-    <div class="play-mode-dock__row">
-      <div
-        class="play-mode-dock__arc"
-        [class.play-mode-dock__arc--exit]="dockPhase === 'exit'"
-        [class.play-mode-dock__arc--enter]="dockPhase === 'enter'"
-        (pointerdown)="onPlayDockPointerDown($event)"
-        (pointermove)="onPlayDockPointerMove($event)"
-        (pointerup)="onPlayDockPointerEnd($event)"
-        (pointercancel)="onPlayDockPointerEnd($event)"
-      >
-        <div
-          class="play-mode-dock__wheel"
-          role="list"
-          [attr.aria-label]="dockSliderAriaKey | i18n"
-          [class.play-mode-dock__wheel--dragging]="playDockDragging"
-          [style.transform]="'rotate(' + playDockWheelDeg + 'deg)'"
+    <div
+      #dockStrip
+      class="play-mode-dock__strip"
+      role="list"
+      [attr.aria-label]="dockSliderAriaKey | i18n"
+      (scroll)="onDockStripScroll()"
+    >
+      <ng-container *ngIf="dockLevel === 'categories'">
+        <button
+          *ngFor="let category of dockCategoryItems; let i = index; trackBy: trackDockCategory"
+          type="button"
+          class="play-mode-dock__card mem-surface"
+          role="listitem"
+          [class.play-mode-dock__card--active]="i === activeSlideIndex"
+          [class.play-mode-dock__card--locked]="isCategoryLocked(category)"
+          [attr.aria-current]="i === activeSlideIndex ? 'true' : null"
+          (click)="onDockCategoryClick(i, category)"
         >
-          <div
-            *ngFor="let slot of playDockWheelSlots; let i = index; trackBy: trackPlayDockSlot"
-            class="play-mode-dock__spoke"
-            [class.play-mode-dock__spoke--active]="playDockIsActiveSlot(i)"
-            [style.transform]="playDockSpokeTransform(i)"
-            role="listitem"
-          >
-            <button
-              type="button"
-              class="play-mode-dock__card mem-surface"
-              [class.play-mode-dock__card--active]="playDockIsActiveSlot(i)"
-              [class.play-mode-dock__card--locked]="playDockIsLocked(slot)"
-              [style.transform]="playDockCardTransform(i)"
-              [attr.aria-current]="playDockIsActiveSlot(i) ? 'true' : null"
-              (click)="onPlayDockCardClick(i)"
-            >
-              <app-icon
-                *ngIf="playDockIsLocked(slot)"
-                class="play-mode-dock__lock"
-                icon="ui-lock"
-                size="sm"
-              ></app-icon>
-              <ng-container *ngIf="dockLevel === 'categories' && playDockCategory(slot) as category">
-                <span class="play-mode-dock__icon-shell" aria-hidden="true">
-                  <app-icon class="play-mode-dock__icon" [icon]="category.icon" size="dock-lg"></app-icon>
-                </span>
-                <span class="play-mode-dock__title">{{ category.titleKey | i18n }}</span>
-                <span class="play-mode-dock__count">
-                  {{ 'play.categoryModesCount' | i18n: { n: category.modeCount } }}
-                </span>
-              </ng-container>
-              <ng-container *ngIf="dockLevel === 'modes' && playDockMode(slot) as mode">
-                <span class="play-mode-dock__icon-shell" aria-hidden="true">
-                  <app-icon class="play-mode-dock__icon" [icon]="mode.icon" size="dock-lg"></app-icon>
-                </span>
-                <span class="play-mode-dock__title">{{ mode.titleKey | i18n }}</span>
-              </ng-container>
-            </button>
-          </div>
-        </div>
-        <div class="play-mode-dock__arc-mask" aria-hidden="true"></div>
-      </div>
+          <app-icon
+            *ngIf="isCategoryLocked(category)"
+            class="play-mode-dock__lock"
+            icon="ui-lock"
+            size="sm"
+          ></app-icon>
+          <span class="play-mode-dock__icon-shell" aria-hidden="true">
+            <app-icon class="play-mode-dock__icon" [icon]="category.icon" size="dock-lg"></app-icon>
+          </span>
+          <span class="play-mode-dock__title">{{ category.titleKey | i18n }}</span>
+          <span class="play-mode-dock__count">
+            {{ 'play.categoryModesCount' | i18n: { n: category.modeCount } }}
+          </span>
+        </button>
+      </ng-container>
 
-      <button
-        *ngIf="dockLevel === 'categories' && recallCategory"
-        type="button"
-        class="play-mode-dock__recall-btn mem-surface"
-        [attr.aria-label]="recallCategory.titleKey | i18n"
-        (click)="onCategoryTap(recallCategory)"
-      >
-        <span class="play-mode-dock__icon-shell" aria-hidden="true">
-          <app-icon class="play-mode-dock__icon" [icon]="recallCategory.icon" size="dock-lg"></app-icon>
-        </span>
-        <span class="play-mode-dock__title">{{ recallCategory.titleKey | i18n }}</span>
-        <span class="play-mode-dock__count">
-          {{ 'play.categoryModesCount' | i18n: { n: recallCategory.modeCount } }}
-        </span>
-      </button>
+      <ng-container *ngIf="dockLevel === 'modes'">
+        <button
+          *ngFor="let mode of categoryModes; let i = index; trackBy: trackDockMode"
+          type="button"
+          class="play-mode-dock__card mem-surface"
+          role="listitem"
+          [class.play-mode-dock__card--active]="i === activeSlideIndex"
+          [class.play-mode-dock__card--locked]="isModeLocked(mode)"
+          [attr.aria-current]="i === activeSlideIndex ? 'true' : null"
+          (click)="onDockModeClick(i, mode)"
+        >
+          <app-icon
+            *ngIf="isModeLocked(mode)"
+            class="play-mode-dock__lock"
+            icon="ui-lock"
+            size="sm"
+          ></app-icon>
+          <span class="play-mode-dock__icon-shell" aria-hidden="true">
+            <app-icon class="play-mode-dock__icon" [icon]="mode.icon" size="dock-lg"></app-icon>
+          </span>
+          <span class="play-mode-dock__title">{{ mode.titleKey | i18n }}</span>
+        </button>
+      </ng-container>
     </div>
   </aside>
 </ion-content>

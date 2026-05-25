@@ -73,12 +73,12 @@
 
 .flag-display--animate .flag-wind__img {
   transform-origin: left center;
-  animation: flagfield-wind-sway 7s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  animation: flagfield-wind-sway 5.5s cubic-bezier(0.42, 0.08, 0.58, 0.92) infinite;
   will-change: transform;
 }
 
 .flag-display--animate .flag-display__sheen {
-  animation: flagfield-sheen-wave 7s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  animation: flagfield-sheen-wave 5.5s cubic-bezier(0.42, 0.08, 0.58, 0.92) infinite;
 }
 
 .flag-display__sheen {
@@ -87,13 +87,13 @@
   pointer-events: none;
   background: linear-gradient(
     100deg,
-    transparent 18%,
-    rgba(255, 255, 255, 0.08) 32%,
-    rgba(255, 255, 255, 0.28) 48%,
-    rgba(255, 255, 255, 0.08) 62%,
-    transparent 78%
+    transparent 12%,
+    rgba(255, 255, 255, 0.12) 28%,
+    rgba(255, 255, 255, 0.42) 48%,
+    rgba(255, 255, 255, 0.12) 68%,
+    transparent 84%
   );
-  opacity: 0.55;
+  opacity: 0.65;
   mix-blend-mode: soft-light;
 }
 
@@ -109,36 +109,36 @@
 @keyframes flagfield-wind-sway {
   0%,
   100% {
-    transform: perspective(520px) rotateY(0deg) skewY(0deg);
+    transform: perspective(480px) rotateY(0deg) rotateZ(0deg) skewY(0deg) scale(1);
   }
 
-  20% {
-    transform: perspective(520px) rotateY(2.5deg) skewY(0.8deg);
+  15% {
+    transform: perspective(480px) rotateY(4deg) rotateZ(0.4deg) skewY(1.4deg) scale(1.01);
   }
 
-  40% {
-    transform: perspective(520px) rotateY(4.5deg) skewY(1.6deg);
+  35% {
+    transform: perspective(480px) rotateY(8deg) rotateZ(0.8deg) skewY(2.8deg) scale(1.015);
   }
 
-  60% {
-    transform: perspective(520px) rotateY(3.5deg) skewY(1.2deg);
+  55% {
+    transform: perspective(480px) rotateY(6deg) rotateZ(-0.5deg) skewY(2.2deg) scale(1.012);
   }
 
-  80% {
-    transform: perspective(520px) rotateY(1.5deg) skewY(-0.6deg);
+  75% {
+    transform: perspective(480px) rotateY(3deg) rotateZ(0.3deg) skewY(-1.2deg) scale(1.008);
   }
 }
 
 @keyframes flagfield-sheen-wave {
   0%,
   100% {
-    transform: translateX(-22%) skewX(-4deg);
-    opacity: 0.35;
+    transform: translateX(-32%) skewX(-7deg);
+    opacity: 0.4;
   }
 
   50% {
-    transform: translateX(22%) skewX(4deg);
-    opacity: 0.55;
+    transform: translateX(32%) skewX(7deg);
+    opacity: 0.75;
   }
 }
 

@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 
 import { LocaleService } from '../services/locale.service';
 
@@ -8,7 +8,7 @@ import { LocaleService } from '../services/locale.service';
   pure: false,
 })
 export class I18nPipe implements PipeTransform {
-  constructor(private readonly locale: LocaleService) {}
+  private readonly locale = inject(LocaleService);
 
   transform(
     key: string,
