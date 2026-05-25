@@ -1,0 +1,60 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ filterTitleKey | i18n }}</ion-title>
+    <ion-note slot="end" class="map-round-note" *ngIf="phase === 'mark'">
+      {{ 'mapMark.selected' | i18n: { count: selectedIsos.size } }}
+    </ion-note>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="map-find-content">
+  <div *ngIf="loading" class="map-find-loading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>{{ 'map.loading' | i18n }}</p>
+  </div>
+
+  <div *ngIf="loadError" class="map-find-loading">
+    <ion-text color="danger">{{ 'map.loadError' | i18n }}</ion-text>
+  </div>
+
+  <section *ngIf="!loading && !loadError && phase === 'mark'" class="map-prompt mem-surface">
+    <p class="map-prompt__kicker">{{ 'mapMark.kicker' | i18n }}</p>
+    <h1 class="map-prompt__country map-mark-prompt">{{ promptKey | i18n }}</h1>
+    <p class="map-prompt__hint">{{ 'mapMark.hintTap' | i18n }}</p>
+    <p *ngIf="expectedCount > 0" class="map-prompt__hint">
+      {{ 'mapMark.targetCount' | i18n: { count: expectedCount } }}
+    </p>
+  </section>
+
+  <div
+    #mapHost
+    class="map-host"
+    [class.map-host--hidden]="loading || loadError"
+    aria-label="Interactive world map"
+  ></div>
+
+  <section *ngIf="showFeedback" class="map-feedback mem-surface">
+    <h2 class="map-feedback--ok">{{ 'mapMark.results' | i18n }}</h2>
+    <p class="map-mark-stats">
+      {{ 'mapMark.stats' | i18n: { correct: correctHits, wrong: wrongHits, missed: missed, percent: scorePercent } }}
+    </p>
+    <p class="map-mark-legend">{{ 'mapMark.legend' | i18n }}</p>
+    <ion-button expand="block" fill="outline" (click)="playAgain()">
+      {{ 'mapMark.tryAgain' | i18n }}
+    </ion-button>
+    <ion-button expand="block" color="primary" (click)="finish()">
+      {{ 'mapMark.done' | i18n }}
+    </ion-button>
+  </section>
+
+  <div *ngIf="!loading && !loadError && phase === 'mark'" class="map-actions">
+    <ion-button expand="block" color="primary" [disabled]="!canSubmit" (click)="submit()">
+      {{ 'mapMark.submit' | i18n }}
+    </ion-button>
+  </div>
+</ion-content>

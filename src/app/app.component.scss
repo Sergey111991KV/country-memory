@@ -1,0 +1,28 @@
+ion-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+}
+
+.billing-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  background: var(--ion-color-warning-tint);
+  color: var(--ion-color-warning-contrast);
+  border-bottom: 1px solid var(--ion-color-warning-shade);
+  flex-shrink: 0;
+}
+
+.billing-banner ion-icon {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+
+ion-router-outlet {
+  flex: 1;
+  min-height: 0;
+}

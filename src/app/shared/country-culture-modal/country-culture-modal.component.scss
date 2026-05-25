@@ -1,0 +1,203 @@
+.culture-modal {
+  --background: transparent;
+}
+
+.culture-modal__stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: radial-gradient(
+    120% 80% at 50% 20%,
+    var(--culture-accent-soft) 0%,
+    #020617 70%
+  );
+}
+
+.culture-modal__video,
+.culture-modal__poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.culture-modal__poster {
+  background-position: center;
+  background-size: cover;
+  animation: culture-ken-burns 18s ease-in-out infinite alternate;
+}
+
+.culture-modal__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(2, 6, 23, 0.15) 0%,
+    rgba(2, 6, 23, 0.35) 45%,
+    rgba(2, 6, 23, 0.92) 100%
+  );
+}
+
+.culture-modal__header {
+  position: absolute;
+  top: max(env(safe-area-inset-top, 0px), 8px);
+  right: 8px;
+  z-index: 4;
+}
+
+.culture-modal__close {
+  --color: #f8fafc;
+  font-size: 1.5rem;
+}
+
+.culture-modal__footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  padding: 20px 20px max(env(safe-area-inset-bottom, 0px), 24px);
+  text-align: center;
+  color: #f8fafc;
+}
+
+.culture-modal__kicker {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--culture-accent) 80%, #f8fafc);
+}
+
+.culture-modal__title {
+  margin: 8px 0 6px;
+  font-size: clamp(1.75rem, 6vw, 2.4rem);
+  line-height: 1.1;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+}
+
+.culture-modal__meta {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(248, 250, 252, 0.88);
+}
+
+.culture-modal__asset-hint,
+.culture-modal__loading {
+  margin: 12px 0 0;
+  font-size: 0.82rem;
+  color: rgba(248, 250, 252, 0.65);
+}
+
+.culture-scene {
+  position: absolute;
+  inset: 0;
+}
+
+.culture-scene__sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--culture-accent) 35%, #0f172a) 0%,
+    var(--culture-accent-soft) 55%,
+    #020617 100%
+  );
+}
+
+.culture-scene__haze {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    70% 50% at 50% 40%,
+    color-mix(in srgb, var(--culture-accent) 25%, transparent),
+    transparent 70%
+  );
+  animation: culture-haze 8s ease-in-out infinite alternate;
+}
+
+.culture-scene__ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38%;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
+}
+
+.culture-scene__figures {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: min(92vw, 400px);
+  transform: translateX(-50%);
+  opacity: 0.92;
+}
+
+.culture-scene__person--left path,
+.culture-scene__person--left circle {
+  fill: color-mix(in srgb, var(--culture-accent) 55%, #1e1b4b);
+}
+
+.culture-scene__person--right path,
+.culture-scene__person--right circle {
+  fill: color-mix(in srgb, var(--culture-accent) 45%, #312e81);
+}
+
+.culture-scene__flag-slot {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  width: min(72vw, 320px);
+  transform: translateX(-50%);
+  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.45));
+  animation: culture-flag-float 5s ease-in-out infinite;
+}
+
+.culture-scene__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes culture-ken-burns {
+  from {
+    transform: scale(1) translate(0, 0);
+  }
+  to {
+    transform: scale(1.08) translate(-1.5%, -1%);
+  }
+}
+
+@keyframes culture-haze {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes culture-flag-float {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .culture-modal__poster,
+  .culture-scene__haze,
+  .culture-scene__flag-slot {
+    animation: none;
+  }
+}

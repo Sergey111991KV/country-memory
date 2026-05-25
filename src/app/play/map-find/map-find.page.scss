@@ -1,0 +1,112 @@
+.map-find-content {
+  --background: var(--ion-background-color);
+}
+
+.map-round-note {
+  margin-inline-end: 12px;
+  font-size: 0.8rem;
+}
+
+.map-find-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 50vh;
+}
+
+.map-prompt {
+  margin: 12px 16px 8px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--ion-color-primary) 28%, transparent);
+}
+
+.map-prompt__kicker {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.map-prompt__country {
+  margin: 6px 0 0;
+  font-size: 1.65rem;
+  line-height: 1.15;
+}
+
+.map-prompt__hint {
+  margin: 8px 0 0;
+  color: var(--ion-color-primary);
+  font-size: 0.9rem;
+}
+
+.map-search {
+  padding-inline: 8px;
+}
+
+.map-search-hits {
+  margin: 0 12px 8px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.map-host {
+  display: block;
+  width: 100%;
+  height: min(48vh, 420px);
+  margin: 8px 0 12px;
+  z-index: 0;
+}
+
+.map-host--hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.map-host ::ng-deep .leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #0f172a;
+  font: inherit;
+}
+
+.map-actions,
+.map-feedback {
+  padding: 0 16px 20px;
+}
+
+.map-feedback {
+  margin: 0 16px 12px;
+  padding: 16px;
+  border-radius: 16px;
+}
+
+.map-feedback h2 {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+}
+
+.map-feedback--ok {
+  color: var(--ion-color-success);
+}
+
+.map-feedback--bad {
+  color: var(--ion-color-danger);
+}
+
+.map-feedback app-flag-display {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.map-feedback__explain {
+  margin: 0 0 12px;
+  color: var(--ion-color-medium);
+}
+
+.mem-surface {
+  background: var(--ion-card-background, var(--ion-background-color));
+}

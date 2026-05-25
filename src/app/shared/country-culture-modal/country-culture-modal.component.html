@@ -1,0 +1,70 @@
+<ion-content class="culture-modal" [ngStyle]="accentStyle" [scrollY]="false">
+  <div class="culture-modal__stage" [class.culture-modal__stage--video]="sceneMode === 'video'">
+    <video
+      *ngIf="sceneMode === 'video' && sceneAssets as assets"
+      class="culture-modal__video"
+      [src]="assets.videoUrl!"
+      [poster]="assets.posterUrl ?? ''"
+      autoplay
+      muted
+      playsinline
+      loop
+      (loadeddata)="onVideoReady($any($event.target))"
+      (error)="onVideoError()"
+    ></video>
+
+    <div
+      *ngIf="sceneMode === 'poster' && sceneAssets?.posterUrl"
+      class="culture-modal__poster"
+      [style.backgroundImage]="posterBackground"
+      aria-hidden="true"
+    ></div>
+
+    <div *ngIf="sceneMode === 'illustrated' || sceneMode === 'loading'" class="culture-scene" aria-hidden="true">
+      <div class="culture-scene__sky"></div>
+      <div class="culture-scene__haze"></div>
+      <div class="culture-scene__ground"></div>
+
+      <svg class="culture-scene__figures" viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="200" cy="248" rx="150" ry="18" fill="rgba(0,0,0,0.35)" />
+        <g class="culture-scene__person culture-scene__person--left">
+          <path d="M118 230 L118 168 Q118 138 132 128 Q146 118 158 128 Q168 136 168 152 L168 230 Z" />
+          <circle cx="143" cy="108" r="22" />
+          <path d="M128 98 Q143 78 162 92 Q150 88 143 96 Q136 104 128 98" opacity="0.85" />
+        </g>
+        <g class="culture-scene__person culture-scene__person--right">
+          <path d="M248 230 L248 162 Q248 132 262 124 Q278 116 290 130 Q298 142 296 158 L294 230 Z" />
+          <circle cx="272" cy="106" r="21" />
+          <path d="M258 94 Q272 72 288 88 Q276 86 270 94 Q264 102 258 94" opacity="0.85" />
+        </g>
+      </svg>
+
+      <div class="culture-scene__flag-slot">
+        <app-flag-display
+          [iso2]="iso2"
+          size="hero"
+          [animate]="true"
+          [enableCultureHold]="false"
+        ></app-flag-display>
+      </div>
+
+      <div class="culture-scene__grain"></div>
+    </div>
+
+    <div class="culture-modal__vignette" aria-hidden="true"></div>
+  </div>
+
+  <header class="culture-modal__header">
+    <ion-button fill="clear" class="culture-modal__close" (click)="close()" [attr.aria-label]="'culture.close' | i18n">
+      <ion-icon name="close" slot="icon-only"></ion-icon>
+    </ion-button>
+  </header>
+
+  <footer class="culture-modal__footer">
+    <p class="culture-modal__kicker">{{ 'culture.kicker' | i18n }}</p>
+    <h1 class="culture-modal__title">{{ countryName }}</h1>
+    <p class="culture-modal__meta">{{ 'culture.meta' | i18n: { capital, continent: continentLabel } }}</p>
+    <p *ngIf="sceneMode === 'illustrated'" class="culture-modal__asset-hint">{{ 'culture.assetHint' | i18n }}</p>
+    <p *ngIf="sceneMode === 'loading'" class="culture-modal__loading">{{ 'culture.loading' | i18n }}</p>
+  </footer>
+</ion-content>

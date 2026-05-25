@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none" role="img" aria-label="Flagfield">
+  <circle cx="48" cy="48" r="44" fill="#0ea5e9" opacity="0.15"/>
+  <circle cx="48" cy="48" r="36" stroke="#0369a1" stroke-width="3" fill="#e0f2fe"/>
+  <ellipse cx="48" cy="48" rx="36" ry="14" stroke="#0284c7" stroke-width="2" fill="none" opacity="0.55"/>
+  <ellipse cx="48" cy="48" rx="14" ry="36" stroke="#0284c7" stroke-width="2" fill="none" opacity="0.55"/>
+  <path d="M48 20v56M20 48h56" stroke="#0284c7" stroke-width="1.5" opacity="0.35"/>
+  <path d="M58 28c8 4 12 12 12 20H46c2-8 6-14 12-20z" fill="#16a34a"/>
+  <path d="M46 48c0-6 2-11 6-14l6 14H46z" fill="#facc15"/>
+  <path d="M52 34l10 14H52V34z" fill="#dc2626"/>
+</svg>

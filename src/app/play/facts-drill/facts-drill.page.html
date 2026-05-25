@@ -1,0 +1,65 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'factsDrill.title' | i18n }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-note>{{ 'globe.round' | i18n: { current: round, total: roundsTotal } }}</ion-note>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding challenge-page">
+  <p *ngIf="loading">{{ 'knowledge.loading' | i18n }}</p>
+
+  <ng-container *ngIf="!loading && target">
+    <div class="challenge-prompt">
+      <p class="challenge-prompt__kicker">{{ 'factsDrill.kicker' | i18n }}</p>
+      <p *ngIf="roundKind !== 'flag'" class="facts-drill-value">{{ promptValue }}</p>
+      <p class="challenge-prompt__text">{{ promptText }}</p>
+      <app-speak-button [text]="promptText"></app-speak-button>
+    </div>
+
+    <div *ngIf="showFlag" class="challenge-flag">
+      <app-flag-display
+        [iso2]="target.iso2"
+        size="hero"
+        [enableCultureHold]="false"
+      ></app-flag-display>
+    </div>
+
+    <ng-container *ngIf="phase === 'pick'">
+      <div class="challenge-choices">
+        <button
+          type="button"
+          *ngFor="let c of choices"
+          class="challenge-choice"
+          [class.challenge-choice--correct]="choiceState(c.country.iso2) === 'correct'"
+          [class.challenge-choice--wrong]="choiceState(c.country.iso2) === 'wrong'"
+          (click)="pickCountry(c)"
+        >
+          <span>{{ c.label }}</span>
+          <app-speak-button [text]="c.label"></app-speak-button>
+        </button>
+      </div>
+    </ng-container>
+
+    <div *ngIf="phase === 'feedback'" class="challenge-feedback">
+      <p [class.correct]="feedbackCorrect" [class.wrong]="!feedbackCorrect">
+        {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n }}
+      </p>
+      <p class="challenge-feedback__line">
+        {{ catalog.localizedName(target, locale.language) }}
+        <app-speak-button
+          [text]="catalog.localizedName(target, locale.language)"
+        ></app-speak-button>
+      </p>
+      <ion-button expand="block" (click)="nextRound()">
+        {{ 'globe.next' | i18n }}
+      </ion-button>
+    </div>
+  </ng-container>
+</ion-content>

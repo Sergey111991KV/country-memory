@@ -1,0 +1,108 @@
+import { Injectable, inject } from '@angular/core';
+
+import type { ExploreFilterId } from '../data/explore-filters';
+import { EXPLORE_TOP_N } from '../data/explore-filters';
+import type { Country } from '../data/country.types';
+import {
+  type GlobeCountryFeature,
+  filterPoliticalCountryFeatures,
+  iso2FromNaturalEarth,
+} from '../utils/globe-geo';
+import { CountriesCatalogService } from './countries-catalog.service';
+import { CountryKnowledgeService } from './country-knowledge.service';
+import { PlayPoolService } from './play-pool.service';
+
+const SPANISH_LANG = /spanish|español|castellano/i;
+
+@Injectable({ providedIn: 'root' })
+export class ExploreFilterService {
+  private readonly catalog = inject(CountriesCatalogService);
+  private readonly knowledge = inject(CountryKnowledgeService);
+  private readonly playPool = inject(PlayPoolService);
+
+  private gdpByIso: Map<string, number> | null = null;
+
+  async getMatchingCountries(filterId: ExploreFilterId): Promise<Country[]> {
+    await this.catalog.ensureLoaded();
+    await this.knowledge.ensureLoaded();
+    const pool = await this.playPool.poolForTier();
+    const playableIso = new Set(pool.map((c) => c.iso2.toUpperCase()));
+    const isos = await this.matchingIsos(filterId);
+    return isos
+      .filter((iso) => playableIso.has(iso))
+      .map((iso) => this.catalog.getByIso(iso))
+      .filter((c): c is Country => Boolean(c));
+  }
+
+  async matchingIsos(filterId: ExploreFilterId): Promise<string[]> {
+    await this.catalog.ensureLoaded();
+    await this.knowledge.ensureLoaded();
+    const all = this.catalog.getAll();
+
+    switch (filterId) {
+      case 'lang_spanish':
+        return all
+          .filter((c) => {
+            const langs = this.knowledge.getEntry(c.iso2)?.languages ?? [];
+            return langs.some((l) => SPANISH_LANG.test(l));
+          })
+          .map((c) => c.iso2.toUpperCase());
+      case 'currency_euro':
+        return all
+          .filter((c) => this.knowledge.getEntry(c.iso2)?.currencyCode === 'EUR')
+          .map((c) => c.iso2.toUpperCase());
+      case 'top_population':
+        return this.topByMetric(all, (iso) => this.knowledge.getEntry(iso)?.population ?? 0);
+      case 'top_area':
+        return this.topByMetric(all, (iso) => this.knowledge.getEntry(iso)?.areaKm2 ?? 0);
+      case 'top_gdp':
+        return this.topByGdp(all);
+      default:
+        return [];
+    }
+  }
+
+  private topByMetric(
+    countries: Country[],
+    value: (iso: string) => number,
+  ): string[] {
+    return [...countries]
+      .sort((a, b) => value(b.iso2) - value(a.iso2))
+      .slice(0, EXPLORE_TOP_N)
+      .map((c) => c.iso2.toUpperCase());
+  }
+
+  private async topByGdp(countries: Country[]): Promise<string[]> {
+    const gdp = await this.loadGdpByIso();
+    return [...countries]
+      .filter((c) => (gdp.get(c.iso2.toUpperCase()) ?? 0) > 0)
+      .sort(
+        (a, b) =>
+          (gdp.get(b.iso2.toUpperCase()) ?? 0) - (gdp.get(a.iso2.toUpperCase()) ?? 0),
+      )
+      .slice(0, EXPLORE_TOP_N)
+      .map((c) => c.iso2.toUpperCase());
+  }
+
+  private async loadGdpByIso(): Promise<Map<string, number>> {
+    if (this.gdpByIso) {
+      return this.gdpByIso;
+    }
+    const map = new Map<string, number>();
+    const res = await fetch('assets/geo/countries.geojson');
+    if (res.ok) {
+      const collection = (await res.json()) as { features?: GlobeCountryFeature[] };
+      const features = filterPoliticalCountryFeatures(collection.features ?? []);
+      for (const f of features) {
+        const iso = iso2FromNaturalEarth(f.properties);
+        const raw = f.properties?.GDP_MD;
+        const gdp = typeof raw === 'number' ? raw : Number(raw);
+        if (iso && Number.isFinite(gdp) && gdp > 0) {
+          map.set(iso, gdp);
+        }
+      }
+    }
+    this.gdpByIso = map;
+    return map;
+  }
+}

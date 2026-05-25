@@ -1,0 +1,94 @@
+<ion-content class="progress-page page-safe-top" [fullscreen]="true">
+  <div class="progress-shell">
+    <header class="progress-header">
+      <h1>{{ 'progress.title' | i18n }}</h1>
+      <p>{{ 'progress.subtitle' | i18n }}</p>
+    </header>
+
+    <section class="progress-block" aria-labelledby="progress-activity-heading">
+      <h2 id="progress-activity-heading" class="progress-kicker">{{ 'progress.activitySection' | i18n }}</h2>
+      <div class="progress-metric-cards">
+        <article class="progress-metric-card">
+          <p class="progress-metric-card__value">{{ dailyDone }}/{{ dailyTarget }}</p>
+          <p class="progress-metric-card__label">{{ 'home.dailyGoalTitle' | i18n }}</p>
+        </article>
+        <article class="progress-metric-card">
+          <p class="progress-metric-card__value">{{ correctToday }}</p>
+          <p class="progress-metric-card__label">{{ 'progress.correctToday' | i18n }}</p>
+        </article>
+        <article class="progress-metric-card progress-metric-card--streak">
+          <ion-icon name="flame" aria-hidden="true"></ion-icon>
+          <p class="progress-metric-card__value">{{ streakDays }}</p>
+          <p class="progress-metric-card__label">{{ 'knowledge.streakLabel' | i18n }}</p>
+        </article>
+        <article class="progress-metric-card progress-metric-card--record">
+          <ion-icon name="flash" aria-hidden="true"></ion-icon>
+          <p class="progress-metric-card__value">{{ bestDayRecord }}</p>
+          <p class="progress-metric-card__label">{{ 'knowledge.recordLabel' | i18n }}</p>
+        </article>
+      </div>
+      <p class="progress-hint">{{ 'home.dailyGoalHint' | i18n }}</p>
+      <p class="progress-stat-line">
+        {{ 'progress.countriesPracticed' | i18n }}: <strong>{{ practicedCount }}</strong>
+      </p>
+    </section>
+
+    <section class="progress-block" aria-labelledby="progress-knowledge-heading">
+      <h2 id="progress-knowledge-heading" class="progress-kicker">{{ 'progress.knowledgeSection' | i18n }}</h2>
+      <p class="progress-summary">
+        {{ 'knowledge.factsKnown' | i18n: { learned: factsLearnedTotal, total: factsTotal } }}
+      </p>
+      <div class="progress-stats-track">
+        <ng-container *ngFor="let row of statRows; let last = last">
+          <div class="progress-stats-node">
+            <span
+              class="progress-stats-node__dot"
+              [class.progress-stats-node__dot--filled]="row.percent > 0"
+            ></span>
+            <span class="progress-stats-node__label">{{ row.labelKey | i18n }}</span>
+            <span class="progress-stats-node__value">{{ row.learned }}/{{ row.total }}</span>
+          </div>
+          <span *ngIf="!last" class="progress-stats-connector" aria-hidden="true"></span>
+        </ng-container>
+      </div>
+    </section>
+
+    <section class="progress-block" aria-labelledby="progress-path-heading">
+      <h2 id="progress-path-heading" class="progress-kicker">{{ 'knowledge.pathSection' | i18n }}</h2>
+      <p class="progress-hint">{{ 'progress.pathHint' | i18n }}</p>
+      <div class="progress-chapter-track" role="list">
+        <span class="progress-chapter-line" aria-hidden="true"></span>
+        <div
+          *ngFor="let dot of pathDots; let i = index"
+          class="progress-chapter-dot"
+          [class.progress-chapter-dot--active]="dot.active"
+          [class.progress-chapter-dot--done]="dot.completed"
+          [attr.aria-label]="dot.label"
+          role="listitem"
+        >
+          <span class="progress-chapter-dot__ring"></span>
+          <span class="progress-chapter-dot__num">{{ i + 1 }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="progress-block" aria-labelledby="progress-recent-heading">
+      <h2 id="progress-recent-heading" class="progress-kicker">{{ 'progress.recent' | i18n }}</h2>
+      <p *ngIf="recent.length === 0" class="progress-empty">{{ 'progress.empty' | i18n }}</p>
+      <ion-list *ngIf="recent.length" class="progress-recent-list" lines="none">
+        <ion-item *ngFor="let row of recent" class="progress-recent-item">
+          <ion-icon
+            slot="start"
+            [name]="row.correct ? 'checkmark-circle' : 'close-circle'"
+            [color]="row.correct ? 'success' : 'danger'"
+            aria-hidden="true"
+          ></ion-icon>
+          <ion-label>
+            <h3 class="progress-recent__country">{{ row.label }}</h3>
+            <p class="progress-recent__mode">{{ row.modeLabel }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </section>
+  </div>
+</ion-content>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <g opacity="0.15" style="font-size:50px;font-family:system-ui,emoji">
+    <text x="28" y="76">=€</text>
+    <text x="180" y="58">½</text>
+    <text x="300" y="96"><¾</text>
+    <text x="72" y="190"><Ó</text>
+    <text x="220" y="210">>ø</text>
+    <text x="320" y="200"><²</text>
+    <text x="48" y="300">¾</text>
+    <text x="200" y="330"><À</text>
+    <text x="300" y="350"><¯</text>
+    <text x="340" y="280">>€</text>
+  </g>
+</svg>

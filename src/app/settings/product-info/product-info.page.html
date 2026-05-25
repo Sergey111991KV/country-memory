@@ -1,0 +1,73 @@
+<ion-content class="ion-padding product-info-content settings-page page-safe-top">
+  <div class="app-page-toolbar">
+    <ion-button fill="clear" size="small" (click)="goBack()" [attr.aria-label]="'common.back' | i18n">
+      <ion-icon slot="icon-only" name="chevron-back" aria-hidden="true"></ion-icon>
+    </ion-button>
+    <h1 class="app-page-toolbar__title">{{ 'aboutProduct.title' | i18n }}</h1>
+  </div>
+
+  <p class="app-section-kicker product-kicker">{{ 'aboutProduct.kicker' | i18n }}</p>
+
+  <section
+    class="about-onboarding mem-surface"
+    [attr.aria-label]="'aboutProduct.title' | i18n"
+  >
+    <div class="about-onboarding__viewport">
+      <article
+        *ngFor="let slide of slides; let i = index"
+        class="about-slide"
+        [class.about-slide--active]="activeSlideIndex === i"
+        [attr.aria-hidden]="activeSlideIndex !== i"
+      >
+        <div class="about-slide__icon-wrap" aria-hidden="true">
+          <ion-icon [name]="slide.icon"></ion-icon>
+        </div>
+        <h2 class="about-slide__title">{{ slide.titleKey | i18n }}</h2>
+        <p class="about-slide__body">{{ slide.bodyKey | i18n: slideParams(slide) }}</p>
+      </article>
+    </div>
+
+    <p class="about-onboarding__counter">
+      {{
+        'aboutProduct.slideCounter'
+          | i18n: { current: activeSlideIndex + 1, total: slideCount }
+      }}
+    </p>
+
+    <div
+      class="about-onboarding__dots"
+      role="tablist"
+      [attr.aria-label]="'aboutProduct.kicker' | i18n"
+    >
+      <button
+        type="button"
+        role="tab"
+        class="about-dot"
+        *ngFor="let slide of slides; let i = index"
+        [class.about-dot--active]="activeSlideIndex === i"
+        [attr.aria-selected]="activeSlideIndex === i"
+        [attr.aria-label]="slide.titleKey | i18n"
+        (click)="goToSlide(i)"
+      ></button>
+    </div>
+
+    <div class="about-onboarding__nav">
+      <ion-button fill="clear" (click)="prevSlide()" [disabled]="isFirstSlide">
+        {{ 'aboutProduct.back' | i18n }}
+      </ion-button>
+      <ion-button (click)="nextSlide()">
+        {{ (isLastSlide ? 'aboutProduct.done' : 'aboutProduct.next') | i18n }}
+        <ion-icon
+          *ngIf="!isLastSlide"
+          slot="end"
+          name="chevron-forward"
+          aria-hidden="true"
+        ></ion-icon>
+      </ion-button>
+    </div>
+  </section>
+
+  <p class="about-version ion-text-center">
+    <ion-text color="medium">{{ 'aboutProduct.version' | i18n: { version: appVersion } }}</ion-text>
+  </p>
+</ion-content>

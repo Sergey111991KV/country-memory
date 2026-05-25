@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" fill="none" role="img" aria-label="Oceania">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0c4a6e"/>
+      <stop offset="100%" stop-color="#164e63"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0.5" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5eead4"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#sky)"/>
+  <g opacity="0.94">
+    <path
+      fill="url(#land)"
+      stroke="#ccfbf1"
+      stroke-width="1.5"
+      stroke-linejoin="round"
+      d="M198 108c34-6 58 8 62 32 4 22-18 38-44 36-24-2-42-18-40-38 2-18 14-28 22-30z"
+    />
+    <path
+      fill="url(#land)"
+      stroke="#ccfbf1"
+      stroke-width="1.2"
+      stroke-linejoin="round"
+      d="M262 142c8-2 14 4 12 12-2 8-12 10-18 4-6-6-2-14 6-16z"
+    />
+    <circle cx="248" cy="88" r="5" fill="#99f6e4" opacity="0.7"/>
+    <circle cx="272" cy="72" r="3" fill="#99f6e4" opacity="0.55"/>
+  </g>
+</svg>

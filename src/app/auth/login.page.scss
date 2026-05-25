@@ -1,0 +1,48 @@
+.login-page {
+  --background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ion-color-primary) 12%, var(--ion-background-color)) 0%,
+    var(--ion-background-color) 50%
+  );
+  font-family: var(--app-font-ui);
+}
+
+.login-shell {
+  max-width: 22rem;
+  margin: 0 auto;
+  padding: var(--app-space-5) 0;
+  text-align: center;
+}
+
+.login-mark {
+  margin-bottom: var(--app-space-4);
+}
+
+.login-title {
+  margin: 0 0 var(--app-space-2);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.login-sub {
+  margin: 0 0 var(--app-space-4);
+  color: var(--ion-color-medium);
+  font-size: 0.95rem;
+}
+
+.login-error {
+  margin: var(--app-space-3) 0 0;
+  color: var(--ion-color-danger);
+  font-size: 0.9rem;
+}
+
+.login-submit {
+  margin-top: var(--app-space-4);
+}
+
+.login-hint {
+  margin-top: var(--app-space-4);
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+  line-height: 1.4;
+}

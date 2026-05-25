@@ -1,0 +1,92 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'play.globeFindTitle' | i18n }}</ion-title>
+    <ion-note slot="end" class="globe-round-note">
+      {{ 'globe.round' | i18n: { current: round, total: roundsTotal } }}
+    </ion-note>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="globe-find-content">
+  <div *ngIf="loading" class="globe-find-loading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>{{ 'globe.loading' | i18n }}</p>
+  </div>
+
+  <div *ngIf="loadError" class="globe-find-loading">
+    <ion-text color="danger">{{ 'globe.loadError' | i18n }}</ion-text>
+  </div>
+
+  <ng-container *ngIf="!loading && !loadError && target">
+    <section class="globe-prompt mem-surface">
+      <p class="globe-prompt__kicker">{{ 'globe.findTitle' | i18n }}</p>
+      <h1 class="globe-prompt__country">{{ targetLabel }}</h1>
+      <p *ngIf="phase === 'pick' && selectedIso" class="globe-prompt__hint">
+        {{ 'globe.hintSelected' | i18n }}
+      </p>
+    </section>
+
+    <ion-searchbar
+      class="globe-search"
+      [placeholder]="'globe.searchPlaceholder' | i18n"
+      [debounce]="200"
+      (ionInput)="onSearchInput($event)"
+      [value]="searchQuery"
+    ></ion-searchbar>
+
+    <ion-list *ngIf="searchHits.length" class="globe-search-hits" lines="none">
+      <ion-item
+        *ngFor="let c of searchHits"
+        button
+        (click)="onSearchPick(c)"
+      >
+        <ion-label>{{ catalog.localizedName(c, locale.language) }}</ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-container>
+
+  <!-- Always in DOM so Three.js can mount while data loads -->
+  <div
+    #globeHost
+    class="globe-host"
+    [class.globe-host--hidden]="loading || loadError"
+    aria-label="Interactive world globe"
+  ></div>
+
+  <ng-container *ngIf="!loading && !loadError && target">
+    <section *ngIf="showFeedback" class="globe-feedback mem-surface">
+      <h2 [class.globe-feedback--ok]="feedbackCorrect" [class.globe-feedback--bad]="!feedbackCorrect">
+        {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n }}
+      </h2>
+      <app-flag-display
+        [iso2]="target.iso2"
+        size="card"
+        [animate]="true"
+        [countryLabel]="targetLabel"
+      ></app-flag-display>
+      <p class="globe-feedback__explain">{{ explainLine(target) }}</p>
+      <ion-button
+        *ngIf="!feedbackCorrect"
+        expand="block"
+        fill="outline"
+        (click)="showCorrectOnGlobe()"
+      >
+        {{ 'globe.showOnGlobe' | i18n }}
+      </ion-button>
+      <ion-button expand="block" color="primary" (click)="nextRound()">
+        {{ 'globe.next' | i18n }}
+      </ion-button>
+    </section>
+
+    <div *ngIf="phase === 'pick'" class="globe-actions">
+      <ion-button expand="block" color="primary" [disabled]="!canVerify" (click)="verify()">
+        {{ 'globe.verify' | i18n }}
+      </ion-button>
+    </div>
+  </ng-container>
+</ion-content>

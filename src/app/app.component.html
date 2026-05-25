@@ -1,0 +1,7 @@
+<ion-app>
+  <div *ngIf="showBillingBanner()" class="billing-banner" role="status">
+    <ion-icon name="warning-outline" aria-hidden="true"></ion-icon>
+    <span>{{ billingBannerText() }}</span>
+  </div>
+  <ion-router-outlet></ion-router-outlet>
+</ion-app>

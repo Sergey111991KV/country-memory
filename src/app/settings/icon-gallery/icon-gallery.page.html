@@ -1,0 +1,28 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n">
+        <ion-icon name="chevron-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'icons.galleryTitle' | i18n }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="icon-gallery ion-padding">
+  <p class="icon-gallery__lead">{{ 'icons.galleryLead' | i18n }}</p>
+
+  <section *ngFor="let group of groups" class="icon-gallery__section mem-surface">
+    <h2 class="icon-gallery__heading">{{ groupTitleKey(group) | i18n }}</h2>
+    <ul class="icon-gallery__grid">
+      <li
+        *ngFor="let item of iconsInGroup(group); trackBy: trackIcon"
+        class="icon-gallery__cell"
+      >
+        <app-icon [icon]="item.id" size="lg"></app-icon>
+        <span class="icon-gallery__label">{{ item.labelKey | i18n }}</span>
+        <code class="icon-gallery__id">{{ item.id }}</code>
+      </li>
+    </ul>
+  </section>
+</ion-content>

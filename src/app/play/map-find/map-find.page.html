@@ -1,0 +1,91 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'play.mapFindTitle' | i18n }}</ion-title>
+    <ion-note slot="end" class="map-round-note">
+      {{ 'map.round' | i18n: { current: round, total: roundsTotal } }}
+    </ion-note>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="map-find-content">
+  <div *ngIf="loading" class="map-find-loading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>{{ 'map.loading' | i18n }}</p>
+  </div>
+
+  <div *ngIf="loadError" class="map-find-loading">
+    <ion-text color="danger">{{ 'map.loadError' | i18n }}</ion-text>
+  </div>
+
+  <ng-container *ngIf="!loading && !loadError && target">
+    <section class="map-prompt mem-surface">
+      <p class="map-prompt__kicker">{{ 'map.findTitle' | i18n }}</p>
+      <h1 class="map-prompt__country">{{ targetLabel }}</h1>
+      <p *ngIf="phase === 'pick' && selectedIso" class="map-prompt__hint">
+        {{ 'map.hintSelected' | i18n }}
+      </p>
+    </section>
+
+    <ion-searchbar
+      class="map-search"
+      [placeholder]="'map.searchPlaceholder' | i18n"
+      [debounce]="200"
+      (ionInput)="onSearchInput($event)"
+      [value]="searchQuery"
+    ></ion-searchbar>
+
+    <ion-list *ngIf="searchHits.length" class="map-search-hits" lines="none">
+      <ion-item
+        *ngFor="let c of searchHits"
+        button
+        (click)="onSearchPick(c)"
+      >
+        <ion-label>{{ catalog.localizedName(c, locale.language) }}</ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-container>
+
+  <div
+    #mapHost
+    class="map-host"
+    [class.map-host--hidden]="loading || loadError"
+    aria-label="Interactive world map"
+  ></div>
+
+  <ng-container *ngIf="!loading && !loadError && target">
+    <section *ngIf="showFeedback" class="map-feedback mem-surface">
+      <h2 [class.map-feedback--ok]="feedbackCorrect" [class.map-feedback--bad]="!feedbackCorrect">
+        {{ (feedbackCorrect ? 'map.correct' : 'map.wrong') | i18n }}
+      </h2>
+      <app-flag-display
+        [iso2]="target.iso2"
+        size="card"
+        [animate]="true"
+        [countryLabel]="targetLabel"
+      ></app-flag-display>
+      <p class="map-feedback__explain">{{ explainLine(target) }}</p>
+      <ion-button
+        *ngIf="!feedbackCorrect"
+        expand="block"
+        fill="outline"
+        (click)="showCorrectOnMap()"
+      >
+        {{ 'map.showOnMap' | i18n }}
+      </ion-button>
+      <ion-button expand="block" color="primary" (click)="nextRound()">
+        {{ 'map.next' | i18n }}
+      </ion-button>
+    </section>
+
+    <div *ngIf="phase === 'pick'" class="map-actions">
+      <ion-button expand="block" color="primary" [disabled]="!canVerify" (click)="verify()">
+        {{ 'map.verify' | i18n }}
+      </ion-button>
+    </div>
+  </ng-container>
+</ion-content>

@@ -1,0 +1,52 @@
+.pass-play-page {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.pass-play-page__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.pass-play-page__lead {
+  margin: 0 0 1.25rem;
+  color: var(--ion-color-medium);
+  line-height: 1.45;
+}
+
+.pass-play-page__players {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pass-play-page__field {
+  display: block;
+}
+
+.pass-play-page__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+.pass-play-page__row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  ion-input {
+    flex: 1;
+  }
+}
+
+.pass-play-page__add {
+  margin-bottom: 0.75rem;
+}
+
+.pass-play-page__start {
+  margin-top: 0.5rem;
+}

@@ -1,0 +1,57 @@
+.icon-gallery__lead {
+  margin: 0 0 var(--app-space-4);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--ion-color-medium);
+}
+
+.icon-gallery__section {
+  margin-bottom: var(--app-space-4);
+  padding: var(--app-space-4);
+  border-radius: 16px;
+}
+
+.icon-gallery__heading {
+  margin: 0 0 var(--app-space-3);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ion-color-medium);
+}
+
+.icon-gallery__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: var(--app-space-3);
+}
+
+.icon-gallery__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--app-space-2);
+  padding: var(--app-space-3);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ion-text-color) 4%, transparent);
+  text-align: center;
+}
+
+.icon-gallery__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.icon-gallery__id {
+  font-size: 0.62rem;
+  color: var(--ion-color-medium);
+  word-break: break-all;
+}
+
+.mem-surface {
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--ion-text-color) 8%, transparent);
+}

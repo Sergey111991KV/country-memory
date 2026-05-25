@@ -1,0 +1,91 @@
+<div
+  class="flag-display"
+  [class.flag-display--hero]="size === 'hero'"
+  [class.flag-display--card]="size === 'card'"
+  [class.flag-display--animate]="animate"
+  [class.flag-display--holdable]="enableCultureHold"
+  [attr.role]="countryLabel ? 'img' : null"
+  [attr.aria-label]="countryLabel || holdAriaLabel || null"
+>
+  <div class="flag-display__pole" aria-hidden="true"></div>
+  <div
+    class="flag-display__fabric"
+    [class.flag-display__fabric--error]="imageError"
+    [class.flag-display__fabric--pressing]="holdHintVisible"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp()"
+    (pointercancel)="onPointerCancel()"
+  >
+    <svg
+      *ngIf="animate && !imageError && src"
+      class="flag-wind-svg"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <filter [attr.id]="windFilterId" x="-12%" y="-12%" width="124%" height="124%">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.011 0.028"
+            numOctaves="1"
+            seed="3"
+            result="noise"
+          >
+            <animate
+              attributeName="baseFrequency"
+              dur="7s"
+              calcMode="spline"
+              keyTimes="0;0.4;0.75;1"
+              keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1"
+              values="0.010 0.026;0.013 0.034;0.009 0.030;0.010 0.026"
+              repeatCount="indefinite"
+            />
+          </feTurbulence>
+          <feGaussianBlur in="noise" stdDeviation="1.8" result="smoothNoise" />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="smoothNoise"
+            scale="5"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          >
+            <animate
+              attributeName="scale"
+              dur="7s"
+              calcMode="spline"
+              keyTimes="0;0.5;1"
+              keySplines="0.42 0 0.58 1;0.42 0 0.58 1"
+              values="3.5;6.5;3.5"
+              repeatCount="indefinite"
+            />
+          </feDisplacementMap>
+        </filter>
+      </defs>
+    </svg>
+    <img
+      *ngIf="animate && !imageError && src"
+      class="flag-wind__img"
+      [src]="src"
+      [style.filter]="windFilterStyle"
+      alt=""
+      loading="lazy"
+      decoding="async"
+      draggable="false"
+      (error)="onImageError()"
+    />
+    <img
+      *ngIf="!animate && !imageError && src"
+      [src]="src"
+      alt=""
+      loading="lazy"
+      decoding="async"
+      draggable="false"
+      (error)="onImageError()"
+    />
+    <span *ngIf="imageError" class="flag-display__fallback" aria-hidden="true">🏳️</span>
+    <span class="flag-display__sheen" aria-hidden="true"></span>
+    <span *ngIf="enableCultureHold && holdHintVisible" class="flag-display__hold-ring" aria-hidden="true"></span>
+  </div>
+  <p *ngIf="enableCultureHold && size === 'hero'" class="flag-display__hold-hint">{{ 'flag.holdExplore' | i18n }}</p>
+</div>

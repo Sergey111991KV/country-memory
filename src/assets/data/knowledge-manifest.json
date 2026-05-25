@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "factCountPerCountry": 4,
+  "statMetrics": [
+    { "id": "countries", "icon": "flag-outline", "labelKey": "knowledge.stat.countries", "field": "countriesLearned", "totalField": "countriesTotal" },
+    { "id": "facts", "icon": "bulb-outline", "labelKey": "knowledge.stat.facts", "field": "factsLearned", "totalField": "factsTotal" },
+    { "id": "capitals", "icon": "business-outline", "labelKey": "knowledge.stat.capitals", "field": "capitalsLearned", "totalField": "capitalsTotal" },
+    { "id": "languages", "icon": "chatbubbles-outline", "labelKey": "knowledge.stat.languages", "field": "languagesLearned", "totalField": "languagesTotal" }
+  ],
+  "factCategories": [
+    { "id": "trivia", "icon": "sparkles-outline", "tier": "extra", "order": 1 }
+  ],
+  "collections": [
+    {
+      "id": "europe",
+      "titleKey": "knowledge.collection.europe",
+      "image": "assets/knowledge/collections/europe.svg",
+      "continent": "europe"
+    },
+    {
+      "id": "americas",
+      "titleKey": "knowledge.collection.americas",
+      "image": "assets/knowledge/collections/americas.svg",
+      "continent": "americas"
+    },
+    {
+      "id": "asia",
+      "titleKey": "knowledge.collection.asia",
+      "image": "assets/knowledge/collections/asia.svg",
+      "continent": "asia"
+    },
+    {
+      "id": "africa",
+      "titleKey": "knowledge.collection.africa",
+      "image": "assets/knowledge/collections/africa.svg",
+      "continent": "africa"
+    },
+    {
+      "id": "oceania",
+      "titleKey": "knowledge.collection.oceania",
+      "image": "assets/knowledge/collections/oceania.svg",
+      "continent": "oceania"
+    },
+    {
+      "id": "other",
+      "titleKey": "knowledge.collection.other",
+      "image": "assets/knowledge/collections/other.svg",
+      "continent": "other"
+    }
+  ],
+  "learnStates": {
+    "new": { "labelKey": "knowledge.status.new", "icon": "ellipse-outline" },
+    "partial": { "labelKey": "knowledge.status.partial", "icon": "checkbox-outline" },
+    "collection": { "labelKey": "knowledge.status.collection", "icon": "bookmark-outline" }
+  }
+}

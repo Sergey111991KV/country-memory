@@ -1,0 +1,117 @@
+/* Flagfield legal pages — static hosting */
+:root {
+  color-scheme: light dark;
+  --bg: #f0f9ff;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --accent: #0284c7;
+  --border: #bae6fd;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0c4a6e;
+    --surface: #0f172a;
+    --text: #f0f9ff;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --border: #1e3a8a;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.brand {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.site-nav a {
+  margin-left: 1rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.site-nav a[aria-current="page"] {
+  text-decoration: underline;
+}
+.content {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  background: var(--surface);
+  min-height: 60vh;
+}
+.landing { text-align: left; }
+.lead { font-size: 1.05rem; color: var(--muted); }
+.card-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+.card-list a {
+  display: block;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--bg);
+}
+.card-list a span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+.hint { font-size: 0.875rem; color: var(--muted); }
+h1 { font-size: 1.75rem; margin-top: 0; }
+h2 { font-size: 1.25rem; margin-top: 2rem; }
+h3 { font-size: 1.05rem; margin-top: 1.25rem; }
+p, li { color: var(--text); }
+.notice {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--accent);
+  background: var(--bg);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+a { color: var(--accent); }
+code {
+  font-size: 0.85em;
+  background: var(--bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.site-footer {
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}

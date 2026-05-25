@@ -1,0 +1,404 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+.page-safe-top {
+  --padding-top: max(env(safe-area-inset-top, 0px), 12px);
+}
+
+app-root {
+  display: block;
+  height: 100%;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bangers&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+@import "@ionic/angular/css/palettes/dark.class.css";
+/* dark.system.css follows OS only — manual theme toggle needs dark.class.css */
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+ion-title,
+h1,
+h2,
+h3 {
+  font-family: var(--app-font-display);
+  letter-spacing: 0.02em;
+}
+
+code,
+pre {
+  font-family: var(--app-font-mono);
+}
+
+html.app-body-default {
+  font-size: 16px;
+}
+
+html.app-body-comfortable {
+  font-size: 17px;
+}
+
+html.app-body-accessible {
+  font-size: 18px;
+}
+
+html.palette-ocean {
+  --ion-color-primary: #0284c7;
+  --ion-color-primary-rgb: 2, 132, 199;
+}
+
+html.palette-forest {
+  --ion-color-primary: #16a34a;
+  --ion-color-primary-rgb: 22, 163, 74;
+}
+
+html.palette-sunset {
+  --ion-color-primary: #ea580c;
+  --ion-color-primary-rgb: 234, 88, 12;
+}
+
+html.palette-classic {
+  --ion-color-primary: #4f46e5;
+  --ion-color-primary-rgb: 79, 70, 229;
+}
+
+ion-card {
+  border: 2px solid color-mix(in srgb, var(--ion-color-primary) 32%, #ffffff);
+  border-radius: 20px;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+}
+
+html.ion-palette-dark ion-card {
+  border-color: color-mix(
+    in srgb,
+    var(--ion-color-primary) 45%,
+    var(--ion-background-color)
+  );
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+ion-button {
+  --border-radius: 14px;
+  font-family: var(--app-font-display);
+  letter-spacing: 0.04em;
+}
+
+ion-button.button-disabled {
+  opacity: 0.55;
+}
+
+/**
+ * Inline stats & card subtitles: the display face reads slanted when bold — keep regular weight.
+ */
+.stat-emphasis,
+ion-card-subtitle {
+  font-style: normal;
+  font-weight: 400;
+}
+
+.stat-emphasis {
+  color: var(--ion-text-color);
+}
+
+strong,
+b {
+  font-style: normal;
+  font-weight: 400;
+}
+
+/**
+ * Native-like scroll: hide persistent scrollbar on main scroll areas (PWA / web).
+ */
+ion-content::part(scroll) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+ion-content::part(scroll)::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/**
+ * Long-form and hub copy: use neutral UI face (display font reads “italic” at small sizes).
+ */
+.home-content,
+.knowledge-page,
+.settings-page,
+.home-about-content {
+  font-family: var(--app-font-ui);
+}
+
+.home-content h1,
+.home-content h2,
+.home-content h3,
+.home-content p,
+.home-content ion-button {
+  font-family: var(--app-font-ui);
+}
+
+.home-content h1,
+.home-content h2 {
+  font-style: normal;
+  text-transform: none;
+}
+
+.home-about-content h2,
+.home-about-content h3,
+.settings-page h2,
+.settings-page h3 {
+  font-family: var(--app-font-ui);
+  letter-spacing: 0.02em;
+}
+
+.settings-page ion-button,
+.product-info-content ion-button,
+.support-page ion-button {
+  font-family: var(--app-font-ui);
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+@keyframes win-celebrate-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+ion-modal.country-culture-modal-shell {
+  --width: 100%;
+  --height: 100%;
+  --border-radius: 0;
+  --backdrop-opacity: 0.92;
+}
+
+ion-modal.country-culture-modal-shell::part(content) {
+  background: #020617;
+}
+
+ion-modal.win-celebrate-modal-shell {
+  --width: min(92vw, 400px);
+  --border-radius: 22px;
+  --box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
+}
+
+ion-modal.win-celebrate-modal-shell .win-celebrate-content {
+  --background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--ion-color-primary) 12%, var(--ion-background-color)) 0%,
+    var(--ion-background-color) 55%
+  );
+}
+
+.win-celebrate {
+  text-align: center;
+  padding: var(--app-space-2) 0 var(--app-space-4);
+  animation: win-celebrate-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .win-celebrate {
+    animation: none;
+  }
+}
+
+.win-celebrate-emoji {
+  font-size: 3.2rem;
+  line-height: 1;
+  margin-bottom: var(--app-space-2);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
+}
+
+.win-celebrate-title {
+  margin: 0 0 var(--app-space-2);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ion-text-color);
+}
+
+.win-celebrate-msg {
+  margin: 0 0 var(--app-space-4);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ion-color-medium-shade);
+  white-space: pre-wrap;
+}
+
+.win-celebrate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-2);
+}
+
+ion-button:focus-visible,
+button:focus-visible,
+[role='button']:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+ion-radio:focus-visible,
+ion-toggle:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ion-color-secondary) 70%, #ffffff);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Shared “casual game” page rhythm — use with ion-content + section headers
+   -------------------------------------------------------------------------- */
+.app-section-kicker {
+  margin: 0 0 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ion-color-primary-shade, var(--ion-color-primary));
+}
+
+.app-lead-strong {
+  margin: 0 0 var(--app-space-3);
+  font-size: 0.98rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--ion-text-color) 90%, var(--ion-color-medium));
+}
+
+.app-hint-banner {
+  margin: 0 0 var(--app-space-3);
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ion-color-primary-shade, var(--ion-color-primary));
+  background: color-mix(in srgb, var(--ion-color-primary) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ion-color-primary) 22%, transparent);
+}
+
+html.ion-palette-dark .app-hint-banner {
+  background: color-mix(in srgb, var(--ion-color-primary) 18%, transparent);
+  border-color: color-mix(in srgb, var(--ion-color-primary) 32%, transparent);
+}
+
+ion-popover.knowledge-hints-popover {
+  --background: #16122b;
+  --box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --border: 1px solid color-mix(in srgb, #ffffff 12%, transparent);
+}
+
+.app-page-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--app-space-4);
+  padding-bottom: var(--app-space-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--ion-color-medium) 24%, transparent);
+}
+
+.app-page-toolbar__title {
+  flex: 1;
+  margin: 0;
+  font-size: 1.28rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.app-cta-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-2);
+  margin-top: var(--app-space-2);
+}
+
+/* Tab bar: safe area + even flex so the last tab is not clipped on notched devices */
+ion-tab-bar {
+  box-sizing: border-box;
+  padding-left: max(10px, env(safe-area-inset-left, 0px));
+  padding-right: max(10px, env(safe-area-inset-right, 0px));
+}
+
+ion-tab-bar ion-tab-button {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 25%;
+}
+
+/* Tab bar: keep selected icons visible (Ionic slotted icon uses height:1em + overflow:hidden) */
+ion-tab-bar ion-tab-button ion-icon {
+  height: auto !important;
+  min-height: 1.5rem;
+  overflow: visible !important;
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  color: inherit;
+}
+
+ion-tab-bar ion-tab-button.tab-selected ion-icon {
+  color: var(--color-selected, #e9d5ff) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+ion-tab-bar ion-tab-button ion-label {
+  font-family: var(--app-font-ui) !important;
+  font-style: normal !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*
+ * Button hierarchy (Ionic):
+ * — Primary: default fill + color (main screen action).
+ * — Secondary: fill="outline" (alternate path).
+ * — Tertiary: fill="clear" size="small" (back / legal / low emphasis).
+ * — Destructive: color="danger" + outline or clear.
+ */

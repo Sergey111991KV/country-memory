@@ -1,0 +1,63 @@
+/* Ionic app theme — loaded with global styles */
+
+:root {
+  --ion-font-family: 'Bangers', 'Segoe UI', system-ui, sans-serif;
+  --app-font-display: 'Bangers', 'Segoe UI', system-ui, sans-serif;
+  --app-font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+  --app-font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+
+  --premium-bg: #0b0814;
+  --premium-card: #16122b;
+  --premium-muted: #a1a1aa;
+  --premium-gradient: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+  --premium-cyan: #22d3ee;
+
+  --app-space-1: 4px;
+  --app-space-2: 8px;
+  --app-space-3: 12px;
+  --app-space-4: 16px;
+  --app-space-5: 24px;
+  --app-space-6: 32px;
+
+  --ion-color-primary: #3b82f6;
+  --ion-color-primary-rgb: 59, 130, 246;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #3472d8;
+  --ion-color-primary-tint: #4f8ff7;
+
+  --ion-color-secondary: #8b5cf6;
+  --ion-color-secondary-rgb: 139, 92, 246;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #7a51d8;
+  --ion-color-secondary-tint: #976df7;
+
+  --ion-color-tertiary: #16a34a;
+  --ion-color-tertiary-rgb: 22, 163, 74;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #138f41;
+  --ion-color-tertiary-tint: #2dae5c;
+
+  --ion-color-warning: #d97706;
+  --ion-color-warning-rgb: 217, 119, 6;
+  --ion-color-danger: #dc2626;
+  --ion-color-danger-rgb: 220, 38, 38;
+  --ion-background-color: #ffffff;
+  --ion-text-color: #111827;
+}
+
+html.ion-palette-dark:root {
+  --ion-background-color: #0b0814;
+  --ion-text-color: #ffffff;
+  --ion-color-primary: #a78bfa;
+  --ion-color-primary-rgb: 167, 139, 250;
+  --ion-color-primary-contrast: #0b0814;
+  --ion-color-primary-contrast-rgb: 11, 8, 20;
+  --ion-color-primary-shade: #937adc;
+  --ion-color-primary-tint: #b097fb;
+  --ion-color-secondary: #22d3ee;
+  --ion-color-secondary-rgb: 34, 211, 238;
+}

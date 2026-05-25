@@ -1,0 +1,105 @@
+.globe-find-content {
+  --background: var(--ion-background-color);
+}
+
+.globe-round-note {
+  margin-inline-end: 12px;
+  font-size: 0.8rem;
+}
+
+.globe-find-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 50vh;
+}
+
+.globe-prompt {
+  margin: 12px 16px 8px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--ion-color-primary) 28%, transparent);
+}
+
+.globe-prompt__kicker {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.globe-prompt__country {
+  margin: 6px 0 0;
+  font-size: 1.65rem;
+  line-height: 1.15;
+}
+
+.globe-prompt__hint {
+  margin: 8px 0 0;
+  color: var(--ion-color-primary);
+  font-size: 0.9rem;
+}
+
+.globe-search {
+  padding-inline: 8px;
+}
+
+.globe-search-hits {
+  margin: 0 12px 8px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.globe-host {
+  display: block;
+  width: 100%;
+  height: min(48vh, 420px);
+  margin: 8px 0 12px;
+  touch-action: none;
+}
+
+.globe-host--hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.globe-actions,
+.globe-feedback {
+  padding: 0 16px 20px;
+}
+
+.globe-feedback {
+  margin: 0 16px 12px;
+  padding: 16px;
+  border-radius: 16px;
+}
+
+.globe-feedback h2 {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+}
+
+.globe-feedback--ok {
+  color: var(--ion-color-success);
+}
+
+.globe-feedback--bad {
+  color: var(--ion-color-danger);
+}
+
+.globe-feedback app-flag-display {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.globe-feedback__explain {
+  margin: 0 0 12px;
+  color: var(--ion-color-medium);
+}
+
+.mem-surface {
+  background: var(--ion-card-background, var(--ion-background-color));
+}

@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "levels": [
+    {
+      "id": "level-1",
+      "order": 1,
+      "title": { "en": "Western Europe flags", "ru": "Флаги Западной Европы" },
+      "subtitle": {
+        "en": "5 countries · flags & capitals",
+        "ru": "5 стран · флаги и столицы"
+      },
+      "countryIsos": ["FR", "DE", "IT", "ES", "GB"],
+      "topics": ["flags", "capitals"]
+    },
+    {
+      "id": "level-2",
+      "order": 2,
+      "title": { "en": "Americas starters", "ru": "Старт по Америке" },
+      "subtitle": {
+        "en": "5 countries · flags & capitals",
+        "ru": "5 стран · флаги и столицы"
+      },
+      "countryIsos": ["US", "CA", "MX", "BR", "AR"],
+      "topics": ["flags", "capitals"]
+    },
+    {
+      "id": "level-3",
+      "order": 3,
+      "title": { "en": "Asia-Pacific", "ru": "Азия и Океания" },
+      "subtitle": {
+        "en": "5 countries · flags & capitals",
+        "ru": "5 стран · флаги и столицы"
+      },
+      "countryIsos": ["CN", "JP", "KR", "IN", "AU"],
+      "topics": ["flags", "capitals"]
+    },
+    {
+      "id": "level-4",
+      "order": 4,
+      "title": { "en": "Facts: population", "ru": "Факты: население" },
+      "subtitle": {
+        "en": "Learn core facts for 5 countries",
+        "ru": "Базовые факты о 5 странах"
+      },
+      "countryIsos": ["RU", "EG", "NG", "TR", "PL"],
+      "topics": ["flags", "capitals", "facts"]
+    },
+    {
+      "id": "level-5",
+      "order": 5,
+      "title": { "en": "Free tier finale", "ru": "Финал бесплатного набора" },
+      "subtitle": {
+        "en": "All 30 free countries — mixed drill",
+        "ru": "Все 30 бесплатных стран — микс"
+      },
+      "countryIsos": [],
+      "topics": ["flags", "capitals"],
+      "useFreeTierPool": true
+    },
+    {
+      "id": "facts-starter",
+      "order": 6,
+      "title": { "en": "Facts: free set", "ru": "Факты: бесплатный набор" },
+      "subtitle": {
+        "en": "Population, language, currency",
+        "ru": "Население, язык, валюта"
+      },
+      "countryIsos": [],
+      "topics": ["facts"],
+      "useFreeTierPool": true
+    },
+    {
+      "id": "facts-world",
+      "order": 7,
+      "title": { "en": "Facts: full library", "ru": "Факты: полная библиотека" },
+      "subtitle": {
+        "en": "All countries in your tier",
+        "ru": "Все страны вашего уровня доступа"
+      },
+      "countryIsos": [],
+      "topics": ["facts"],
+      "useTierPool": true
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'play.learningTitle' | i18n }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding learning-path-page">
+  <p *ngIf="loading">{{ 'knowledge.loading' | i18n }}</p>
+  <p class="learning-path-lead">{{ 'play.learningLead' | i18n }}</p>
+
+  <ion-list *ngIf="!loading" lines="none">
+    <ion-item
+      *ngFor="let row of rows"
+      button
+      [detail]="row.unlocked"
+      [disabled]="!row.unlocked"
+      (click)="openLevel(row)"
+    >
+      <ion-icon
+        slot="start"
+        [name]="row.completed ? 'checkmark-circle' : row.unlocked ? 'ellipse-outline' : 'lock-closed'"
+        [color]="row.completed ? 'success' : 'medium'"
+        aria-hidden="true"
+      ></ion-icon>
+      <ion-label>
+        <h2>{{ title(row.def) }}</h2>
+        <p>{{ subtitle(row.def) }}</p>
+        <p *ngIf="row.unlocked">
+          {{ 'play.learningProgress' | i18n: { done: row.progress, total: row.target } }}
+        </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

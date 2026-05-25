@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" fill="none" role="img" aria-label="Africa">
+  <defs>
+    <linearGradient id="sky" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#422006"/>
+      <stop offset="100%" stop-color="#3b0764"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#sky)"/>
+  <path
+    fill="url(#land)"
+    stroke="#fef3c7"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+    opacity="0.94"
+    d="M158 38c16-8 36-4 44 16 6 16 2 38-10 54-12 16-30 28-48 26-18-2-32-20-36-40-4-22 10-44 28-52 8-4 16-6 22-4z"
+  />
+</svg>

@@ -1,0 +1,82 @@
+<ion-content class="home-content page-safe-top ion-padding">
+  <div class="home-shell" [ngClass]="'typography-' + heroTypography">
+    <header class="home-header">
+      <img
+        class="home-mark"
+        src="assets/brand/flagfield-mark.svg"
+        width="64"
+        height="64"
+        alt=""
+      />
+      <p class="home-brand-name">Flagfield</p>
+      <h1 class="home-hero-title">{{ heroTitleDisplay }}</h1>
+      <p class="home-hero-sub">{{ heroSubShortDisplay }}</p>
+    </header>
+
+    <section class="home-daily" aria-labelledby="home-daily-heading">
+      <div class="home-daily__head">
+        <h2 id="home-daily-heading" class="home-daily__title">
+          {{ 'home.dailyGoalTitle' | i18n }}
+        </h2>
+        <span *ngIf="dailyComplete" class="home-daily__badge">{{ 'home.dailyGoalDoneShort' | i18n }}</span>
+      </div>
+      <p class="home-daily__progress stat-emphasis">
+        <ng-container *ngIf="!dailyComplete">
+          {{ 'home.dailyGoalProgress' | i18n: { done: dailyDone, target: dailyTarget } }}
+        </ng-container>
+        <ng-container *ngIf="dailyComplete">{{ 'home.dailyGoalDone' | i18n }}</ng-container>
+      </p>
+      <div
+        class="home-daily__bar"
+        role="progressbar"
+        [attr.aria-valuenow]="dailyDone"
+        [attr.aria-valuemin]="0"
+        [attr.aria-valuemax]="dailyTarget"
+        [attr.aria-label]="'home.dailyGoalTitle' | i18n"
+      >
+        <span class="home-daily__bar-fill" [style.width.%]="dailyProgressPercent"></span>
+      </div>
+      <p class="home-daily__meta">
+        <span *ngIf="!sub.isSubscribed()" class="home-daily__free">
+          {{ 'home.freeTierCountries' | i18n: { n: freeCountryCount } }}
+        </span>
+        <span *ngIf="sub.isSubscribed()" class="home-daily__premium">{{ 'home.premiumActive' | i18n }}</span>
+      </p>
+    </section>
+
+    <section class="home-modes" aria-labelledby="home-modes-heading">
+      <h2 id="home-modes-heading" class="home-modes__title">{{ 'home.modesTitle' | i18n }}</h2>
+      <div class="home-modes__grid">
+        <button type="button" class="home-mode" (click)="play()">
+          <app-icon class="home-mode__icon" icon="mode-flag-pick" size="lg"></app-icon>
+          <span class="home-mode__label">{{ 'play.freeSection' | i18n }}</span>
+        </button>
+        <button type="button" class="home-mode" (click)="play()">
+          <app-icon class="home-mode__icon" icon="mode-knowledge-quiz" size="lg"></app-icon>
+          <span class="home-mode__label">{{ 'tabs.knowledge' | i18n }}</span>
+        </button>
+        <button type="button" class="home-mode" (click)="play()">
+          <app-icon class="home-mode__icon" icon="mode-learning-path" size="lg"></app-icon>
+          <span class="home-mode__label">{{ 'play.learningTitle' | i18n }}</span>
+        </button>
+      </div>
+    </section>
+
+    <div class="home-actions">
+      <ion-button expand="block" size="large" color="primary" class="home-play-cta" (click)="play()">
+        {{ 'home.playCta' | i18n }}
+      </ion-button>
+      <ion-button
+        *ngIf="!sub.isSubscribed()"
+        expand="block"
+        fill="clear"
+        color="warning"
+        class="home-premium-cta"
+        (click)="openPaywall()"
+      >
+        <app-icon slot="start" icon="ui-premium" size="sm"></app-icon>
+        {{ 'home.getPremiumCta' | i18n }}
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

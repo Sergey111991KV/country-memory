@@ -1,0 +1,12 @@
+# Copy to URLS.txt (gitignored optional) and replace YOUR_DOMAIN once.
+
+PUBLIC_SITE=https://YOUR_DOMAIN
+PRIVACY=https://YOUR_DOMAIN/privacy
+TERMS=https://YOUR_DOMAIN/terms
+SUPPORT=mailto:supp0rt.serg@yandex.com
+
+# App Store Connect / Play Console — paste the same PRIVACY and TERMS URLs.
+
+# environment.prod.local.ts:
+#   privacyPolicyUrl: 'https://YOUR_DOMAIN/privacy',
+#   termsOfUseUrl: 'https://YOUR_DOMAIN/terms',

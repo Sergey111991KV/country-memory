@@ -1,0 +1,53 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'factsQuiz.title' | i18n }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-note>{{ 'globe.round' | i18n: { current: round, total: roundsTotal } }}</ion-note>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding facts-quiz-page">
+  <p *ngIf="loading">{{ 'knowledge.loading' | i18n }}</p>
+  <p *ngIf="!loading && empty" class="facts-quiz-empty">{{ 'factsQuiz.empty' | i18n }}</p>
+
+  <ng-container *ngIf="!loading && !empty && target && targetFact">
+    <p class="facts-quiz-kicker">{{ questionLabel }}</p>
+    <div class="facts-quiz-statement">
+      <p class="facts-quiz-statement__text">{{ factPrompt }}</p>
+      <app-speak-button [text]="factPrompt"></app-speak-button>
+    </div>
+
+    <ng-container *ngIf="phase === 'pick'">
+      <div class="challenge-choices">
+        <button
+          type="button"
+          *ngFor="let c of choices"
+          class="challenge-choice"
+          (click)="pickCountry(c)"
+        >
+          <span>{{ c.label }}</span>
+          <app-speak-button [text]="c.label"></app-speak-button>
+        </button>
+      </div>
+    </ng-container>
+
+    <div *ngIf="phase === 'feedback'" class="challenge-feedback">
+      <p [class.correct]="feedbackCorrect" [class.wrong]="!feedbackCorrect">
+        {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n }}
+      </p>
+      <p class="challenge-feedback__line">
+        {{ catalog.localizedName(target, locale.language) }}
+        <app-speak-button
+          [text]="catalog.localizedName(target, locale.language)"
+        ></app-speak-button>
+      </p>
+      <ion-button expand="block" (click)="nextRound()">{{ 'globe.next' | i18n }}</ion-button>
+    </div>
+  </ng-container>
+</ion-content>

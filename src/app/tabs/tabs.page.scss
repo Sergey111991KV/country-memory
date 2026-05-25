@@ -1,0 +1,90 @@
+:host {
+  display: block;
+  height: 100%;
+  position: relative;
+}
+
+ion-tabs {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+ion-tab-bar {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: calc(62px + env(safe-area-inset-bottom, 0px));
+  --border: 1px solid color-mix(in srgb, #ffffff 10%, transparent);
+  --background: color-mix(in srgb, #16122b 72%, transparent);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  padding-top: 8px;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  padding-left: max(10px, env(safe-area-inset-left, 0px));
+  padding-right: max(10px, env(safe-area-inset-right, 0px));
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+}
+
+ion-tab-button {
+  --color: #71717a;
+  --color-selected: #e9d5ff;
+  --ripple-color: color-mix(in srgb, #a78bfa 55%, transparent);
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 25%;
+  font-family: var(--app-font-ui);
+}
+
+ion-tab-button ion-label {
+  font-family: var(--app-font-ui) !important;
+  font-size: clamp(0.5rem, 2.6vw, 0.625rem);
+  font-weight: 600;
+  font-style: normal !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  line-height: 1.15;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+ion-tab-button::part(native) {
+  border-radius: 14px;
+  margin: 2px 1px;
+  padding-top: 8px;
+  padding-bottom: 6px;
+  padding-inline: 2px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+ion-tab-button ion-icon {
+  font-size: 1.5rem;
+  margin-bottom: 2px;
+  height: auto;
+  min-height: 1.5rem;
+  overflow: visible;
+}
+
+ion-tab-button.tab-selected::part(native) {
+  background: color-mix(in srgb, #a78bfa 14%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, #ec4899 14%, transparent);
+}
+
+ion-tab-button:first-child::part(native) {
+  margin-inline-start: 0;
+}
+
+ion-tab-button:last-child::part(native) {
+  margin-inline-end: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ion-tab-button {
+    transition: none;
+  }
+}

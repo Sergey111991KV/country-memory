@@ -1,0 +1,37 @@
+@import '../flag-challenge/flag-challenge.page.scss';
+
+.facts-quiz-page {
+  font-family: var(--app-font-ui);
+}
+
+.facts-quiz-kicker {
+  margin: 0 0 var(--app-space-2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ion-color-medium);
+}
+
+.facts-quiz-statement {
+  display: flex;
+  gap: var(--app-space-2);
+  align-items: flex-start;
+  padding: var(--app-space-4);
+  margin-bottom: var(--app-space-4);
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--ion-color-primary) 22%, transparent);
+  background: color-mix(in srgb, var(--ion-color-primary) 6%, var(--ion-background-color));
+
+  &__text {
+    flex: 1;
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+}
+
+.facts-quiz-empty {
+  text-align: center;
+  color: var(--ion-color-medium);
+  padding: var(--app-space-4);
+}

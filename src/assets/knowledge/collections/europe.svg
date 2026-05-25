@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" fill="none" role="img" aria-label="Europe">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#312e81"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0.4" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#c4b5fd"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#sky)"/>
+  <path
+    fill="url(#land)"
+    stroke="#e9d5ff"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+    opacity="0.92"
+    d="M168 44c18-6 38-2 48 14 8 14 4 34-10 44-16 12-38 10-52-4-10-12-8-32 4-42 6-6 14-10 10-12z
+       M198 58c6 2 10 8 8 14-2 8-10 10-16 6-6-4-4-14 4-18 4-2 6-2 4-2z
+       M152 72c8-4 18-2 22 8 4 10-6 18-16 14-8-4-10-16-6-22z"
+  />
+</svg>

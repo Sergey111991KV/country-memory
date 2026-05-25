@@ -1,0 +1,97 @@
+<ion-header class="ion-no-border session-result-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="backToPlay()" [attr.aria-label]="'common.back' | i18n">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title *ngIf="result">{{ result.doneHeaderKey | i18n }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="session-result-content" *ngIf="result as r">
+  <div class="session-result-hero">
+    <p class="session-result-hero__kicker">{{ 'sessionResult.kicker' | i18n }}</p>
+    <div class="session-result-hero__badge" [class.session-result-hero__badge--duel]="isPassPlay">
+      <app-icon [icon]="heroIcon" size="hero"></app-icon>
+    </div>
+    <h1 class="session-result-hero__title">{{ titleText() }}</h1>
+    <p *ngIf="subtitleText()" class="session-result-hero__sub">{{ subtitleText() }}</p>
+  </div>
+
+  <section *ngIf="isPassPlay && r.players?.length" class="session-result-board mem-surface">
+    <h2 class="session-result-board__heading">{{ 'sessionResult.scoreboard' | i18n }}</h2>
+    <ul class="session-result-board__list">
+      <li
+        *ngFor="let row of r.players"
+        class="session-result-row"
+        [class.session-result-row--winner]="row.isWinner"
+        [class.session-result-row--tie-lead]="r.isTie && row.rank === 1"
+      >
+        <span class="session-result-row__medal">
+          <app-icon
+            *ngIf="rankMedalIcon(row.rank) as medalIcon"
+            [icon]="medalIcon"
+            size="md"
+          ></app-icon>
+          <span *ngIf="!rankMedalIcon(row.rank)">{{ rankMedal(row.rank) }}</span>
+        </span>
+        <span class="session-result-row__name">{{ row.name }}</span>
+        <span class="session-result-row__score">
+          {{ 'sessionResult.points' | i18n: { score: row.score, total: r.total } }}
+        </span>
+      </li>
+    </ul>
+    <p *ngIf="r.isTie" class="session-result-board__tie">{{ 'sessionResult.tieHint' | i18n }}</p>
+  </section>
+
+  <section *ngIf="!isPassPlay" class="session-result-solo mem-surface">
+    <p
+      class="session-result-solo__ring"
+      [style.--solo-pct]="soloPercent"
+      aria-hidden="true"
+    >
+      <span class="session-result-solo__value">{{ soloPercent }}%</span>
+    </p>
+    <p class="session-result-solo__line">
+      {{ 'sessionResult.scoreSummary' | i18n: { correct: r.correct, total: r.total } }}
+    </p>
+    <p *ngIf="extraStatsText()" class="session-result-solo__extra">{{ extraStatsText() }}</p>
+  </section>
+
+  <section *ngIf="atLimit" class="session-result-limit mem-surface">
+    <p>{{ 'play.limitReachedMessage' | i18n }}</p>
+  </section>
+
+  <div class="session-result-actions">
+    <ion-button
+      *ngIf="canPlayAgain"
+      expand="block"
+      color="primary"
+      size="large"
+      (click)="playAgain()"
+    >
+      {{ 'sessionResult.playAgain' | i18n }}
+    </ion-button>
+    <ion-button
+      *ngIf="atLimit"
+      expand="block"
+      color="primary"
+      size="large"
+      (click)="openPaywall()"
+    >
+      {{ 'home.getPremiumCta' | i18n }}
+    </ion-button>
+    <ion-button expand="block" fill="outline" size="large" (click)="backToPlay()">
+      {{ 'sessionResult.backToPlay' | i18n }}
+    </ion-button>
+    <ion-button
+      *ngIf="atLimit"
+      expand="block"
+      fill="clear"
+      (click)="backToPlay()"
+    >
+      {{ 'play.limitLater' | i18n }}
+    </ion-button>
+  </div>
+</ion-content>

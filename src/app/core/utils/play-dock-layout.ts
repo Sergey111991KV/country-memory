@@ -1,0 +1,24 @@
+/** Shared Play dock wheel geometry (keep in sync with play.page.scss). */
+export const PLAY_DOCK_LAYOUT = {
+  arcRadius: 220,
+  arcSink: 210,
+  arcWindow: 176,
+  inactiveCard: 108,
+  activeCard: 156,
+  activeGlow: 4,
+} as const;
+
+/** Top edge of the centered active card (px above arc bottom; negative = inside window). */
+export function playDockActiveCardTopPx(
+  layout: typeof PLAY_DOCK_LAYOUT = PLAY_DOCK_LAYOUT,
+): number {
+  const cardBottom = layout.arcSink - layout.arcRadius;
+  return cardBottom - layout.activeCard - layout.activeGlow;
+}
+
+/** How many px the active card extends above the arc clip window (0 = fully contained). */
+export function playDockActiveTopOverflowPx(
+  layout: typeof PLAY_DOCK_LAYOUT = PLAY_DOCK_LAYOUT,
+): number {
+  return Math.max(0, -playDockActiveCardTopPx(layout) - layout.arcWindow);
+}

@@ -1,0 +1,36 @@
+<ion-content class="login-page ion-padding page-safe-top">
+  <div class="login-shell">
+    <img
+      class="login-mark"
+      src="assets/brand/flagfield-mark.svg"
+      width="72"
+      height="72"
+      alt=""
+    />
+    <h1 class="login-title">{{ 'auth.title' | i18n }}</h1>
+    <p class="login-sub">{{ 'auth.subtitle' | i18n }}</p>
+
+    <ion-card>
+      <ion-card-content>
+        <ion-item lines="full">
+          <ion-input
+            [label]="'auth.username' | i18n"
+            labelPlacement="stacked"
+            [(ngModel)]="username"
+            autocomplete="nickname"
+            maxlength="40"
+            (keyup.enter)="submit()"
+          ></ion-input>
+        </ion-item>
+
+        <p *ngIf="errorKey" class="login-error">{{ errorKey | i18n }}</p>
+
+        <ion-button expand="block" class="login-submit" [disabled]="busy" (click)="submit()">
+          {{ 'auth.continueCta' | i18n }}
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <p class="login-hint">{{ 'auth.localOnlyHint' | i18n }}</p>
+  </div>
+</ion-content>

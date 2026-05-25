@@ -1,0 +1,62 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'play.quizTitle' | i18n }}</ion-title>
+    <ion-note slot="end" class="quiz-round-note">
+      {{ 'quiz.round' | i18n: { current: round, total: roundsTotal } }}
+    </ion-note>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="quiz-content ion-padding">
+  <div *ngIf="loading" class="quiz-loading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>{{ 'quiz.loading' | i18n }}</p>
+  </div>
+
+  <ng-container *ngIf="!loading && target">
+    <p class="quiz-prompt">{{ 'quiz.whichCountry' | i18n }}</p>
+
+    <app-flag-display
+      [iso2]="target.iso2"
+      size="hero"
+      [animate]="phase === 'pick'"
+      [countryLabel]="'quiz.flagAlt' | i18n"
+    ></app-flag-display>
+
+    <div class="quiz-choices" role="listbox" [attr.aria-label]="'quiz.whichCountry' | i18n">
+      <button
+        *ngFor="let choice of choices"
+        type="button"
+        class="quiz-choice"
+        [class.quiz-choice--correct]="choiceState(choice.country.iso2) === 'correct'"
+        [class.quiz-choice--wrong]="choiceState(choice.country.iso2) === 'wrong'"
+        [disabled]="phase === 'feedback'"
+        (click)="pickChoice(choice)"
+      >
+        {{ choice.label }}
+      </button>
+    </div>
+
+    <section *ngIf="showFeedback" class="quiz-feedback mem-surface">
+      <h2 [class.quiz-feedback--ok]="feedbackCorrect" [class.quiz-feedback--bad]="!feedbackCorrect">
+        {{ (feedbackCorrect ? 'quiz.correct' : 'quiz.wrong') | i18n }}
+      </h2>
+      <p class="quiz-feedback__explain">{{ explainLine(target) }}</p>
+      <app-flag-display
+        *ngIf="!feedbackCorrect"
+        [iso2]="target.iso2"
+        size="card"
+        [animate]="true"
+        [countryLabel]="targetLabel"
+      ></app-flag-display>
+      <ion-button expand="block" color="primary" (click)="nextRound()">
+        {{ 'quiz.next' | i18n }}
+      </ion-button>
+    </section>
+  </ng-container>
+</ion-content>
