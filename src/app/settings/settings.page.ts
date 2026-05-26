@@ -24,7 +24,7 @@ import { ThemeService } from '../core/services/theme.service';
 import { environment } from '../../environments/environment';
 
 export interface SettingsSupportBlock {
-  id: 'privacy' | 'terms' | 'support' | 'donate' | 'icons' | 'logs';
+  id: 'privacy' | 'terms' | 'support' | 'donate' | 'logs';
   icon: string;
   titleKey: string;
   hintKey: string;
@@ -40,7 +40,7 @@ export interface SettingsSupportBlock {
 export class SettingsPage implements OnInit, ViewWillEnter {
   private readonly appSettings = inject(AppSettingsService);
   private readonly toastCtrl = inject(ToastController);
-  private readonly i18n = inject(LocaleService);
+  protected readonly i18n = inject(LocaleService);
   private readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -96,13 +96,6 @@ export class SettingsPage implements OnInit, ViewWillEnter {
       hintKey: 'aboutDeveloper.blockDonateHint',
       actionKey: 'aboutDeveloper.openLink',
     },
-    {
-      id: 'icons',
-      icon: 'grid-outline',
-      titleKey: 'icons.galleryNavTitle',
-      hintKey: 'icons.galleryNavHint',
-      actionKey: 'icons.galleryNavAction',
-    },
   ];
 
   readonly hasPrivacyUrl = this.legal.hasPrivacyUrl();
@@ -146,8 +139,6 @@ export class SettingsPage implements OnInit, ViewWillEnter {
         return true;
       case 'donate':
         return this.hasDonateUrl;
-      case 'icons':
-        return true;
       default: {
         const _exhaustive: never = block.id;
         return _exhaustive;
@@ -175,10 +166,14 @@ export class SettingsPage implements OnInit, ViewWillEnter {
       case 'donate':
         await this.legal.openDonate();
         break;
-      case 'icons':
-        void this.router.navigate(['/tabs/settings/icon-gallery']);
-        break;
     }
+  }
+
+  openIconGallery(): void {
+    if (!this.billingDebugEnabled) {
+      return;
+    }
+    void this.router.navigate(['/tabs/settings/icon-gallery']);
   }
 
   onAccordionChange(ev: CustomEvent): void {

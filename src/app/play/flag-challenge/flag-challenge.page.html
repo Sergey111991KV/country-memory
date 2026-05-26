@@ -1,3 +1,4 @@
+@let lang = locale.langSig();
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -5,22 +6,22 @@
         <ion-icon slot="icon-only" name="arrow-back" aria-hidden="true"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'challenge.mode.' + mode | i18n }}</ion-title>
+    <ion-title>{{ 'challenge.mode.' + mode | i18n:null:lang}}</ion-title>
     <ion-buttons slot="end">
-      <ion-note>{{ 'globe.round' | i18n: { current: round, total: roundsTotal } }}</ion-note>
+      <ion-note>{{ 'globe.round' | i18n:{ current: round, total: roundsTotal }:lang}}</ion-note>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding challenge-page">
-  <p *ngIf="loading">{{ 'knowledge.loading' | i18n }}</p>
+  <p *ngIf="loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
 
   <p *ngIf="passPlay && !loading && !passPlayBuzzer" class="challenge-pass-play-turn">
-    {{ 'passPlay.turn' | i18n: { name: passPlayTurnName } }}
+    {{ 'passPlay.turn' | i18n:{ name: passPlayTurnName }:lang}}
   </p>
 
   <p *ngIf="passPlayBuzzer && !loading && phase === 'pick'" class="challenge-pass-play-buzzer-hint">
-    {{ 'passPlay.buzzerHint' | i18n }}
+    {{ 'passPlay.buzzerHint' | i18n:null:lang}}
   </p>
 
   <ng-container *ngIf="!loading && target">
@@ -63,7 +64,7 @@
         class="challenge-buzzer-skip"
         (click)="skipBuzzRound()"
       >
-        {{ 'passPlay.buzzerSkip' | i18n }}
+        {{ 'passPlay.buzzerSkip' | i18n:null:lang}}
       </ion-button>
     </ng-container>
 
@@ -102,14 +103,14 @@
       <div *ngIf="mode === 'flag_type_country'" class="challenge-type">
         <ion-item>
           <ion-input
-            [label]="'challenge.typeCountryLabel' | i18n"
+            [label]="'challenge.typeCountryLabel' | i18n:null:lang"
             labelPlacement="stacked"
             [(ngModel)]="typedName"
             (keyup.enter)="verifyTyped()"
           ></ion-input>
         </ion-item>
         <ion-button expand="block" (click)="verifyTyped()">
-          {{ 'globe.verify' | i18n }}
+          {{ 'globe.verify' | i18n:null:lang}}
         </ion-button>
       </div>
     </ng-container>
@@ -117,7 +118,7 @@
     <div *ngIf="phase === 'feedback'" class="challenge-feedback">
       <ng-container *ngIf="passPlayBuzzer">
         <p class="challenge-feedback__buzzer">
-          {{ 'passPlay.buzzerFirst' | i18n: { name: buzzPlayerName } }}
+          {{ 'passPlay.buzzerFirst' | i18n:{ name: buzzPlayerName }:lang}}
         </p>
         <p class="challenge-feedback__line">
           {{ catalog.localizedName(target, locale.language) }}
@@ -132,16 +133,16 @@
           ></app-speak-button>
         </p>
         <ion-button expand="block" color="success" (click)="confirmBuzzCorrect()">
-          {{ 'passPlay.buzzerCorrect' | i18n }}
+          {{ 'passPlay.buzzerCorrect' | i18n:null:lang}}
         </ion-button>
         <ion-button expand="block" fill="outline" color="medium" (click)="rejectBuzz()">
-          {{ 'passPlay.buzzerWrong' | i18n }}
+          {{ 'passPlay.buzzerWrong' | i18n:null:lang}}
         </ion-button>
       </ng-container>
 
       <ng-container *ngIf="!passPlayBuzzer">
         <p [class.correct]="feedbackCorrect" [class.wrong]="!feedbackCorrect">
-          {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n }}
+          {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}
         </p>
         <p class="challenge-feedback__line">
           {{ catalog.localizedName(target, locale.language) }}
@@ -156,7 +157,7 @@
           ></app-speak-button>
         </p>
         <ion-button expand="block" (click)="nextRound()">
-          {{ 'globe.next' | i18n }}
+          {{ 'globe.next' | i18n:null:lang}}
         </ion-button>
       </ng-container>
     </div>

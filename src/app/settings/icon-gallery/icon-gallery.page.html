@@ -1,27 +1,70 @@
+@let lang = locale.langSig();
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
         <ion-icon name="chevron-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'icons.galleryTitle' | i18n }}</ion-title>
+    <ion-title>{{ 'icons.galleryTitle' | i18n:null:lang}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="icon-gallery ion-padding">
-  <p class="icon-gallery__lead">{{ 'icons.galleryLead' | i18n }}</p>
+  <p class="icon-gallery__badge">{{ 'icons.devOnlyBadge' | i18n:null:lang}}</p>
+  <p class="icon-gallery__lead">{{ 'icons.galleryLead' | i18n:null:lang}}</p>
+
+  <section class="icon-gallery__section mem-surface">
+    <h2 class="icon-gallery__heading">{{ 'icons.playDockPreviewTitle' | i18n:null:lang}}</h2>
+    <p class="icon-gallery__sub">{{ 'icons.playDockPreviewLead' | i18n:null:lang}}</p>
+
+    <h3 class="icon-gallery__subheading">{{ 'icons.groupCategories' | i18n:null:lang}}</h3>
+    <ul class="icon-gallery__dock-row">
+      <li
+        *ngFor="let category of playCategories; trackBy: trackCategory"
+        class="icon-gallery__dock-card mem-surface"
+      >
+        <span class="icon-gallery__dock-shell" aria-hidden="true">
+          <app-icon [icon]="category.icon" size="dock-lg"></app-icon>
+        </span>
+        <span class="icon-gallery__dock-title">{{ category.titleKey | i18n:null:lang}}</span>
+        <code class="icon-gallery__id">{{ category.icon }}</code>
+      </li>
+    </ul>
+
+    <section
+      *ngFor="let section of playSections; trackBy: trackSection"
+      class="icon-gallery__mode-section"
+    >
+      <h3 class="icon-gallery__subheading">{{ section.titleKey | i18n:null:lang}}</h3>
+      <ul class="icon-gallery__dock-row icon-gallery__dock-row--wrap">
+        <li
+          *ngFor="let mode of section.items; trackBy: trackMode"
+          class="icon-gallery__dock-card mem-surface"
+        >
+          <span class="icon-gallery__dock-shell" aria-hidden="true">
+            <app-icon [icon]="mode.icon" size="dock-lg"></app-icon>
+          </span>
+          <span class="icon-gallery__dock-title">{{ mode.titleKey | i18n:null:lang}}</span>
+          <code class="icon-gallery__id">{{ mode.icon }}</code>
+        </li>
+      </ul>
+    </section>
+  </section>
 
   <section *ngFor="let group of groups" class="icon-gallery__section mem-surface">
-    <h2 class="icon-gallery__heading">{{ groupTitleKey(group) | i18n }}</h2>
+    <h2 class="icon-gallery__heading">{{ groupTitleKey(group) | i18n:null:lang}}</h2>
     <ul class="icon-gallery__grid">
       <li
         *ngFor="let item of iconsInGroup(group); trackBy: trackIcon"
         class="icon-gallery__cell"
       >
         <app-icon [icon]="item.id" size="lg"></app-icon>
-        <span class="icon-gallery__label">{{ item.labelKey | i18n }}</span>
+        <span class="icon-gallery__label">{{ item.labelKey | i18n:null:lang}}</span>
         <code class="icon-gallery__id">{{ item.id }}</code>
+        <a class="icon-gallery__svg-link" [href]="iconAsset(item.id)" target="_blank" rel="noopener">
+          SVG
+        </a>
       </li>
     </ul>
   </section>

@@ -87,8 +87,13 @@ export class LocaleService {
     return this.lang;
   }
 
-  translate(key: string, vars?: Record<string, string | number>): string {
-    const table = MESSAGES[this.lang] ?? MESSAGES.en;
+  translate(
+    key: string,
+    vars?: Record<string, string | number>,
+    lang?: AppLang,
+  ): string {
+    const activeLang = lang ?? this.lang;
+    const table = MESSAGES[activeLang] ?? MESSAGES.en;
     const fallback = MESSAGES.en[key];
     const raw = table[key] ?? fallback ?? key;
     return interpolate(raw, vars);

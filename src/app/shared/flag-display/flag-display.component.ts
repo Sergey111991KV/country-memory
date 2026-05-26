@@ -22,7 +22,7 @@ let windFilterSeq = 0;
 export class FlagDisplayComponent {
   private readonly flags = inject(FlagAssetsService);
   private readonly catalog = inject(CountriesCatalogService);
-  private readonly locale = inject(LocaleService);
+  readonly locale = inject(LocaleService);
   private readonly cultureModal = inject(CountryCultureModalService);
 
   @Input({ required: true }) iso2 = '';

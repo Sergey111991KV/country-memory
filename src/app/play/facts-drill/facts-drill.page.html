@@ -1,3 +1,4 @@
+@let lang = locale.langSig();
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -5,19 +6,19 @@
         <ion-icon slot="icon-only" name="arrow-back" aria-hidden="true"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'factsDrill.title' | i18n }}</ion-title>
+    <ion-title>{{ 'factsDrill.title' | i18n:null:lang}}</ion-title>
     <ion-buttons slot="end">
-      <ion-note>{{ 'globe.round' | i18n: { current: round, total: roundsTotal } }}</ion-note>
+      <ion-note>{{ 'globe.round' | i18n:{ current: round, total: roundsTotal }:lang}}</ion-note>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding challenge-page">
-  <p *ngIf="loading">{{ 'knowledge.loading' | i18n }}</p>
+  <p *ngIf="loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
 
   <ng-container *ngIf="!loading && target">
     <div class="challenge-prompt">
-      <p class="challenge-prompt__kicker">{{ 'factsDrill.kicker' | i18n }}</p>
+      <p class="challenge-prompt__kicker">{{ 'factsDrill.kicker' | i18n:null:lang}}</p>
       <p *ngIf="roundKind !== 'flag'" class="facts-drill-value">{{ promptValue }}</p>
       <p class="challenge-prompt__text">{{ promptText }}</p>
       <app-speak-button [text]="promptText"></app-speak-button>
@@ -49,7 +50,7 @@
 
     <div *ngIf="phase === 'feedback'" class="challenge-feedback">
       <p [class.correct]="feedbackCorrect" [class.wrong]="!feedbackCorrect">
-        {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n }}
+        {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}
       </p>
       <p class="challenge-feedback__line">
         {{ catalog.localizedName(target, locale.language) }}
@@ -58,7 +59,7 @@
         ></app-speak-button>
       </p>
       <ion-button expand="block" (click)="nextRound()">
-        {{ 'globe.next' | i18n }}
+        {{ 'globe.next' | i18n:null:lang}}
       </ion-button>
     </div>
   </ng-container>

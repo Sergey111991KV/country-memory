@@ -1,18 +1,19 @@
+@let lang = locale.langSig();
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()" [attr.aria-label]="'paywall.back' | i18n">
+      <ion-button (click)="goBack()" [attr.aria-label]="'paywall.back' | i18n:null:lang">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'paywall.title' | i18n }}</ion-title>
+    <ion-title>{{ 'paywall.title' | i18n:null:lang}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding paywall-content page-safe-top">
   <div *ngIf="!sub.readySig()" class="paywall-loading">
     <ion-spinner name="crescent"></ion-spinner>
-    <p>{{ 'paywall.connecting' | i18n }}</p>
+    <p>{{ 'paywall.connecting' | i18n:null:lang}}</p>
   </div>
 
   <ng-container *ngIf="sub.readySig()">
@@ -29,14 +30,14 @@
       color="medium"
       class="paywall-warn ion-text-wrap"
     >
-      <p>{{ 'paywall.webOnly' | i18n }}</p>
+      <p>{{ 'paywall.webOnly' | i18n:null:lang}}</p>
     </ion-text>
 
     <p
       *ngIf="sub.canPurchaseInApp()"
       class="paywall-store-badge"
     >
-      {{ 'paywall.storeBadge' | i18n: { store: sub.storeLabel() } }}
+      {{ 'paywall.storeBadge' | i18n:{ store: sub.storeLabel() }:lang}}
     </p>
 
     <section class="paywall-hero">
@@ -47,10 +48,10 @@
         height="72"
         alt=""
       />
-      <h1>{{ 'paywall.heroTitle' | i18n }}</h1>
-      <p class="paywall-hero__lead">{{ 'paywall.heroLead' | i18n }}</p>
+      <h1>{{ 'paywall.heroTitle' | i18n:null:lang}}</h1>
+      <p class="paywall-hero__lead">{{ 'paywall.heroLead' | i18n:null:lang}}</p>
       <p *ngIf="!sub.isSubscribed()" class="paywall-hero__free">
-        {{ 'paywall.freeGamesLine' | i18n: { n: freeGamesLeft, limit: freeGamesLimit } }}
+        {{ 'paywall.freeGamesLine' | i18n:{ n: freeGamesLeft, limit: freeGamesLimit }:lang}}
       </p>
     </section>
 
@@ -58,31 +59,31 @@
       <ion-card-content>
         <ion-chip color="warning">
           <app-icon icon="ui-premium" size="sm"></app-icon>
-          <ion-label>{{ 'paywall.premiumActive' | i18n }}</ion-label>
+          <ion-label>{{ 'paywall.premiumActive' | i18n:null:lang}}</ion-label>
         </ion-chip>
-        <p>{{ 'paywall.premiumSub' | i18n }}</p>
+        <p>{{ 'paywall.premiumSub' | i18n:null:lang}}</p>
         <ng-container [ngSwitch]="sub.premiumKindSig()">
-          <p *ngSwitchCase="'lifetime'">{{ 'settings.premiumTypeLifetime' | i18n }}</p>
-          <p *ngSwitchCase="'subscription'">{{ 'settings.premiumTypeSubscription' | i18n }}</p>
-          <p *ngSwitchCase="'trial'">{{ 'settings.premiumTypeTrial' | i18n }}</p>
-          <p *ngSwitchCase="'intro'">{{ 'settings.premiumTypeIntro' | i18n }}</p>
+          <p *ngSwitchCase="'lifetime'">{{ 'settings.premiumTypeLifetime' | i18n:null:lang}}</p>
+          <p *ngSwitchCase="'subscription'">{{ 'settings.premiumTypeSubscription' | i18n:null:lang}}</p>
+          <p *ngSwitchCase="'trial'">{{ 'settings.premiumTypeTrial' | i18n:null:lang}}</p>
+          <p *ngSwitchCase="'intro'">{{ 'settings.premiumTypeIntro' | i18n:null:lang}}</p>
         </ng-container>
         <p *ngIf="sub.premiumExpiresIsoSig() as exp" class="muted">
-          {{ 'settings.premiumValidUntil' | i18n: { date: formatPremiumExpiry(exp) } }}
+          {{ 'settings.premiumValidUntil' | i18n:{ date: formatPremiumExpiry(exp) }:lang}}
         </p>
       </ion-card-content>
     </ion-card>
 
     <ion-card *ngIf="!sub.isSubscribed()" class="mem-surface">
       <ion-card-header>
-        <ion-card-title>{{ 'paywall.featuresCardTitle' | i18n }}</ion-card-title>
+        <ion-card-title>{{ 'paywall.featuresCardTitle' | i18n:null:lang}}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
         <ul class="paywall-features">
-          <li>{{ 'paywall.f1' | i18n }}</li>
-          <li>{{ 'paywall.f2' | i18n }}</li>
-          <li>{{ 'paywall.f3' | i18n }}</li>
-          <li>{{ 'paywall.f4' | i18n }}</li>
+          <li>{{ 'paywall.f1' | i18n:null:lang}}</li>
+          <li>{{ 'paywall.f2' | i18n:null:lang}}</li>
+          <li>{{ 'paywall.f3' | i18n:null:lang}}</li>
+          <li>{{ 'paywall.f4' | i18n:null:lang}}</li>
         </ul>
       </ion-card-content>
     </ion-card>
@@ -92,11 +93,11 @@
         expand="block"
         color="primary"
         class="paywall-cta"
-        [disabled]="busy || (sub.canPurchaseInApp() && !sub.monthlyPackageSig())"
+        [disabled]="busy || (sub.canPurchaseInApp() && !sub.monthlyProductSig())"
         (click)="subscribeMonthly()"
       >
-        <span *ngIf="sub.monthlyPriceSig() as price">{{ 'paywall.subscribe' | i18n }} — {{ price }}</span>
-        <span *ngIf="!sub.monthlyPriceSig()">{{ 'paywall.subscribe' | i18n }}</span>
+        <span *ngIf="sub.monthlyPriceSig() as price">{{ 'paywall.subscribe' | i18n:null:lang}} — {{ price }}</span>
+        <span *ngIf="!sub.monthlyPriceSig()">{{ 'paywall.subscribe' | i18n:null:lang}}</span>
       </ion-button>
 
       <ion-button
@@ -104,18 +105,18 @@
         fill="outline"
         color="primary"
         class="paywall-cta"
-        [disabled]="busy || (sub.canPurchaseInApp() && !sub.lifetimePackageSig())"
+        [disabled]="busy || (sub.canPurchaseInApp() && !sub.lifetimeProductSig())"
         (click)="buyLifetime()"
       >
-        <span *ngIf="sub.lifetimePriceSig() as price">{{ 'paywall.lifetime' | i18n }} — {{ price }}</span>
-        <span *ngIf="!sub.lifetimePriceSig()">{{ 'paywall.lifetime' | i18n }}</span>
+        <span *ngIf="sub.lifetimePriceSig() as price">{{ 'paywall.lifetime' | i18n:null:lang}} — {{ price }}</span>
+        <span *ngIf="!sub.lifetimePriceSig()">{{ 'paywall.lifetime' | i18n:null:lang}}</span>
       </ion-button>
 
       <p class="paywall-fine muted ion-text-wrap">
-        {{ sub.monthlyFinePrintKey() | i18n: { store: sub.storeLabel() } }}
+        {{ sub.monthlyFinePrintKey() | i18n:{ store: sub.storeLabel() }:lang}}
       </p>
       <p class="paywall-fine muted ion-text-wrap">
-        {{ sub.lifetimeFinePrintKey() | i18n: { store: sub.storeLabel() } }}
+        {{ sub.lifetimeFinePrintKey() | i18n:{ store: sub.storeLabel() }:lang}}
       </p>
     </ng-container>
 
@@ -125,7 +126,7 @@
       (click)="restore()"
       [disabled]="busy || (!sub.canPurchaseInApp() && !devMockBilling)"
     >
-      {{ 'paywall.restore' | i18n }}
+      {{ 'paywall.restore' | i18n:null:lang}}
     </ion-button>
 
     <ion-button
@@ -134,7 +135,7 @@
       fill="clear"
       (click)="openManageSubscriptions()"
     >
-      {{ 'paywall.manageSubs' | i18n: { store: sub.storeLabel() } }}
+      {{ 'paywall.manageSubs' | i18n:{ store: sub.storeLabel() }:lang}}
     </ion-button>
 
     <ion-button
@@ -144,17 +145,17 @@
       color="medium"
       (click)="toggleDebugPremium()"
     >
-      {{ 'paywall.devToggle' | i18n }}
+      {{ 'paywall.devToggle' | i18n:null:lang}}
     </ion-button>
 
     <div class="legal-row">
       <ion-button fill="clear" size="small" (click)="openPrivacy()" [disabled]="!legalReady">
-        {{ 'paywall.privacy' | i18n }}
+        {{ 'paywall.privacy' | i18n:null:lang}}
       </ion-button>
       <ion-button fill="clear" size="small" (click)="openTerms()" [disabled]="!legalReady">
-        {{ 'paywall.terms' | i18n }}
+        {{ 'paywall.terms' | i18n:null:lang}}
       </ion-button>
     </div>
-    <p *ngIf="!legalReady" class="muted ion-text-wrap">{{ 'paywall.legalWarn' | i18n }}</p>
+    <p *ngIf="!legalReady" class="muted ion-text-wrap">{{ 'paywall.legalWarn' | i18n:null:lang}}</p>
   </ng-container>
 </ion-content>

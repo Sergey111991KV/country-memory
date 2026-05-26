@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Resume / finish Flagfield translations (Lingva + MyMemory fallback).
+# Resume / finish Flagfield translations (MyMemory — stable; Lingva often 403/500).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -15,14 +15,19 @@ echo "$$" >"$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 export SKIP_EXISTING=1
-export DELAY_MS="${DELAY_MS:-900}"
+export DELAY_MS="${DELAY_MS:-1000}"
 
-LANGS=(hi ar pt ja ko it tr vi id pl nl bn ur)
+# Remaining locales without flagfield JSON
+LANGS=(ja ko it tr vi id pl nl bn ur)
 
 for lang in "${LANGS[@]}"; do
   echo "========== $lang =========="
-  node scripts/translate-flagfield-lingva.mjs "$lang" || true
+  node scripts/translate-flagfield-mymemory.mjs "$lang" || true
   node scripts/build-flagfield-locales.mjs
 done
+
+echo "Fixing placeholder glitches in es, de, fr…"
+node scripts/fix-flagfield-placeholders.mjs es de fr || true
+node scripts/build-flagfield-locales.mjs
 
 echo "All done."

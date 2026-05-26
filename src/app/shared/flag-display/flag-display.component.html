@@ -1,3 +1,4 @@
+@let lang = locale.langSig();
 <div
   class="flag-display"
   [class.flag-display--hero]="size === 'hero'"
@@ -87,5 +88,5 @@
     <span class="flag-display__sheen" aria-hidden="true"></span>
     <span *ngIf="enableCultureHold && holdHintVisible" class="flag-display__hold-ring" aria-hidden="true"></span>
   </div>
-  <p *ngIf="enableCultureHold && size === 'hero'" class="flag-display__hold-hint">{{ 'flag.holdExplore' | i18n }}</p>
+  <p *ngIf="enableCultureHold && size === 'hero'" class="flag-display__hold-hint">{{ 'flag.holdExplore' | i18n:null:lang}}</p>
 </div>

@@ -1,3 +1,4 @@
+@let lang = locale.langSig();
 <ion-content class="culture-modal" [ngStyle]="accentStyle" [scrollY]="false">
   <div class="culture-modal__stage" [class.culture-modal__stage--video]="sceneMode === 'video'">
     <video
@@ -55,16 +56,16 @@
   </div>
 
   <header class="culture-modal__header">
-    <ion-button fill="clear" class="culture-modal__close" (click)="close()" [attr.aria-label]="'culture.close' | i18n">
+    <ion-button fill="clear" class="culture-modal__close" (click)="close()" [attr.aria-label]="'culture.close' | i18n:null:lang">
       <ion-icon name="close" slot="icon-only"></ion-icon>
     </ion-button>
   </header>
 
   <footer class="culture-modal__footer">
-    <p class="culture-modal__kicker">{{ 'culture.kicker' | i18n }}</p>
+    <p class="culture-modal__kicker">{{ 'culture.kicker' | i18n:null:lang}}</p>
     <h1 class="culture-modal__title">{{ countryName }}</h1>
-    <p class="culture-modal__meta">{{ 'culture.meta' | i18n: { capital, continent: continentLabel } }}</p>
-    <p *ngIf="sceneMode === 'illustrated'" class="culture-modal__asset-hint">{{ 'culture.assetHint' | i18n }}</p>
-    <p *ngIf="sceneMode === 'loading'" class="culture-modal__loading">{{ 'culture.loading' | i18n }}</p>
+    <p class="culture-modal__meta">{{ 'culture.meta' | i18n:{ capital, continent: continentLabel }:lang}}</p>
+    <p *ngIf="sceneMode === 'illustrated'" class="culture-modal__asset-hint">{{ 'culture.assetHint' | i18n:null:lang}}</p>
+    <p *ngIf="sceneMode === 'loading'" class="culture-modal__loading">{{ 'culture.loading' | i18n:null:lang}}</p>
   </footer>
 </ion-content>

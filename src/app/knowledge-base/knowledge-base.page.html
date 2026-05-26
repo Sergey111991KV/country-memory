@@ -1,39 +1,40 @@
+@let lang = locale.langSig();
 <ion-content class="knowledge-page page-safe-top" [fullscreen]="true">
   <div class="knowledge-shell" *ngIf="!loading; else loadingTpl">
     <header class="knowledge-header">
       <div class="knowledge-header__text">
         <p class="knowledge-header__brand">Flagfield</p>
-        <h1>{{ 'knowledge.title' | i18n }}</h1>
-        <p class="knowledge-header__sub">{{ 'knowledge.subtitle' | i18n }}</p>
+        <h1>{{ 'knowledge.title' | i18n:null:lang}}</h1>
+        <p class="knowledge-header__sub">{{ 'knowledge.subtitle' | i18n:null:lang}}</p>
       </div>
     </header>
 
     <section class="knowledge-block" aria-labelledby="knowledge-summary-heading">
-      <h2 id="knowledge-summary-heading" class="knowledge-kicker">{{ 'knowledge.summaryLead' | i18n }}</h2>
+      <h2 id="knowledge-summary-heading" class="knowledge-kicker">{{ 'knowledge.summaryLead' | i18n:null:lang}}</h2>
       <p class="knowledge-summary-line">
-        {{ 'knowledge.summaryCountries' | i18n: { n: summaryCollectionCount } }}
+        {{ 'knowledge.summaryCountries' | i18n:{ n: summaryCollectionCount }:lang}}
       </p>
       <p class="knowledge-summary-line">
-        {{ 'knowledge.summaryEngaged' | i18n: { n: summaryEngagedCount } }}
+        {{ 'knowledge.summaryEngaged' | i18n:{ n: summaryEngagedCount }:lang}}
       </p>
       <p class="knowledge-summary-line">
-        {{ 'knowledge.summaryMarks' | i18n: { known: summaryMarksKnown, total: summaryMarksTotal } }}
+        {{ 'knowledge.summaryMarks' | i18n:{ known: summaryMarksKnown, total: summaryMarksTotal }:lang}}
       </p>
       <p *ngIf="summaryPartialCount > 0" class="knowledge-summary-hint">
-        {{ 'knowledge.summaryPartial' | i18n: { n: summaryPartialCount } }}
+        {{ 'knowledge.summaryPartial' | i18n:{ n: summaryPartialCount }:lang}}
       </p>
     </section>
 
     <section class="knowledge-block" aria-labelledby="knowledge-collections-heading">
       <div class="knowledge-block__head">
-        <h2 id="knowledge-collections-heading" class="knowledge-kicker knowledge-block__kicker">{{ 'knowledge.collectionsSection' | i18n }}</h2>
+        <h2 id="knowledge-collections-heading" class="knowledge-kicker knowledge-block__kicker">{{ 'knowledge.collectionsSection' | i18n:null:lang}}</h2>
         <button
           type="button"
           class="knowledge-link-btn"
           [class.knowledge-link-btn--active]="isAllRegionsActive()"
           (click)="clearCollectionFilter()"
         >
-          {{ 'knowledge.allThemes' | i18n }}
+          {{ 'knowledge.allThemes' | i18n:null:lang}}
         </button>
       </div>
       <div class="knowledge-collections-scroll">
@@ -55,34 +56,33 @@
           >
             <ion-icon name="checkmark-circle"></ion-icon>
           </span>
-          <span class="knowledge-collection-card__title">{{ col.titleKey | i18n }}</span>
+          <span class="knowledge-collection-card__title">{{ col.titleKey | i18n:null:lang}}</span>
           <span class="knowledge-collection-card__meta">
             {{
               'knowledge.collectionCardMeta'
-                | i18n: {
+                | i18n:{
                   engaged: collectionEngagedCount(col),
                   total: collectionTotalCount(col),
                   saved: collectionSavedCount(col)
-                }
-            }}
+                }:lang}}
           </span>
         </button>
       </div>
       <p *ngIf="activeCollectionLabel" class="knowledge-filter-hint">
-        {{ 'knowledge.filterActive' | i18n: { region: activeCollectionLabel } }}
+        {{ 'knowledge.filterActive' | i18n:{ region: activeCollectionLabel }:lang}}
       </p>
     </section>
 
     <section class="knowledge-block knowledge-block--mark" aria-labelledby="knowledge-countries-heading">
       <div class="knowledge-mark-toolbar">
         <div class="knowledge-mark-toolbar__text">
-          <h2 id="knowledge-countries-heading" class="knowledge-kicker">{{ 'knowledge.markTitle' | i18n }}</h2>
-          <p class="knowledge-mark-lead">{{ 'knowledge.markHint' | i18n }}</p>
+          <h2 id="knowledge-countries-heading" class="knowledge-kicker">{{ 'knowledge.markTitle' | i18n:null:lang}}</h2>
+          <p class="knowledge-mark-lead">{{ 'knowledge.markHint' | i18n:null:lang}}</p>
         </div>
         <ion-searchbar
           class="knowledge-search"
           [(ngModel)]="searchQuery"
-          [placeholder]="'knowledge.searchPlaceholder' | i18n"
+          [placeholder]="'knowledge.searchPlaceholder' | i18n:null:lang"
           debounce="200"
         ></ion-searchbar>
       </div>
@@ -107,10 +107,10 @@
             <div class="knowledge-country-card__body">
               <h3>{{ catalog.localizedName(row.country, locale.language) }}</h3>
               <p class="knowledge-country-card__meta">
-                {{ 'knowledge.markProgress' | i18n: {
+                {{ 'knowledge.markProgress' | i18n:{
                   known: row.status.marksKnown,
                   total: row.status.marksTotal
-                } }}
+                }:lang}}
               </p>
               <span
                 class="knowledge-status-chip"
@@ -134,7 +134,7 @@
               [class.knowledge-action-btn--secondary]="row.status.manual"
               (click)="onCountryAction(row, $event)"
             >
-              {{ countryActionKey(row.status) | i18n }}
+              {{ countryActionKey(row.status) | i18n:null:lang}}
             </button>
           </div>
 
@@ -142,9 +142,9 @@
             <section
               *ngIf="row.fields.length"
               class="knowledge-detail-section"
-              [attr.aria-label]="'knowledge.fieldsSection' | i18n"
+              [attr.aria-label]="'knowledge.fieldsSection' | i18n:null:lang"
             >
-              <h4 class="knowledge-detail-section__title">{{ 'knowledge.fieldsSection' | i18n }}</h4>
+              <h4 class="knowledge-detail-section__title">{{ 'knowledge.fieldsSection' | i18n:null:lang}}</h4>
               <div
                 *ngFor="let field of row.fields"
                 class="knowledge-field-row"
@@ -152,14 +152,14 @@
               >
                 <ion-icon [name]="field.icon" aria-hidden="true"></ion-icon>
                 <div class="knowledge-field-row__body">
-                  <span class="knowledge-field-row__label">{{ field.labelKey | i18n }}</span>
+                  <span class="knowledge-field-row__label">{{ field.labelKey | i18n:null:lang}}</span>
                   <span class="knowledge-field-row__value">{{ field.value }}</span>
                 </div>
                 <ion-toggle
                   class="knowledge-mark-toggle"
                   [checked]="isMarkKnown(row, field.id)"
                   (ionChange)="onFieldKnownChange(row, field, $event)"
-                  [attr.aria-label]="field.labelKey | i18n"
+                  [attr.aria-label]="field.labelKey | i18n:null:lang"
                 ></ion-toggle>
               </div>
             </section>
@@ -167,9 +167,9 @@
             <section
               *ngIf="row.facts.length"
               class="knowledge-detail-section"
-              [attr.aria-label]="'knowledge.factsSection' | i18n"
+              [attr.aria-label]="'knowledge.factsSection' | i18n:null:lang"
             >
-              <h4 class="knowledge-detail-section__title">{{ 'knowledge.factsSection' | i18n }}</h4>
+              <h4 class="knowledge-detail-section__title">{{ 'knowledge.factsSection' | i18n:null:lang}}</h4>
               <div
                 *ngFor="let fact of row.facts"
                 class="knowledge-fact-row"
@@ -181,7 +181,7 @@
                   class="knowledge-mark-toggle"
                   [checked]="isMarkKnown(row, fact.id)"
                   (ionChange)="onFactKnownChange(row, fact, $event)"
-                  [attr.aria-label]="'knowledge.factKnownToggle' | i18n"
+                  [attr.aria-label]="'knowledge.factKnownToggle' | i18n:null:lang"
                 ></ion-toggle>
               </div>
             </section>
@@ -192,6 +192,6 @@
   </div>
 
   <ng-template #loadingTpl>
-    <p class="knowledge-loading">{{ 'knowledge.loading' | i18n }}</p>
+    <p class="knowledge-loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
   </ng-template>
 </ion-content>

@@ -76,7 +76,7 @@ developerWebsiteUrl: PUBLIC_SITE,
 
 ## 2. RevenueCat и покупки
 
-Пошагово: [REVENUECAT.md](REVENUECAT.md).
+Пошагово: [NATIVE-BILLING.md](NATIVE-BILLING.md).
 
 Кратко:
 

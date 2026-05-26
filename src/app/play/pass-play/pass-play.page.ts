@@ -30,7 +30,7 @@ const PASS_PLAY_MODES: FreeChallengeMode[] = [
 export class PassPlayPage implements ViewWillEnter {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly locale = inject(LocaleService);
+  readonly locale = inject(LocaleService);
   private readonly playPool = inject(PlayPoolService);
   private readonly playSession = inject(PlaySessionService);
   private readonly subscription = inject(SubscriptionService);

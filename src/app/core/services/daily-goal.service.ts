@@ -50,13 +50,22 @@ export class DailyGoalService {
   }
 
   async syncFromLearning(): Promise<DailyGoalState> {
+    await this.learning.flushPersist();
     await this.learning.hydrate();
     const today = this.todayKey();
-    const correct = this.learning.countCorrectToday();
+    const progress = Math.min(this.defaultTarget, this.learning.countCorrectToday());
+    const existing = await this.storage.get<DailyGoalState>(KEY);
+    if (
+      existing?.date === today &&
+      existing.target === this.defaultTarget &&
+      existing.progress === progress
+    ) {
+      return existing;
+    }
     const state: DailyGoalState = {
       date: today,
       target: this.defaultTarget,
-      progress: Math.min(this.defaultTarget, correct),
+      progress,
     };
     await this.storage.set(KEY, state);
     return state;

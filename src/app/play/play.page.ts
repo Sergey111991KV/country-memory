@@ -2,10 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef,
-  NgZone,
   OnInit,
-  ViewChild,
   inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
@@ -41,6 +38,15 @@ import { PlaySessionService } from '../core/services/play-session.service';
 import { SessionAccessService } from '../core/services/session-access.service';
 import { SubscriptionService } from '../core/services/subscription.service';
 import { ensurePlaySessionAccess } from '../core/utils/play-access';
+import {
+  buildPlayDockWheelSlots,
+  nearestPlayDockSlotIndex,
+  playDockFocusFromAngle,
+  playDockMiddleSlotIndex,
+  resolvePlayDockSnapWheel,
+  snapPlayDockSlotIndex,
+  type PlayDockWheelSlot,
+} from '../core/utils/play-dock-arc';
 import { environment } from '../../environments/environment';
 
 export type PlayDockLevel = 'categories' | 'modes';
@@ -68,13 +74,10 @@ interface PlayRefreshSnapshot {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlayPage implements OnInit, ViewWillEnter {
-  @ViewChild('dockStrip') private dockStripRef?: ElementRef<HTMLElement>;
-
   private readonly router = inject(Router);
   private readonly alertCtrl = inject(AlertController);
-  private readonly locale = inject(LocaleService);
+  protected readonly locale = inject(LocaleService);
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly ngZone = inject(NgZone);
   private readonly courseLaunch = inject(CourseLaunchService);
   private readonly learningPath = inject(LearningPathService);
   private readonly displayText = inject(DisplayTextService);
@@ -106,10 +109,18 @@ export class PlayPage implements OnInit, ViewWillEnter {
   selectedCategory: PlayCategorySlide | null = null;
   activeSlideIndex = 0;
 
-  private dockScrollRaf: number | null = null;
+  playDockWheelSlots: PlayDockWheelSlot[] = [];
+  playDockFocusedSlotIndex = 0;
+  playDockWheelDeg = 0;
+  playDockDragging = false;
+
+  private playDockDragStartX = 0;
+  private playDockDragStartWheelDeg = 0;
   private lastRefreshSnapshot: PlayRefreshSnapshot | null = null;
 
   ngOnInit(): void {
+    this.rebuildPlayDockWheel();
+    this.snapPlayDockToLogical(0, false);
     void this.refresh();
   }
 
@@ -136,19 +147,53 @@ export class PlayPage implements OnInit, ViewWillEnter {
     return [...this.playCategories, this.recallCategory];
   }
 
-  trackDockCategory(_index: number, category: PlayCategorySlide): string {
-    return category.id;
+  get playDockTileCount(): number {
+    return this.dockLevel === 'categories'
+      ? this.dockCategoryItems.length
+      : this.categoryModes.length;
   }
 
-  trackDockMode(_index: number, mode: PlayModeSlide): string {
-    return mode.id;
+  trackPlayDockSlot(_index: number, slot: PlayDockWheelSlot): number {
+    return slot.slotIndex;
   }
 
-  isCategoryLocked(category: PlayCategorySlide): boolean {
-    return category.premiumLocked === true;
+  playDockSpokeTransform(slotIndex: number): string {
+    const angle = this.playDockWheelSlots[slotIndex]?.angle ?? 0;
+    return `rotate(${angle}deg) translateY(calc(-1 * var(--play-arc-radius)))`;
   }
 
-  isModeLocked(mode: PlayModeSlide): boolean {
+  playDockSlotFocus(slotIndex: number): number {
+    const angle =
+      (this.playDockWheelSlots[slotIndex]?.angle ?? 0) + this.playDockWheelDeg;
+    return playDockFocusFromAngle(angle);
+  }
+
+  playDockCardTransform(slotIndex: number): string {
+    const angle =
+      (this.playDockWheelSlots[slotIndex]?.angle ?? 0) + this.playDockWheelDeg;
+    const slot = this.playDockWheelSlots[slotIndex];
+    const focus = playDockFocusFromAngle(angle);
+    const isLogicalCenter = slot?.logicalIndex === this.activeSlideIndex;
+    const scale = isLogicalCenter && focus > 0.45 ? 1 : 0.76 + focus * 0.12;
+    return `rotate(${-angle}deg) scale(${scale.toFixed(3)})`;
+  }
+
+  playDockIsActiveSlot(slotIndex: number): boolean {
+    const slot = this.playDockWheelSlots[slotIndex];
+    if (!slot || slot.logicalIndex !== this.activeSlideIndex) {
+      return false;
+    }
+    return this.playDockSlotFocus(slotIndex) > 0.45;
+  }
+
+  playDockIsLocked(slot: PlayDockWheelSlot): boolean {
+    if (this.dockLevel === 'categories') {
+      return this.playDockCategory(slot)?.premiumLocked === true;
+    }
+    const mode = this.playDockMode(slot);
+    if (!mode) {
+      return false;
+    }
     return (
       (mode.action.type === 'globe' ||
         mode.action.type === 'map' ||
@@ -157,36 +202,79 @@ export class PlayPage implements OnInit, ViewWillEnter {
     );
   }
 
-  onDockStripScroll(): void {
-    this.ngZone.runOutsideAngular(() => {
-      if (this.dockScrollRaf !== null) {
-        cancelAnimationFrame(this.dockScrollRaf);
+  playDockCategory(slot: PlayDockWheelSlot): PlayCategorySlide | null {
+    return this.dockCategoryItems[slot.logicalIndex] ?? null;
+  }
+
+  playDockMode(slot: PlayDockWheelSlot): PlayModeSlide | null {
+    return this.categoryModes[slot.logicalIndex] ?? null;
+  }
+
+  onPlayDockPointerDown(event: PointerEvent): void {
+    if (this.dockPhase !== 'idle' || this.playDockTileCount < 2) {
+      return;
+    }
+    const target = event.currentTarget;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+    target.setPointerCapture(event.pointerId);
+    this.playDockDragging = true;
+    this.playDockDragStartX = event.clientX;
+    this.playDockDragStartWheelDeg = this.playDockWheelDeg;
+  }
+
+  onPlayDockPointerMove(event: PointerEvent): void {
+    if (!this.playDockDragging) {
+      return;
+    }
+    const deltaX = event.clientX - this.playDockDragStartX;
+    this.playDockWheelDeg = this.playDockDragStartWheelDeg + deltaX * 0.38;
+    this.updatePlayDockFocusedSlot();
+    this.cdr.markForCheck();
+  }
+
+  onPlayDockPointerEnd(event: PointerEvent): void {
+    if (!this.playDockDragging) {
+      return;
+    }
+    const target = event.currentTarget;
+    if (target instanceof HTMLElement && target.hasPointerCapture(event.pointerId)) {
+      target.releasePointerCapture(event.pointerId);
+    }
+    this.playDockDragging = false;
+    const dragDelta = this.playDockWheelDeg - this.playDockDragStartWheelDeg;
+    const snappedSlot = snapPlayDockSlotIndex(
+      this.playDockWheelSlots,
+      this.playDockWheelDeg,
+      dragDelta,
+      this.playDockTileCount,
+    );
+    this.snapPlayDockToSlot(snappedSlot);
+    this.cdr.markForCheck();
+  }
+
+  onPlayDockCardClick(slotIndex: number): void {
+    const slot = this.playDockWheelSlots[slotIndex];
+    if (!slot) {
+      return;
+    }
+    if (slot.logicalIndex !== this.activeSlideIndex) {
+      this.snapPlayDockToLogical(slot.logicalIndex);
+      this.cdr.markForCheck();
+      return;
+    }
+    if (this.dockLevel === 'categories') {
+      const category = this.dockCategoryItems[slot.logicalIndex];
+      if (category) {
+        void this.onCategoryTap(category);
       }
-      this.dockScrollRaf = requestAnimationFrame(() => {
-        this.dockScrollRaf = null;
-        const previousIndex = this.activeSlideIndex;
-        this.syncActiveIndexFromStripScroll();
-        if (previousIndex !== this.activeSlideIndex) {
-          this.ngZone.run(() => this.cdr.markForCheck());
-        }
-      });
-    });
-  }
-
-  onDockCategoryClick(index: number, category: PlayCategorySlide): void {
-    if (index !== this.activeSlideIndex) {
-      this.scrollDockToIndex(index);
       return;
     }
-    void this.onCategoryTap(category);
-  }
-
-  onDockModeClick(index: number, mode: PlayModeSlide): void {
-    if (index !== this.activeSlideIndex) {
-      this.scrollDockToIndex(index);
-      return;
+    const mode = this.categoryModes[slot.logicalIndex];
+    if (mode) {
+      void this.launchMode(mode);
     }
-    void this.launchMode(mode);
   }
 
   async refresh(options?: { fromViewEnter?: boolean }): Promise<void> {
@@ -256,7 +344,8 @@ export class PlayPage implements OnInit, ViewWillEnter {
       );
     }
     this.lastRefreshSnapshot = snapshot;
-    this.syncDockScrollPosition(false);
+    this.rebuildPlayDockWheel();
+    this.snapPlayDockToLogical(this.activeSlideIndex, false);
     this.cdr.markForCheck();
   }
 
@@ -274,49 +363,6 @@ export class PlayPage implements OnInit, ViewWillEnter {
       a.selectedCategoryId === b.selectedCategoryId &&
       a.categoryIds === b.categoryIds
     );
-  }
-
-  private scrollDockToIndex(index: number, smooth = true): void {
-    const el = this.dockStripRef?.nativeElement;
-    if (!el || index < 0 || index >= el.children.length) {
-      this.activeSlideIndex = index;
-      this.cdr.markForCheck();
-      return;
-    }
-    const card = el.children[index] as HTMLElement;
-    card.scrollIntoView({
-      inline: 'center',
-      block: 'nearest',
-      behavior: smooth ? 'smooth' : 'auto',
-    });
-    this.activeSlideIndex = index;
-    this.cdr.markForCheck();
-  }
-
-  private syncDockScrollPosition(smooth = false): void {
-    queueMicrotask(() => {
-      this.scrollDockToIndex(this.activeSlideIndex, smooth);
-    });
-  }
-
-  private syncActiveIndexFromStripScroll(): void {
-    const el = this.dockStripRef?.nativeElement;
-    if (!el || el.children.length === 0) {
-      return;
-    }
-    const center = el.scrollLeft + el.clientWidth / 2;
-    let bestIndex = 0;
-    let bestDistance = Number.POSITIVE_INFINITY;
-    for (let i = 0; i < el.children.length; i += 1) {
-      const child = el.children[i] as HTMLElement;
-      const childCenter = child.offsetLeft + child.offsetWidth / 2;
-      const distance = Math.abs(center - childCenter);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        bestIndex = i;
-      }
-    }
-    this.activeSlideIndex = bestIndex;
   }
 
   async onCategoryTap(category: PlayCategorySlide): Promise<void> {
@@ -339,7 +385,8 @@ export class PlayPage implements OnInit, ViewWillEnter {
       this.selectedCategory = null;
       this.categoryModes = [];
       this.activeSlideIndex = 0;
-      this.syncDockScrollPosition(false);
+      this.rebuildPlayDockWheel();
+      this.snapPlayDockToLogical(0, false);
     });
   }
 
@@ -448,8 +495,66 @@ export class PlayPage implements OnInit, ViewWillEnter {
       this.dockLevel = 'modes';
       this.categoryModes = modes;
       this.activeSlideIndex = 0;
-      this.syncDockScrollPosition(false);
+      this.rebuildPlayDockWheel();
+      this.snapPlayDockToLogical(0, false);
     });
+  }
+
+  private rebuildPlayDockWheel(): void {
+    const count = this.playDockTileCount;
+    this.playDockWheelSlots = buildPlayDockWheelSlots(count);
+    if (count > 0) {
+      this.playDockFocusedSlotIndex = playDockMiddleSlotIndex(
+        Math.min(this.activeSlideIndex, count - 1),
+        count,
+      );
+    } else {
+      this.playDockFocusedSlotIndex = 0;
+    }
+  }
+
+  private updatePlayDockFocusedSlot(): void {
+    this.playDockFocusedSlotIndex = nearestPlayDockSlotIndex(
+      this.playDockWheelSlots,
+      this.playDockWheelDeg,
+      this.playDockTileCount,
+    );
+    const slot = this.playDockWheelSlots[this.playDockFocusedSlotIndex];
+    if (slot) {
+      this.activeSlideIndex = slot.logicalIndex;
+    }
+  }
+
+  private snapPlayDockToLogical(logicalIndex: number, animate = true): void {
+    const slotIndex = playDockMiddleSlotIndex(logicalIndex, this.playDockTileCount);
+    this.snapPlayDockToSlot(slotIndex, animate);
+  }
+
+  private snapPlayDockToSlot(slotIndex: number, animate = true): void {
+    const slot = this.playDockWheelSlots[slotIndex];
+    if (!slot) {
+      return;
+    }
+    const middleSlotIndex = playDockMiddleSlotIndex(
+      slot.logicalIndex,
+      this.playDockTileCount,
+    );
+    this.playDockWheelDeg = resolvePlayDockSnapWheel(
+      this.playDockWheelSlots,
+      middleSlotIndex,
+      this.playDockWheelDeg,
+      this.playDockTileCount,
+    );
+    this.playDockFocusedSlotIndex = middleSlotIndex;
+    this.activeSlideIndex = slot.logicalIndex;
+
+    if (!animate) {
+      this.playDockDragging = true;
+      queueMicrotask(() => {
+        this.playDockDragging = false;
+        this.cdr.markForCheck();
+      });
+    }
   }
 
   private async runDockTransition(swap: () => void): Promise<void> {

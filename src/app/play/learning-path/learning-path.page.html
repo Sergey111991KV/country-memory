@@ -1,3 +1,4 @@
+@let lang = locale.langSig();
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -5,13 +6,13 @@
         <ion-icon slot="icon-only" name="arrow-back" aria-hidden="true"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'play.learningTitle' | i18n }}</ion-title>
+    <ion-title>{{ 'play.learningTitle' | i18n:null:lang}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding learning-path-page">
-  <p *ngIf="loading">{{ 'knowledge.loading' | i18n }}</p>
-  <p class="learning-path-lead">{{ 'play.learningLead' | i18n }}</p>
+  <p *ngIf="loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
+  <p class="learning-path-lead">{{ 'play.learningLead' | i18n:null:lang}}</p>
 
   <ion-list *ngIf="!loading" lines="none">
     <ion-item
@@ -31,7 +32,7 @@
         <h2>{{ title(row.def) }}</h2>
         <p>{{ subtitle(row.def) }}</p>
         <p *ngIf="row.unlocked">
-          {{ 'play.learningProgress' | i18n: { done: row.progress, total: row.target } }}
+          {{ 'play.learningProgress' | i18n:{ done: row.progress, total: row.target }:lang}}
         </p>
       </ion-label>
     </ion-item>

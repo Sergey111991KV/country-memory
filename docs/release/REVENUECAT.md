@@ -1,5 +1,8 @@
 # RevenueCat + store products — Flagfield
 
+> **Deprecated.** Flagfield now uses **native App Store / Google Play billing** only.  
+> See **[NATIVE-BILLING.md](NATIVE-BILLING.md)** for current setup.
+
 **Bundle ID:** `com.flagfield.learn`  
 **Entitlement ID in app:** `premium`  
 **Free tier:** 10 completed game sessions (`freeGamesLimit`)

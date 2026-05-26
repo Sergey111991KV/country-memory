@@ -6,6 +6,7 @@ import type { HeroTypography } from '../core/services/app-settings.service';
 import { AppSettingsService } from '../core/services/app-settings.service';
 import { DisplayTextService } from '../core/services/display-text.service';
 import { DailyGoalService } from '../core/services/daily-goal.service';
+import { LocaleService } from '../core/services/locale.service';
 import { PlayPoolService } from '../core/services/play-pool.service';
 import { PlaySessionService } from '../core/services/play-session.service';
 import { SubscriptionService } from '../core/services/subscription.service';
@@ -23,6 +24,7 @@ export class HomePage implements OnInit, ViewWillEnter {
   private readonly playPool = inject(PlayPoolService);
   private readonly playSession = inject(PlaySessionService);
   readonly sub = inject(SubscriptionService);
+  readonly locale = inject(LocaleService);
   private readonly router = inject(Router);
 
   heroTitleDisplay = '';

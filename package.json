@@ -28,7 +28,8 @@
     "i18n:flagfield:uk": "node scripts/ru-to-uk-flagfield.mjs",
     "i18n:flagfield:build": "node scripts/build-flagfield-locales.mjs",
     "i18n:flagfield:complete": "bash scripts/i18n-flagfield-complete.sh",
-    "i18n:flagfield:continue": "bash scripts/i18n-flagfield-continue.sh"
+    "i18n:flagfield:continue": "bash scripts/i18n-flagfield-continue.sh",
+    "i18n:flagfield:fix-placeholders": "node scripts/fix-flagfield-placeholders.mjs es de fr"
   },
   "private": true,
   "dependencies": {
@@ -51,8 +52,8 @@
     "@capacitor/keyboard": "8.0.1",
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/status-bar": "8.0.1",
+    "@capgo/native-purchases": "^8.4.0",
     "@ionic/angular": "^8.0.0",
-    "@revenuecat/purchases-capacitor": "^12.3.0",
     "@types/three": "^0.184.1",
     "ionicons": "^7.0.0",
     "leaflet": "^1.9.4",

@@ -17,6 +17,7 @@ export class UserLearnedService {
   private countries = new Set<string>();
   private facts = new Set<string>();
   private hydrated = false;
+  private marksRevision = 0;
 
   async hydrate(): Promise<void> {
     if (this.hydrated) {
@@ -73,6 +74,10 @@ export class UserLearnedService {
   }
 
   /** Countries in collection or with at least one marked fact. */
+  getMarksRevision(): number {
+    return this.marksRevision;
+  }
+
   async getLearnedCountryIsos(): Promise<Set<string>> {
     await this.hydrate();
     const out = new Set(this.countries);
@@ -90,6 +95,7 @@ export class UserLearnedService {
       countries: [...this.countries],
       facts: [...this.facts],
     });
+    this.marksRevision += 1;
   }
 
   async reset(): Promise<void> {

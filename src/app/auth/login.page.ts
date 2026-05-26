@@ -6,6 +6,7 @@ import {
 } from '../core/services/app-settings.service';
 import { AppLogService } from '../core/services/app-log.service';
 import { LocalAuthService } from '../core/services/local-auth.service';
+import { LocaleService } from '../core/services/locale.service';
 
 @Component({
   selector: 'app-login',
@@ -18,6 +19,7 @@ export class LoginPage implements OnInit {
   private readonly appSettings = inject(AppSettingsService);
   private readonly appLog = inject(AppLogService);
   private readonly router = inject(Router);
+  readonly locale = inject(LocaleService);
 
   username = '';
   errorKey = '';

@@ -38,7 +38,7 @@ npm run build:ios:archive   # xcarchive + IPA в ios/build/export/
 |-----|------|
 | App Store текст | [../store/app-store-listing.md](../store/app-store-listing.md) |
 | Google Play текст | [../store/play-store-listing.md](../store/play-store-listing.md) |
-| RevenueCat | [REVENUECAT.md](REVENUECAT.md) |
+| Native billing | [NATIVE-BILLING.md](NATIVE-BILLING.md) |
 | Play Data safety | [../store/data-safety-play.md](../store/data-safety-play.md) |
 | App Privacy | [../store/app-store-privacy.md](../store/app-store-privacy.md) |
 | Скриншоты | [SCREENSHOTS.md](SCREENSHOTS.md) |

@@ -1,24 +1,11 @@
 export const environment = {
   production: false,
-  /** RevenueCat public SDK keys from the RevenueCat dashboard */
-  revenueCatIosKey: '',
-  revenueCatAndroidKey: '',
-  /** Must match the entitlement identifier in RevenueCat (subscription AND lifetime should unlock this). */
-  premiumEntitlementId: 'premium',
   /** Finished game sessions before subscription is required. */
   freeGamesLimit: 10,
   /**
-   * Optional: use a specific offering id from RevenueCat instead of the default "current" offering.
+   * Google Play base plan id for `flagfield_premium_monthly` (Subscriptions → Base plans).
    */
-  revenueCatOfferingId: '',
-  /**
-   * Fallback if `offering.monthly` is null: match `package.identifier` (e.g. custom id from dashboard).
-   */
-  monthlyPackageIdentifierFallback: '$rc_monthly',
-  /**
-   * Fallback if `offering.lifetime` is null: match `package.identifier` or `packageType === LIFETIME`.
-   */
-  lifetimePackageIdentifierFallback: '$rc_lifetime',
+  androidMonthlyBasePlanId: 'monthly',
 
   /**
    * When true (dev only), browser builds can toggle premium via localStorage.

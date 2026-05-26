@@ -33,7 +33,7 @@ Configure release keys in **`src/environments/environment.prod.local.ts`** (copy
 | Legal HTML | `npm run legal:build` → upload [legal/public/](legal/public/) |
 | Host HTTPS | [release/HOSTING-LEGAL.md](release/HOSTING-LEGAL.md) |
 | Env secrets | `npm run env:init` → edit `environment.prod.local.ts` |
-| RevenueCat | [release/REVENUECAT.md](release/REVENUECAT.md) |
+| Native billing | [release/NATIVE-BILLING.md](release/NATIVE-BILLING.md) |
 | Native build | `npm run cap:sync:release` |
 | App Store copy | [store/app-store-listing.md](store/app-store-listing.md) |
 | Play copy | [store/play-store-listing.md](store/play-store-listing.md) |

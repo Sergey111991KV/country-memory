@@ -1,3 +1,4 @@
+@let lang = locale.langSig();
 <ion-content class="login-page ion-padding page-safe-top">
   <div class="login-shell">
     <img
@@ -7,14 +8,14 @@
       height="72"
       alt=""
     />
-    <h1 class="login-title">{{ 'auth.title' | i18n }}</h1>
-    <p class="login-sub">{{ 'auth.subtitle' | i18n }}</p>
+    <h1 class="login-title">{{ 'auth.title' | i18n:null:lang}}</h1>
+    <p class="login-sub">{{ 'auth.subtitle' | i18n:null:lang}}</p>
 
     <ion-card>
       <ion-card-content>
         <ion-item lines="full">
           <ion-input
-            [label]="'auth.username' | i18n"
+            [label]="'auth.username' | i18n:null:lang"
             labelPlacement="stacked"
             [(ngModel)]="username"
             autocomplete="nickname"
@@ -23,14 +24,14 @@
           ></ion-input>
         </ion-item>
 
-        <p *ngIf="errorKey" class="login-error">{{ errorKey | i18n }}</p>
+        <p *ngIf="errorKey" class="login-error">{{ errorKey | i18n:null:lang}}</p>
 
         <ion-button expand="block" class="login-submit" [disabled]="busy" (click)="submit()">
-          {{ 'auth.continueCta' | i18n }}
+          {{ 'auth.continueCta' | i18n:null:lang}}
         </ion-button>
       </ion-card-content>
     </ion-card>
 
-    <p class="login-hint">{{ 'auth.localOnlyHint' | i18n }}</p>
+    <p class="login-hint">{{ 'auth.localOnlyHint' | i18n:null:lang}}</p>
   </div>
 </ion-content>

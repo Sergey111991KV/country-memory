@@ -1,3 +1,4 @@
+@let lang = locale.langSig();
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -5,13 +6,13 @@
         <ion-icon slot="icon-only" name="arrow-back" aria-hidden="true"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ modeTitleKey | i18n }}</ion-title>
+    <ion-title>{{ modeTitleKey | i18n:null:lang}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding pass-play-page">
-  <h1 class="pass-play-page__title">{{ 'passPlay.title' | i18n }}</h1>
-  <p class="pass-play-page__lead">{{ leadKey | i18n }}</p>
+  <h1 class="pass-play-page__title">{{ 'passPlay.title' | i18n:null:lang}}</h1>
+  <p class="pass-play-page__lead">{{ leadKey | i18n:null:lang}}</p>
 
   <div class="pass-play-page__players">
     <label
@@ -19,19 +20,19 @@
       *ngFor="let name of playerNames; let i = index"
     >
       <span class="pass-play-page__label">
-        {{ 'passPlay.playerLabel' | i18n: { n: i + 1 } }}
+        {{ 'passPlay.playerLabel' | i18n:{ n: i + 1 }:lang}}
       </span>
       <div class="pass-play-page__row">
         <ion-input
           [(ngModel)]="playerNames[i]"
-          [attr.aria-label]="'passPlay.playerLabel' | i18n: { n: i + 1 }"
+          [attr.aria-label]="'passPlay.playerLabel' | i18n:{ n: i + 1 }:lang"
         ></ion-input>
         <ion-button
           *ngIf="playerNames.length > 2"
           fill="clear"
           size="small"
           (click)="removePlayer(i)"
-          [attr.aria-label]="'passPlay.removePlayer' | i18n"
+          [attr.aria-label]="'passPlay.removePlayer' | i18n:null:lang"
         >
           <ion-icon slot="icon-only" name="close" aria-hidden="true"></ion-icon>
         </ion-button>
@@ -46,7 +47,7 @@
     class="pass-play-page__add"
     (click)="addPlayer()"
   >
-    {{ 'passPlay.addPlayer' | i18n }}
+    {{ 'passPlay.addPlayer' | i18n:null:lang}}
   </ion-button>
 
   <ion-button
@@ -55,6 +56,6 @@
     [disabled]="!canStart || starting"
     (click)="startGame()"
   >
-    {{ 'passPlay.start' | i18n }}
+    {{ 'passPlay.start' | i18n:null:lang}}
   </ion-button>
 </ion-content>

@@ -1,13 +1,14 @@
+@let lang = locale.langSig();
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'play.quizTitle' | i18n }}</ion-title>
+    <ion-title>{{ 'play.quizTitle' | i18n:null:lang}}</ion-title>
     <ion-note slot="end" class="quiz-round-note">
-      {{ 'quiz.round' | i18n: { current: round, total: roundsTotal } }}
+      {{ 'quiz.round' | i18n:{ current: round, total: roundsTotal }:lang}}
     </ion-note>
   </ion-toolbar>
 </ion-header>
@@ -15,20 +16,20 @@
 <ion-content class="quiz-content ion-padding">
   <div *ngIf="loading" class="quiz-loading">
     <ion-spinner name="crescent"></ion-spinner>
-    <p>{{ 'quiz.loading' | i18n }}</p>
+    <p>{{ 'quiz.loading' | i18n:null:lang}}</p>
   </div>
 
   <ng-container *ngIf="!loading && target">
-    <p class="quiz-prompt">{{ 'quiz.whichCountry' | i18n }}</p>
+    <p class="quiz-prompt">{{ 'quiz.whichCountry' | i18n:null:lang}}</p>
 
     <app-flag-display
       [iso2]="target.iso2"
       size="hero"
       [animate]="phase === 'pick'"
-      [countryLabel]="'quiz.flagAlt' | i18n"
+      [countryLabel]="'quiz.flagAlt' | i18n:null:lang"
     ></app-flag-display>
 
-    <div class="quiz-choices" role="listbox" [attr.aria-label]="'quiz.whichCountry' | i18n">
+    <div class="quiz-choices" role="listbox" [attr.aria-label]="'quiz.whichCountry' | i18n:null:lang">
       <button
         *ngFor="let choice of choices"
         type="button"
@@ -44,7 +45,7 @@
 
     <section *ngIf="showFeedback" class="quiz-feedback mem-surface">
       <h2 [class.quiz-feedback--ok]="feedbackCorrect" [class.quiz-feedback--bad]="!feedbackCorrect">
-        {{ (feedbackCorrect ? 'quiz.correct' : 'quiz.wrong') | i18n }}
+        {{ (feedbackCorrect ? 'quiz.correct' : 'quiz.wrong') | i18n:null:lang}}
       </h2>
       <p class="quiz-feedback__explain">{{ explainLine(target) }}</p>
       <app-flag-display
@@ -55,7 +56,7 @@
         [countryLabel]="targetLabel"
       ></app-flag-display>
       <ion-button expand="block" color="primary" (click)="nextRound()">
-        {{ 'quiz.next' | i18n }}
+        {{ 'quiz.next' | i18n:null:lang}}
       </ion-button>
     </section>
   </ng-container>

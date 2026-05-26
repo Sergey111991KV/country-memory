@@ -24,7 +24,7 @@ export interface LevelRow {
 })
 export class LearningPathPage implements ViewWillEnter {
   private readonly path = inject(LearningPathService);
-  private readonly locale = inject(LocaleService);
+  readonly locale = inject(LocaleService);
   private readonly router = inject(Router);
   private readonly playPool = inject(PlayPoolService);
   private readonly playSession = inject(PlaySessionService);

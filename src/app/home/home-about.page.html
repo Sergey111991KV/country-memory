@@ -1,73 +1,73 @@
+@let lang = locale.langSig();
 <ion-content class="ion-padding home-about-content page-safe-top">
   <div class="about-shell">
     <div class="app-page-toolbar">
-      <ion-button fill="clear" size="small" (click)="goBack()" [attr.aria-label]="'common.back' | i18n">
+      <ion-button fill="clear" size="small" (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
         <ion-icon slot="icon-only" name="chevron-back" aria-hidden="true"></ion-icon>
       </ion-button>
-      <h1 class="app-page-toolbar__title">{{ 'home.aboutGameTitle' | i18n }}</h1>
+      <h1 class="app-page-toolbar__title">{{ 'home.aboutGameTitle' | i18n:null:lang}}</h1>
     </div>
 
     <ion-card class="about-card about-card--intro">
       <ion-card-content>
-        <p class="app-section-kicker about-card-kicker">{{ 'home.aboutGameKicker' | i18n }}</p>
-        <p class="about-lead">{{ 'home.aboutGameLead' | i18n }}</p>
+        <p class="app-section-kicker about-card-kicker">{{ 'home.aboutGameKicker' | i18n:null:lang}}</p>
+        <p class="about-lead">{{ 'home.aboutGameLead' | i18n:null:lang}}</p>
         <p>
           {{
             'home.aboutGameP3'
-              | i18n: { countries: freeCountryCount, sessions: freeGamesLimit }
-          }}
+              | i18n:{ countries: freeCountryCount, sessions: freeGamesLimit }:lang}}
         </p>
       </ion-card-content>
     </ion-card>
 
     <section class="about-section" aria-labelledby="about-modes-heading">
-      <h2 id="about-modes-heading" class="about-section__title">{{ 'home.aboutGameSectionModes' | i18n }}</h2>
+      <h2 id="about-modes-heading" class="about-section__title">{{ 'home.aboutGameSectionModes' | i18n:null:lang}}</h2>
       <ion-card class="about-card">
         <ion-card-content>
-          <p>{{ 'home.aboutGameModesLead' | i18n }}</p>
-          <p>{{ 'home.aboutGameModesFree' | i18n: { countries: freeCountryCount } }}</p>
-          <p>{{ 'home.aboutGameModesQuiz' | i18n }}</p>
-          <p>{{ 'home.aboutGameModesPath' | i18n }}</p>
-          <p class="about-last">{{ 'home.aboutGameModesPremium' | i18n }}</p>
+          <p>{{ 'home.aboutGameModesLead' | i18n:null:lang}}</p>
+          <p>{{ 'home.aboutGameModesFree' | i18n:{ countries: freeCountryCount }:lang}}</p>
+          <p>{{ 'home.aboutGameModesQuiz' | i18n:null:lang}}</p>
+          <p>{{ 'home.aboutGameModesPath' | i18n:null:lang}}</p>
+          <p class="about-last">{{ 'home.aboutGameModesPremium' | i18n:null:lang}}</p>
         </ion-card-content>
       </ion-card>
     </section>
 
     <section class="about-section" aria-labelledby="about-knowledge-heading">
-      <h2 id="about-knowledge-heading" class="about-section__title">{{ 'home.aboutGameSectionKnowledge' | i18n }}</h2>
+      <h2 id="about-knowledge-heading" class="about-section__title">{{ 'home.aboutGameSectionKnowledge' | i18n:null:lang}}</h2>
       <ion-card class="about-card">
         <ion-card-content>
-          <p>{{ 'home.aboutGameKnowledgeP1' | i18n }}</p>
-          <p class="about-last">{{ 'home.aboutGameKnowledgeP2' | i18n }}</p>
+          <p>{{ 'home.aboutGameKnowledgeP1' | i18n:null:lang}}</p>
+          <p class="about-last">{{ 'home.aboutGameKnowledgeP2' | i18n:null:lang}}</p>
         </ion-card-content>
       </ion-card>
     </section>
 
     <section class="about-section" aria-labelledby="about-daily-heading">
-      <h2 id="about-daily-heading" class="about-section__title">{{ 'home.aboutGameSectionDaily' | i18n }}</h2>
+      <h2 id="about-daily-heading" class="about-section__title">{{ 'home.aboutGameSectionDaily' | i18n:null:lang}}</h2>
       <ion-card class="about-card">
         <ion-card-content>
-          <p>{{ 'home.aboutGameDailyP1' | i18n: { target: dailyTarget } }}</p>
-          <p class="about-last">{{ 'home.aboutGameDailyP2' | i18n }}</p>
+          <p>{{ 'home.aboutGameDailyP1' | i18n:{ target: dailyTarget }:lang}}</p>
+          <p class="about-last">{{ 'home.aboutGameDailyP2' | i18n:null:lang}}</p>
         </ion-card-content>
       </ion-card>
     </section>
 
     <section class="about-section" aria-labelledby="about-account-heading">
-      <h2 id="about-account-heading" class="about-section__title">{{ 'home.aboutGameSectionAccount' | i18n }}</h2>
+      <h2 id="about-account-heading" class="about-section__title">{{ 'home.aboutGameSectionAccount' | i18n:null:lang}}</h2>
       <ion-card class="about-card">
         <ion-card-content>
-          <p>{{ 'home.aboutGameAccountP1' | i18n }}</p>
-          <p class="about-last">{{ 'home.aboutGameAccountP2' | i18n }}</p>
+          <p>{{ 'home.aboutGameAccountP1' | i18n:null:lang}}</p>
+          <p class="about-last">{{ 'home.aboutGameAccountP2' | i18n:null:lang}}</p>
         </ion-card-content>
       </ion-card>
     </section>
 
     <ion-card class="about-card about-card--legacy">
       <ion-card-content>
-        <p class="about-legacy-label">{{ 'home.aboutGameLegacyLabel' | i18n }}</p>
-        <p>{{ 'home.aboutGameP1' | i18n }}</p>
-        <p class="about-last">{{ 'home.aboutGameP2' | i18n }}</p>
+        <p class="about-legacy-label">{{ 'home.aboutGameLegacyLabel' | i18n:null:lang}}</p>
+        <p>{{ 'home.aboutGameP1' | i18n:null:lang}}</p>
+        <p class="about-last">{{ 'home.aboutGameP2' | i18n:null:lang}}</p>
       </ion-card-content>
     </ion-card>
   </div>

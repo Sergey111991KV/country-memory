@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { DailyGoalService } from '../core/services/daily-goal.service';
+import { LocaleService } from '../core/services/locale.service';
 import { PlayPoolService } from '../core/services/play-pool.service';
 import { environment } from '../../environments/environment';
 
@@ -15,6 +16,7 @@ export class HomeAboutPage implements OnInit {
   private readonly router = inject(Router);
   private readonly playPool = inject(PlayPoolService);
   private readonly dailyGoal = inject(DailyGoalService);
+  readonly locale = inject(LocaleService);
 
   readonly freeGamesLimit = environment.freeGamesLimit;
   freeCountryCount = 30;

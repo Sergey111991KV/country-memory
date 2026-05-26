@@ -1,6 +1,26 @@
+.icon-gallery__badge {
+  display: inline-block;
+  margin: 0 0 var(--app-space-2);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ion-color-warning-contrast, #fff);
+  background: var(--ion-color-warning, #f59e0b);
+}
+
 .icon-gallery__lead {
   margin: 0 0 var(--app-space-4);
   font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--ion-color-medium);
+}
+
+.icon-gallery__sub {
+  margin: 0 0 var(--app-space-3);
+  font-size: 0.88rem;
   line-height: 1.45;
   color: var(--ion-color-medium);
 }
@@ -12,12 +32,89 @@
 }
 
 .icon-gallery__heading {
-  margin: 0 0 var(--app-space-3);
+  margin: 0 0 var(--app-space-2);
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ion-color-medium);
+}
+
+.icon-gallery__subheading {
+  margin: var(--app-space-3) 0 var(--app-space-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ion-color-primary) 70%, var(--ion-text-color));
+}
+
+.icon-gallery__mode-section + .icon-gallery__mode-section {
+  margin-top: var(--app-space-2);
+}
+
+.icon-gallery__dock-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--app-space-3);
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &--wrap {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+}
+
+.icon-gallery__dock-card {
+  flex: 0 0 96px;
+  width: 96px;
+  min-height: 112px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  border: 2px solid color-mix(in srgb, #a78bfa 28%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, #1e1835 92%, #000000);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.icon-gallery__dock-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.65rem;
+  height: 3.65rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in srgb, #ffffff 14%, transparent),
+    color-mix(in srgb, #a78bfa 10%, transparent) 55%,
+    transparent 72%
+  );
+}
+
+.icon-gallery__dock-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.15;
 }
 
 .icon-gallery__grid {
@@ -50,6 +147,13 @@
   font-size: 0.62rem;
   color: var(--ion-color-medium);
   word-break: break-all;
+}
+
+.icon-gallery__svg-link {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+  text-decoration: none;
 }
 
 .mem-surface {

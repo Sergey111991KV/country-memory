@@ -20,7 +20,10 @@ export class CountryLearnStatusService {
     await this.userLearned.hydrate();
     await this.countryKnowledge.ensureLoaded();
     await this.catalog.ensureLoaded();
+    return this.getCountryStatusSync(iso2, learnedSet);
+  }
 
+  getCountryStatusSync(iso2: string, learnedSet: Set<string>): CountryLearnStatus {
     const iso = iso2.toUpperCase();
     const country = this.catalog.getByIso(iso);
     const manual = this.userLearned.isCountryMarked(iso);

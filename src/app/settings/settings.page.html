@@ -1,3 +1,4 @@
+@let lang = i18n.langSig();
 <ion-content class="ion-padding settings-page page-safe-top settings-page--rhythm">
   <ion-accordion-group
     [multiple]="false"
@@ -8,23 +9,23 @@
     <ion-accordion value="premium" class="settings-accordion mem-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
-          <h2>{{ 'settings.sectionPremium' | i18n }}</h2>
-          <p>{{ 'settings.sectionPremiumSub' | i18n }}</p>
+          <h2>{{ 'settings.sectionPremium' | i18n:null:lang}}</h2>
+          <p>{{ 'settings.sectionPremiumSub' | i18n:null:lang}}</p>
         </ion-label>
       </ion-item>
       <div slot="content" class="settings-acc-panel">
         <ion-text color="medium" class="ion-text-wrap premium-benefits">
-          <p class="premium-benefits__lead">{{ 'settings.premiumBenefitsLead' | i18n }}</p>
+          <p class="premium-benefits__lead">{{ 'settings.premiumBenefitsLead' | i18n:null:lang}}</p>
           <ul class="premium-benefits__list">
-            <li>{{ 'settings.premiumBenefitGrids' | i18n }}</li>
-            <li>{{ 'settings.premiumBenefitThemes' | i18n }}</li>
-            <li>{{ 'settings.premiumBenefitPhotos' | i18n }}</li>
-            <li>{{ 'settings.premiumBenefitQuest' | i18n }}</li>
+            <li>{{ 'settings.premiumBenefitGrids' | i18n:null:lang}}</li>
+            <li>{{ 'settings.premiumBenefitThemes' | i18n:null:lang}}</li>
+            <li>{{ 'settings.premiumBenefitPhotos' | i18n:null:lang}}</li>
+            <li>{{ 'settings.premiumBenefitQuest' | i18n:null:lang}}</li>
           </ul>
         </ion-text>
 
         <p *ngIf="!sub.isSubscribed()" class="settings-free-line">
-          {{ 'paywall.freeGamesLine' | i18n: { n: freeGamesLeft, limit: freeGamesLimit } }}
+          {{ 'paywall.freeGamesLine' | i18n:{ n: freeGamesLeft, limit: freeGamesLimit }:lang}}
         </p>
 
         <ion-button
@@ -36,23 +37,23 @@
           (click)="openPaywall()"
         >
           <app-icon slot="start" icon="ui-premium" size="sm"></app-icon>
-          {{ 'home.getPremiumCta' | i18n }}
+          {{ 'home.getPremiumCta' | i18n:null:lang}}
         </ion-button>
 
         <ng-container *ngIf="sub.isSubscribed()">
           <ion-chip color="warning" class="premium-active-chip">
             <app-icon icon="ui-premium" size="sm"></app-icon>
-            <ion-label>{{ 'paywall.premiumActive' | i18n }}</ion-label>
+            <ion-label>{{ 'paywall.premiumActive' | i18n:null:lang}}</ion-label>
           </ion-chip>
           <ng-container [ngSwitch]="sub.premiumKindSig()">
-            <p *ngSwitchCase="'lifetime'" class="premium-type-line">{{ 'settings.premiumTypeLifetime' | i18n }}</p>
-            <p *ngSwitchCase="'subscription'" class="premium-type-line">{{ 'settings.premiumTypeSubscription' | i18n }}</p>
-            <p *ngSwitchCase="'trial'" class="premium-type-line">{{ 'settings.premiumTypeTrial' | i18n }}</p>
-            <p *ngSwitchCase="'intro'" class="premium-type-line">{{ 'settings.premiumTypeIntro' | i18n }}</p>
-            <p *ngSwitchDefault class="premium-type-line">{{ 'settings.premiumTypeUnknown' | i18n }}</p>
+            <p *ngSwitchCase="'lifetime'" class="premium-type-line">{{ 'settings.premiumTypeLifetime' | i18n:null:lang}}</p>
+            <p *ngSwitchCase="'subscription'" class="premium-type-line">{{ 'settings.premiumTypeSubscription' | i18n:null:lang}}</p>
+            <p *ngSwitchCase="'trial'" class="premium-type-line">{{ 'settings.premiumTypeTrial' | i18n:null:lang}}</p>
+            <p *ngSwitchCase="'intro'" class="premium-type-line">{{ 'settings.premiumTypeIntro' | i18n:null:lang}}</p>
+            <p *ngSwitchDefault class="premium-type-line">{{ 'settings.premiumTypeUnknown' | i18n:null:lang}}</p>
           </ng-container>
           <p *ngIf="sub.premiumExpiresIsoSig() as expIso" class="premium-expiry-line muted">
-            {{ 'settings.premiumValidUntil' | i18n: { date: formatPremiumExpiry(expIso) } }}
+            {{ 'settings.premiumValidUntil' | i18n:{ date: formatPremiumExpiry(expIso) }:lang}}
           </p>
           <ion-button
             *ngIf="sub.premiumKindSig() === 'subscription' && sub.manageSubscriptionsUrl()"
@@ -60,7 +61,7 @@
             fill="clear"
             (click)="openManageSubscriptions()"
           >
-            {{ 'paywall.manageSubs' | i18n: { store: sub.storeLabel() } }}
+            {{ 'paywall.manageSubs' | i18n:{ store: sub.storeLabel() }:lang}}
           </ion-button>
         </ng-container>
 
@@ -70,7 +71,7 @@
           fill="outline"
           (click)="restorePurchases()"
         >
-          {{ 'paywall.restore' | i18n }}
+          {{ 'paywall.restore' | i18n:null:lang}}
         </ion-button>
       </div>
     </ion-accordion>
@@ -78,15 +79,15 @@
     <ion-accordion value="language" class="settings-accordion mem-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
-          <h2>{{ 'settings.sectionLanguage' | i18n }}</h2>
-          <p>{{ 'settings.sectionLanguageSub' | i18n }}</p>
+          <h2>{{ 'settings.sectionLanguage' | i18n:null:lang}}</h2>
+          <p>{{ 'settings.sectionLanguageSub' | i18n:null:lang}}</p>
         </ion-label>
       </ion-item>
       <div slot="content" class="settings-acc-panel">
         <ion-list [inset]="true" class="settings-list settings-list--in-card">
           <ion-item>
             <ion-input
-              [label]="'settings.accountPlayerName' | i18n"
+              [label]="'settings.accountPlayerName' | i18n:null:lang"
               labelPlacement="stacked"
               placeholder="Player"
               [(ngModel)]="primaryPlayerName"
@@ -96,47 +97,47 @@
           </ion-item>
           <ion-item lines="none">
             <ion-text color="medium" class="ion-text-wrap small-hint">
-              <p class="ion-no-margin">{{ 'settings.accountPlayerNameHint' | i18n }}</p>
+              <p class="ion-no-margin">{{ 'settings.accountPlayerNameHint' | i18n:null:lang}}</p>
             </ion-text>
           </ion-item>
           <ion-item lines="none" class="settings-reset-item">
             <ion-label class="ion-text-wrap">
-              <h3>{{ 'settings.resetAccountTitle' | i18n }}</h3>
-              <p>{{ 'settings.resetAccountHint' | i18n }}</p>
+              <h3>{{ 'settings.resetAccountTitle' | i18n:null:lang}}</h3>
+              <p>{{ 'settings.resetAccountHint' | i18n:null:lang}}</p>
             </ion-label>
           </ion-item>
           <div class="ion-padding-horizontal ion-padding-bottom">
             <ion-button expand="block" color="danger" fill="outline" (click)="confirmResetAccount()">
-              {{ 'settings.resetAccountConfirm' | i18n }}
+              {{ 'settings.resetAccountConfirm' | i18n:null:lang}}
             </ion-button>
           </div>
           <ion-item>
             <ion-select
-              [label]="'settings.language' | i18n"
+              [label]="'settings.language' | i18n:null:lang"
               [value]="localeCode"
               (ionChange)="onLangChange($event)"
               interface="popover"
             >
-              <ion-select-option value="en">{{ 'settings.langEn' | i18n }}</ion-select-option>
-              <ion-select-option value="ru">{{ 'settings.langRu' | i18n }}</ion-select-option>
-              <ion-select-option value="es">{{ 'settings.langEs' | i18n }}</ion-select-option>
-              <ion-select-option value="de">{{ 'settings.langDe' | i18n }}</ion-select-option>
-              <ion-select-option value="fr">{{ 'settings.langFr' | i18n }}</ion-select-option>
-              <ion-select-option value="uk">{{ 'settings.langUk' | i18n }}</ion-select-option>
-              <ion-select-option value="zh">{{ 'settings.langZh' | i18n }}</ion-select-option>
-              <ion-select-option value="hi">{{ 'settings.langHi' | i18n }}</ion-select-option>
-              <ion-select-option value="ar">{{ 'settings.langAr' | i18n }}</ion-select-option>
-              <ion-select-option value="pt">{{ 'settings.langPt' | i18n }}</ion-select-option>
-              <ion-select-option value="ja">{{ 'settings.langJa' | i18n }}</ion-select-option>
-              <ion-select-option value="ko">{{ 'settings.langKo' | i18n }}</ion-select-option>
-              <ion-select-option value="it">{{ 'settings.langIt' | i18n }}</ion-select-option>
-              <ion-select-option value="tr">{{ 'settings.langTr' | i18n }}</ion-select-option>
-              <ion-select-option value="vi">{{ 'settings.langVi' | i18n }}</ion-select-option>
-              <ion-select-option value="id">{{ 'settings.langId' | i18n }}</ion-select-option>
-              <ion-select-option value="pl">{{ 'settings.langPl' | i18n }}</ion-select-option>
-              <ion-select-option value="nl">{{ 'settings.langNl' | i18n }}</ion-select-option>
-              <ion-select-option value="bn">{{ 'settings.langBn' | i18n }}</ion-select-option>
-              <ion-select-option value="ur">{{ 'settings.langUr' | i18n }}</ion-select-option>
+              <ion-select-option value="en">{{ 'settings.langEn' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="ru">{{ 'settings.langRu' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="es">{{ 'settings.langEs' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="de">{{ 'settings.langDe' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="fr">{{ 'settings.langFr' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="uk">{{ 'settings.langUk' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="zh">{{ 'settings.langZh' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="hi">{{ 'settings.langHi' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="ar">{{ 'settings.langAr' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="pt">{{ 'settings.langPt' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="ja">{{ 'settings.langJa' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="ko">{{ 'settings.langKo' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="it">{{ 'settings.langIt' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="tr">{{ 'settings.langTr' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="vi">{{ 'settings.langVi' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="id">{{ 'settings.langId' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="pl">{{ 'settings.langPl' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="nl">{{ 'settings.langNl' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="bn">{{ 'settings.langBn' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="ur">{{ 'settings.langUr' | i18n:null:lang}}</ion-select-option>
             </ion-select>
           </ion-item>
         </ion-list>
@@ -146,52 +147,52 @@
     <ion-accordion value="display" class="settings-accordion mem-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
-          <h2>{{ 'settings.sectionDisplay' | i18n }}</h2>
-          <p>{{ 'settings.sectionDisplaySub' | i18n }}</p>
+          <h2>{{ 'settings.sectionDisplay' | i18n:null:lang}}</h2>
+          <p>{{ 'settings.sectionDisplaySub' | i18n:null:lang}}</p>
         </ion-label>
       </ion-item>
       <div slot="content" class="settings-acc-panel">
         <ion-list [inset]="true" class="settings-list settings-list--in-card">
           <ion-item>
             <ion-toggle [checked]="isDarkTheme" (ionChange)="onThemeToggle($event)">
-              {{ 'settings.darkTheme' | i18n }}
+              {{ 'settings.darkTheme' | i18n:null:lang}}
             </ion-toggle>
           </ion-item>
           <ion-item>
             <ion-select
-              [label]="'settings.colorTheme' | i18n"
+              [label]="'settings.colorTheme' | i18n:null:lang"
               [value]="colorPalette"
               (ionChange)="onColorPaletteChange($event)"
               interface="popover"
             >
-              <ion-select-option value="ocean">{{ 'settings.paletteOcean' | i18n }}</ion-select-option>
-              <ion-select-option value="forest">{{ 'settings.paletteForest' | i18n }}</ion-select-option>
-              <ion-select-option value="sunset">{{ 'settings.paletteSunset' | i18n }}</ion-select-option>
-              <ion-select-option value="classic">{{ 'settings.paletteClassic' | i18n }}</ion-select-option>
+              <ion-select-option value="ocean">{{ 'settings.paletteOcean' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="forest">{{ 'settings.paletteForest' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="sunset">{{ 'settings.paletteSunset' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="classic">{{ 'settings.paletteClassic' | i18n:null:lang}}</ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item>
             <ion-select
-              [label]="'settings.heroTypography' | i18n"
+              [label]="'settings.heroTypography' | i18n:null:lang"
               [value]="heroTypography"
               (ionChange)="onHeroTypographyChange($event)"
               interface="popover"
             >
-              <ion-select-option value="compact">{{ 'settings.typoCompact' | i18n }}</ion-select-option>
-              <ion-select-option value="comfortable">{{ 'settings.typoComfortable' | i18n }}</ion-select-option>
-              <ion-select-option value="large">{{ 'settings.typoLarge' | i18n }}</ion-select-option>
+              <ion-select-option value="compact">{{ 'settings.typoCompact' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="comfortable">{{ 'settings.typoComfortable' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="large">{{ 'settings.typoLarge' | i18n:null:lang}}</ion-select-option>
             </ion-select>
           </ion-item>
           <ion-item>
             <ion-select
-              [label]="'settings.bodyTypography' | i18n"
+              [label]="'settings.bodyTypography' | i18n:null:lang"
               [value]="bodyTypography"
               (ionChange)="onBodyTypographyChange($event)"
               interface="popover"
             >
-              <ion-select-option value="default">{{ 'settings.bodyTypoDefault' | i18n }}</ion-select-option>
-              <ion-select-option value="comfortable">{{ 'settings.bodyTypoComfortable' | i18n }}</ion-select-option>
-              <ion-select-option value="accessible">{{ 'settings.bodyTypoAccessible' | i18n }}</ion-select-option>
+              <ion-select-option value="default">{{ 'settings.bodyTypoDefault' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="comfortable">{{ 'settings.bodyTypoComfortable' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="accessible">{{ 'settings.bodyTypoAccessible' | i18n:null:lang}}</ion-select-option>
             </ion-select>
           </ion-item>
         </ion-list>
@@ -199,13 +200,13 @@
         <ion-list [inset]="true" class="settings-list settings-list--in-card ion-margin-top">
           <ion-item lines="none">
             <ion-label class="ion-text-wrap">
-              <h3 class="ion-no-margin">{{ 'settings.customTextsTitle' | i18n }}</h3>
-              <p class="ion-margin-top">{{ 'settings.customTextsHint' | i18n }}</p>
+              <h3 class="ion-no-margin">{{ 'settings.customTextsTitle' | i18n:null:lang}}</h3>
+              <p class="ion-margin-top">{{ 'settings.customTextsHint' | i18n:null:lang}}</p>
             </ion-label>
           </ion-item>
           <ion-item>
             <ion-input
-              [label]="'settings.heroTitleLabel' | i18n"
+              [label]="'settings.heroTitleLabel' | i18n:null:lang"
               labelPlacement="stacked"
               [placeholder]="displayText.defaultFor('home.heroTitle')"
               [(ngModel)]="heroTitleCustom"
@@ -214,7 +215,7 @@
           </ion-item>
           <ion-item>
             <ion-input
-              [label]="'settings.heroSubShortLabel' | i18n"
+              [label]="'settings.heroSubShortLabel' | i18n:null:lang"
               labelPlacement="stacked"
               [placeholder]="displayText.defaultFor('home.heroSubShort')"
               [(ngModel)]="heroSubShortCustom"
@@ -223,7 +224,7 @@
           </ion-item>
           <ion-item lines="none">
             <ion-textarea
-              [label]="'settings.heroSubLabel' | i18n"
+              [label]="'settings.heroSubLabel' | i18n:null:lang"
               labelPlacement="stacked"
               [placeholder]="displayText.defaultFor('home.heroSub')"
               [(ngModel)]="heroSubLongCustom"
@@ -234,10 +235,10 @@
           </ion-item>
           <div class="ion-padding-horizontal ion-padding-bottom">
             <ion-button expand="block" (click)="saveCustomHeroTexts()">
-              {{ 'settings.saveCustomTexts' | i18n }}
+              {{ 'settings.saveCustomTexts' | i18n:null:lang}}
             </ion-button>
             <ion-button expand="block" fill="clear" color="medium" (click)="resetCustomHeroTexts()">
-              {{ 'settings.resetCustomTexts' | i18n }}
+              {{ 'settings.resetCustomTexts' | i18n:null:lang}}
             </ion-button>
           </div>
         </ion-list>
@@ -247,17 +248,17 @@
     <ion-accordion value="how-it-works" class="settings-accordion mem-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
-          <h2>{{ 'settings.sectionHowItWorks' | i18n }}</h2>
-          <p>{{ 'settings.sectionHowItWorksSub' | i18n }}</p>
+          <h2>{{ 'settings.sectionHowItWorks' | i18n:null:lang}}</h2>
+          <p>{{ 'settings.sectionHowItWorksSub' | i18n:null:lang}}</p>
         </ion-label>
       </ion-item>
       <div slot="content" class="settings-acc-panel">
         <ion-text color="medium" class="ion-text-wrap settings-how-hint">
-          <p class="ion-no-margin">{{ 'settings.howItWorksHint' | i18n }}</p>
+          <p class="ion-no-margin">{{ 'settings.howItWorksHint' | i18n:null:lang}}</p>
         </ion-text>
         <ion-button expand="block" class="ion-margin-top" routerLink="/tabs/settings/about-product">
           <ion-icon slot="start" name="play-circle-outline" aria-hidden="true"></ion-icon>
-          {{ 'settings.openHowItWorks' | i18n }}
+          {{ 'settings.openHowItWorks' | i18n:null:lang}}
         </ion-button>
       </div>
     </ion-accordion>
@@ -265,8 +266,8 @@
     <ion-accordion value="about" class="settings-accordion mem-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
-          <h2>{{ 'settings.sectionAbout' | i18n }}</h2>
-          <p>{{ 'settings.sectionAboutSub' | i18n }}</p>
+          <h2>{{ 'settings.sectionAbout' | i18n:null:lang}}</h2>
+          <p>{{ 'settings.sectionAboutSub' | i18n:null:lang}}</p>
         </ion-label>
       </ion-item>
       <div slot="content" class="settings-acc-panel">
@@ -278,16 +279,16 @@
             height="56"
             alt=""
           />
-          <p class="settings-about-product__lead">{{ 'settings.aboutProductLead' | i18n }}</p>
+          <p class="settings-about-product__lead">{{ 'settings.aboutProductLead' | i18n:null:lang}}</p>
           <ul class="settings-about-product__list">
-            <li>{{ 'settings.aboutProductF1' | i18n }}</li>
-            <li>{{ 'settings.aboutProductF2' | i18n }}</li>
-            <li>{{ 'settings.aboutProductF3' | i18n }}</li>
-            <li>{{ 'settings.aboutProductF4' | i18n }}</li>
+            <li>{{ 'settings.aboutProductF1' | i18n:null:lang}}</li>
+            <li>{{ 'settings.aboutProductF2' | i18n:null:lang}}</li>
+            <li>{{ 'settings.aboutProductF3' | i18n:null:lang}}</li>
+            <li>{{ 'settings.aboutProductF4' | i18n:null:lang}}</li>
           </ul>
           <p class="settings-about-product__version ion-text-center">
             <ion-text color="medium">
-              {{ 'settings.aboutProductVersion' | i18n: { version: appVersion } }}
+              {{ 'settings.aboutProductVersion' | i18n:{ version: appVersion }:lang}}
             </ion-text>
           </p>
         </div>
@@ -297,8 +298,8 @@
     <ion-accordion value="support" class="settings-accordion mem-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
-          <h2>{{ 'settings.sectionSupport' | i18n }}</h2>
-          <p>{{ 'settings.sectionSupportSub' | i18n }}</p>
+          <h2>{{ 'settings.sectionSupport' | i18n:null:lang}}</h2>
+          <p>{{ 'settings.sectionSupportSub' | i18n:null:lang}}</p>
         </ion-label>
       </ion-item>
       <div slot="content" class="settings-acc-panel">
@@ -313,16 +314,16 @@
           >
             <ion-icon [name]="block.icon" slot="start" aria-hidden="true"></ion-icon>
             <ion-label class="ion-text-wrap">
-              <h3>{{ block.titleKey | i18n }}</h3>
-              <p>{{ block.hintKey | i18n }}</p>
+              <h3>{{ block.titleKey | i18n:null:lang}}</h3>
+              <p>{{ block.hintKey | i18n:null:lang}}</p>
               <p *ngIf="block.id === 'support' && hasSupportEmail" class="settings-support-list__meta">
                 {{ supportEmail }}
               </p>
               <p *ngIf="!isSupportBlockEnabled(block)" class="settings-support-list__warn">
-                {{ 'aboutDeveloper.linkUnavailable' | i18n }}
+                {{ 'aboutDeveloper.linkUnavailable' | i18n:null:lang}}
               </p>
             </ion-label>
-            <ion-note slot="end" *ngIf="isSupportBlockEnabled(block)">{{ block.actionKey | i18n }}</ion-note>
+            <ion-note slot="end" *ngIf="isSupportBlockEnabled(block)">{{ block.actionKey | i18n:null:lang}}</ion-note>
           </ion-item>
         </ion-list>
 
@@ -333,14 +334,22 @@
         >
           <ion-item lines="none">
             <ion-label class="ion-text-wrap">
-              <h3>{{ 'support.billingDebugTitle' | i18n }}</h3>
-              <p>{{ 'support.billingDebugHint' | i18n }}</p>
+              <h3>{{ 'support.billingDebugTitle' | i18n:null:lang}}</h3>
+              <p>{{ 'support.billingDebugHint' | i18n:null:lang}}</p>
             </ion-label>
             <ion-toggle
               slot="end"
               [checked]="debugPremium"
               (ionChange)="onDebugPremiumToggle($event)"
             ></ion-toggle>
+          </ion-item>
+          <ion-item button detail="false" lines="none" (click)="openIconGallery()">
+            <ion-icon name="grid-outline" slot="start" aria-hidden="true"></ion-icon>
+            <ion-label class="ion-text-wrap">
+              <h3>{{ 'icons.galleryNavTitle' | i18n:null:lang}}</h3>
+              <p>{{ 'icons.galleryDevHint' | i18n:null:lang}}</p>
+            </ion-label>
+            <ion-note slot="end">{{ 'icons.galleryNavAction' | i18n:null:lang}}</ion-note>
           </ion-item>
         </ion-list>
       </div>

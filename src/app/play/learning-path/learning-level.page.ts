@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ViewDidEnter } from '@ionic/angular';
 
 import { LearningPathService } from '../../core/services/learning-path.service';
+import { LocaleService } from '../../core/services/locale.service';
 import { PlaySessionService } from '../../core/services/play-session.service';
 import { playDebug } from '../../core/utils/play-debug';
 import { resolveLevelLaunchPlan } from '../play-level-route';
@@ -17,6 +18,7 @@ export class LearningLevelPage implements ViewDidEnter {
   private readonly router = inject(Router);
   private readonly path = inject(LearningPathService);
   private readonly playSession = inject(PlaySessionService);
+  readonly locale = inject(LocaleService);
 
   ionViewDidEnter(): void {
     void this.start();

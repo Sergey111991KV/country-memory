@@ -5,6 +5,7 @@ import { StorageService } from './storage.service';
 
 const EVENTS_KEY = 'flagfield_learning_events_v1';
 const MASTERY_KEY = 'flagfield_mastery_v1';
+const PERSIST_DEBOUNCE_MS = 400;
 
 @Injectable({ providedIn: 'root' })
 export class UserLearningService {
@@ -13,6 +14,8 @@ export class UserLearningService {
   private events: LearningEvent[] = [];
   private mastery = new Map<string, CountryMastery>();
   private hydrated = false;
+  private persistTimer: ReturnType<typeof setTimeout> | null = null;
+  private persistInFlight: Promise<void> | null = null;
 
   async hydrate(): Promise<void> {
     if (this.hydrated) {
@@ -57,7 +60,16 @@ export class UserLearningService {
       lastAt: at,
     };
     this.mastery.set(countryId, next);
-    await this.persist();
+    this.schedulePersist();
+  }
+
+  /** Writes pending learning data immediately (e.g. before reading daily goal). */
+  async flushPersist(): Promise<void> {
+    if (this.persistTimer !== null) {
+      clearTimeout(this.persistTimer);
+      this.persistTimer = null;
+    }
+    await this.persistNow();
   }
 
   getMastery(countryId: string): CountryMastery | undefined {
@@ -127,12 +139,38 @@ export class UserLearningService {
     return best;
   }
 
-  private async persist(): Promise<void> {
-    await this.storage.set(EVENTS_KEY, this.events);
-    await this.storage.set(MASTERY_KEY, [...this.mastery.values()]);
+  private schedulePersist(): void {
+    if (this.persistTimer !== null) {
+      clearTimeout(this.persistTimer);
+    }
+    this.persistTimer = setTimeout(() => {
+      this.persistTimer = null;
+      void this.persistNow();
+    }, PERSIST_DEBOUNCE_MS);
+  }
+
+  private async persistNow(): Promise<void> {
+    if (this.persistInFlight) {
+      await this.persistInFlight;
+      return;
+    }
+    this.persistInFlight = (async () => {
+      await this.storage.set(EVENTS_KEY, this.events);
+      await this.storage.set(MASTERY_KEY, [...this.mastery.values()]);
+    })();
+    try {
+      await this.persistInFlight;
+    } finally {
+      this.persistInFlight = null;
+    }
   }
 
   async reset(): Promise<void> {
+    if (this.persistTimer !== null) {
+      clearTimeout(this.persistTimer);
+      this.persistTimer = null;
+    }
+    await this.persistInFlight;
     this.events = [];
     this.mastery.clear();
     this.hydrated = false;

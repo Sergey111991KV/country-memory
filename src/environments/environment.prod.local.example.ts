@@ -4,8 +4,9 @@
  *
  * REQUIRED before App Store / Play submit:
  * 1. PUBLIC_SITE — your HTTPS domain (no trailing slash)
- * 2. revenueCatIosKey + revenueCatAndroidKey
- * 3. devMockBilling: false
+ * 2. Product IDs in App Store Connect / Play Console (see billing.constants.ts)
+ * 3. `androidMonthlyBasePlanId` — Google Play base plan id for monthly sub
+ * 4. devMockBilling: false
  *
  * Build: npm run build:release | npm run cap:sync:release
  */
@@ -15,13 +16,8 @@ const PUBLIC_SITE = 'https://YOUR_DOMAIN';
 
 export const environment = {
   production: true,
-  revenueCatIosKey: 'appl_YOUR_IOS_PUBLIC_KEY',
-  revenueCatAndroidKey: 'goog_YOUR_ANDROID_PUBLIC_KEY',
-  premiumEntitlementId: 'premium',
   freeGamesLimit: 10,
-  revenueCatOfferingId: '',
-  monthlyPackageIdentifierFallback: '$rc_monthly',
-  lifetimePackageIdentifierFallback: '$rc_lifetime',
+  androidMonthlyBasePlanId: 'monthly',
   devMockBilling: false,
   /** Set true only for App Review / sandbox QA builds. */
   billingDebugEnabled: false,

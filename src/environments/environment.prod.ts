@@ -8,13 +8,8 @@
  */
 export const environment = {
   production: true,
-  revenueCatIosKey: '',
-  revenueCatAndroidKey: '',
-  premiumEntitlementId: 'premium',
   freeGamesLimit: 10,
-  revenueCatOfferingId: '',
-  monthlyPackageIdentifierFallback: '$rc_monthly',
-  lifetimePackageIdentifierFallback: '$rc_lifetime',
+  androidMonthlyBasePlanId: 'monthly',
   devMockBilling: false,
   billingDebugEnabled: false,
   /** Production: no console debug traces */

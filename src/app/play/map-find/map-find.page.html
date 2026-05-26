@@ -1,13 +1,14 @@
+@let lang = locale.langSig();
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'play.mapFindTitle' | i18n }}</ion-title>
+    <ion-title>{{ 'play.mapFindTitle' | i18n:null:lang}}</ion-title>
     <ion-note slot="end" class="map-round-note">
-      {{ 'map.round' | i18n: { current: round, total: roundsTotal } }}
+      {{ 'map.round' | i18n:{ current: round, total: roundsTotal }:lang}}
     </ion-note>
   </ion-toolbar>
 </ion-header>
@@ -15,25 +16,25 @@
 <ion-content class="map-find-content">
   <div *ngIf="loading" class="map-find-loading">
     <ion-spinner name="crescent"></ion-spinner>
-    <p>{{ 'map.loading' | i18n }}</p>
+    <p>{{ 'map.loading' | i18n:null:lang}}</p>
   </div>
 
   <div *ngIf="loadError" class="map-find-loading">
-    <ion-text color="danger">{{ 'map.loadError' | i18n }}</ion-text>
+    <ion-text color="danger">{{ 'map.loadError' | i18n:null:lang}}</ion-text>
   </div>
 
   <ng-container *ngIf="!loading && !loadError && target">
     <section class="map-prompt mem-surface">
-      <p class="map-prompt__kicker">{{ 'map.findTitle' | i18n }}</p>
+      <p class="map-prompt__kicker">{{ 'map.findTitle' | i18n:null:lang}}</p>
       <h1 class="map-prompt__country">{{ targetLabel }}</h1>
       <p *ngIf="phase === 'pick' && selectedIso" class="map-prompt__hint">
-        {{ 'map.hintSelected' | i18n }}
+        {{ 'map.hintSelected' | i18n:null:lang}}
       </p>
     </section>
 
     <ion-searchbar
       class="map-search"
-      [placeholder]="'map.searchPlaceholder' | i18n"
+      [placeholder]="'map.searchPlaceholder' | i18n:null:lang"
       [debounce]="200"
       (ionInput)="onSearchInput($event)"
       [value]="searchQuery"
@@ -60,7 +61,7 @@
   <ng-container *ngIf="!loading && !loadError && target">
     <section *ngIf="showFeedback" class="map-feedback mem-surface">
       <h2 [class.map-feedback--ok]="feedbackCorrect" [class.map-feedback--bad]="!feedbackCorrect">
-        {{ (feedbackCorrect ? 'map.correct' : 'map.wrong') | i18n }}
+        {{ (feedbackCorrect ? 'map.correct' : 'map.wrong') | i18n:null:lang}}
       </h2>
       <app-flag-display
         [iso2]="target.iso2"
@@ -75,16 +76,16 @@
         fill="outline"
         (click)="showCorrectOnMap()"
       >
-        {{ 'map.showOnMap' | i18n }}
+        {{ 'map.showOnMap' | i18n:null:lang}}
       </ion-button>
       <ion-button expand="block" color="primary" (click)="nextRound()">
-        {{ 'map.next' | i18n }}
+        {{ 'map.next' | i18n:null:lang}}
       </ion-button>
     </section>
 
     <div *ngIf="phase === 'pick'" class="map-actions">
       <ion-button expand="block" color="primary" [disabled]="!canVerify" (click)="verify()">
-        {{ 'map.verify' | i18n }}
+        {{ 'map.verify' | i18n:null:lang}}
       </ion-button>
     </div>
   </ng-container>

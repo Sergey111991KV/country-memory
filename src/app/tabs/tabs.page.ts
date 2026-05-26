@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+
+import { LocaleService } from '../core/services/locale.service';
 
 @Component({
   selector: 'app-tabs',
@@ -6,4 +8,6 @@ import { Component } from '@angular/core';
   styleUrls: ['tabs.page.scss'],
   standalone: false,
 })
-export class TabsPage {}
+export class TabsPage {
+  readonly locale = inject(LocaleService);
+}

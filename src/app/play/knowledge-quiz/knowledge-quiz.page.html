@@ -1,3 +1,4 @@
+@let lang = locale.langSig();
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
@@ -5,17 +6,17 @@
         <ion-icon slot="icon-only" name="arrow-back" aria-hidden="true"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'play.knowledgeQuizTitle' | i18n }}</ion-title>
+    <ion-title>{{ 'play.knowledgeQuizTitle' | i18n:null:lang}}</ion-title>
     <ion-buttons slot="end">
-      <ion-note>{{ 'globe.round' | i18n: { current: round, total: roundsTotal } }}</ion-note>
+      <ion-note>{{ 'globe.round' | i18n:{ current: round, total: roundsTotal }:lang}}</ion-note>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding knowledge-quiz-page">
-  <p *ngIf="loading">{{ 'knowledge.loading' | i18n }}</p>
+  <p *ngIf="loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
   <p *ngIf="!loading && empty" class="knowledge-quiz-empty">
-    {{ 'play.knowledgeEmpty' | i18n }}
+    {{ 'play.knowledgeEmpty' | i18n:null:lang}}
   </p>
 
   <ng-container *ngIf="!loading && !empty && target">
@@ -54,8 +55,8 @@
     </ng-container>
 
     <div *ngIf="phase === 'feedback'">
-      <p>{{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n }}</p>
-      <ion-button expand="block" (click)="nextRound()">{{ 'globe.next' | i18n }}</ion-button>
+      <p>{{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}</p>
+      <ion-button expand="block" (click)="nextRound()">{{ 'globe.next' | i18n:null:lang}}</ion-button>
     </div>
   </ng-container>
 </ion-content>

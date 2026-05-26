@@ -21,7 +21,7 @@ export class PaywallPage implements OnInit, ViewWillEnter {
   private readonly router = inject(Router);
   private readonly toastCtrl = inject(ToastController);
   private readonly legal = inject(LegalLinksService);
-  private readonly locale = inject(LocaleService);
+  protected readonly locale = inject(LocaleService);
 
   readonly devMockBilling = environment.devMockBilling;
   readonly billingDebugEnabled = this.sub.canUseBillingDebug();

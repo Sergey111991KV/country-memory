@@ -1,18 +1,21 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
-import {
-  LOG_LEVEL,
-  PURCHASES_ERROR_CODE,
-  Purchases,
-  type CustomerInfo,
-  type PurchasesEntitlementInfo,
-  type PurchasesOfferings,
-  type PurchasesPackage,
-} from '@revenuecat/purchases-capacitor';
-import { PACKAGE_TYPE } from '@revenuecat/purchases-typescript-internal-esm';
+import { NativePurchases } from '@capgo/native-purchases';
+import type { Transaction } from '@capgo/native-purchases';
 
 import { environment } from '../../../environments/environment';
+import {
+  checkNativeBillingSupported,
+  fetchActivePurchases,
+  isNativeStoreBillingAvailable,
+  isPurchaseCancelledError,
+  loadStoreProducts,
+  purchaseStoreProduct,
+  resolvePremiumFromTransactions,
+  restoreNativePurchases,
+} from '../billing/native-store-billing';
+import type { StoreProductInfo } from '../billing/store-product.types';
 import {
   detectBillingStorePlatform,
   isNativeBillingPlatform,
@@ -27,10 +30,6 @@ export type PremiumKind = 'none' | 'lifetime' | 'subscription' | 'trial' | 'intr
 const DEBUG_PREMIUM_KEY = 'flagfield_billing_debug_premium';
 const LEGACY_DEV_PREMIUM_KEY = 'flagfield_dev_premium';
 
-function isPurchasesError(err: unknown): err is { code: string; message?: string } {
-  return typeof err === 'object' && err !== null && 'code' in err;
-}
-
 @Injectable({ providedIn: 'root' })
 export class SubscriptionService {
   private readonly locale = inject(LocaleService);
@@ -38,7 +37,7 @@ export class SubscriptionService {
   private readonly storage = inject(StorageService);
 
   private initialized = false;
-  private customerInfoListenerId: string | null = null;
+  private transactionListenerRegistered = false;
 
   readonly billingPlatformSig = signal<BillingStorePlatform>(detectBillingStorePlatform());
   readonly readySig = signal(false);
@@ -48,8 +47,8 @@ export class SubscriptionService {
   readonly premiumKindSig = signal<PremiumKind>('none');
   readonly premiumExpiresIsoSig = signal<string | null>(null);
   readonly premiumProductIdSig = signal<string | null>(null);
-  readonly monthlyPackageSig = signal<PurchasesPackage | null>(null);
-  readonly lifetimePackageSig = signal<PurchasesPackage | null>(null);
+  readonly monthlyProductSig = signal<StoreProductInfo | null>(null);
+  readonly lifetimeProductSig = signal<StoreProductInfo | null>(null);
   readonly monthlyPriceSig = signal<string | null>(null);
   readonly lifetimePriceSig = signal<string | null>(null);
   readonly offeringsLoadingSig = signal(false);
@@ -74,28 +73,23 @@ export class SubscriptionService {
     }
     this.initialized = true;
     this.billingPlatformSig.set(detectBillingStorePlatform());
-    this.storeConfiguredSig.set(this.detectStoreConfigured());
     await this.syncDebugPremiumFromStorage();
     await this.logBilling('init_start', {
       platform: this.billingPlatformSig(),
-      storeConfigured: this.storeConfiguredSig(),
       canPurchaseInApp: this.canPurchaseInAppSig(),
     });
 
     try {
-      if (this.canPurchaseInAppSig()) {
-        const apiKey = this.apiKeyForPlatform();
-        await Purchases.configure({ apiKey });
-        if (!environment.production) {
-          await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
+      if (isNativeStoreBillingAvailable()) {
+        const supported = await checkNativeBillingSupported();
+        this.storeConfiguredSig.set(supported);
+        if (supported) {
+          await this.registerTransactionListener();
+          await this.syncEntitlementFromStore();
+          await this.refreshOfferings();
+        } else {
+          this.initErrorMessageSig.set('Native billing is not supported on this device.');
         }
-        await this.registerCustomerInfoListener();
-        if (this.billingPlatformSig() === 'android') {
-          await Purchases.syncPurchases();
-        }
-        const { customerInfo } = await Purchases.getCustomerInfo();
-        this.applyCustomerInfo(customerInfo);
-        await this.refreshOfferings();
       } else if (this.canUseBillingDebug()) {
         await this.syncDebugPremiumFromStorage();
       }
@@ -185,8 +179,7 @@ export class SubscriptionService {
     }
     try {
       await this.logBilling('refresh_start');
-      const { customerInfo } = await Purchases.getCustomerInfo();
-      this.applyCustomerInfo(customerInfo);
+      await this.syncEntitlementFromStore();
       await this.refreshOfferings();
       await this.logBilling('refresh_success', {
         subscribed: this.isSubscribed(),
@@ -207,27 +200,43 @@ export class SubscriptionService {
     }
     this.offeringsLoadingSig.set(true);
     try {
-      const offerings = await Purchases.getOfferings();
-      this.applyOfferings(offerings);
+      const { monthly, lifetime } = await loadStoreProducts(
+        this.billingPlatformSig(),
+        environment.androidMonthlyBasePlanId,
+      );
+      this.monthlyProductSig.set(monthly);
+      this.lifetimeProductSig.set(lifetime);
+      this.monthlyPriceSig.set(monthly?.priceString ?? null);
+      this.lifetimePriceSig.set(lifetime?.priceString ?? null);
+    } catch (err) {
+      await this.logBilling(
+        'offerings_error',
+        { message: err instanceof Error ? err.message : String(err) },
+        'error',
+      );
+      this.monthlyProductSig.set(null);
+      this.lifetimeProductSig.set(null);
+      this.monthlyPriceSig.set(null);
+      this.lifetimePriceSig.set(null);
     } finally {
       this.offeringsLoadingSig.set(false);
     }
   }
 
   async purchaseMonthly(): Promise<'success' | 'cancelled' | 'error'> {
-    const pkg = this.monthlyPackageSig();
-    if (!pkg) {
+    const product = this.monthlyProductSig();
+    if (!product) {
       return 'error';
     }
-    return this.purchasePackage(pkg);
+    return this.purchaseProduct(product);
   }
 
   async purchaseLifetime(): Promise<'success' | 'cancelled' | 'error'> {
-    const pkg = this.lifetimePackageSig();
-    if (!pkg) {
+    const product = this.lifetimeProductSig();
+    if (!product) {
       return 'error';
     }
-    return this.purchasePackage(pkg);
+    return this.purchaseProduct(product);
   }
 
   async restore(): Promise<'success' | 'empty' | 'error'> {
@@ -241,8 +250,8 @@ export class SubscriptionService {
     }
     try {
       await this.logBilling('restore_start');
-      const { customerInfo } = await Purchases.restorePurchases();
-      this.applyCustomerInfo(customerInfo);
+      const purchases = await restoreNativePurchases();
+      this.applyPurchases(purchases);
       const result = this.hasEntitlementSig() ? 'success' : 'empty';
       await this.logBilling('restore_complete', { result });
       return result;
@@ -257,11 +266,22 @@ export class SubscriptionService {
   }
 
   async openManageSubscriptions(): Promise<void> {
-    const url = this.manageSubscriptionsUrl();
-    if (!url) {
-      return;
+    if (this.canPurchaseInApp()) {
+      try {
+        await NativePurchases.manageSubscriptions();
+        return;
+      } catch (err) {
+        await this.logBilling(
+          'manage_subscriptions_native_failed',
+          { message: err instanceof Error ? err.message : String(err) },
+          'warn',
+        );
+      }
     }
-    await Browser.open({ url });
+    const url = this.manageSubscriptionsUrl();
+    if (url) {
+      await Browser.open({ url });
+    }
   }
 
   manageSubscriptionsUrl(): string | null {
@@ -314,8 +334,8 @@ export class SubscriptionService {
     return 'paywall.fineLifetime';
   }
 
-  private async purchasePackage(
-    aPackage: PurchasesPackage,
+  private async purchaseProduct(
+    product: StoreProductInfo,
   ): Promise<'success' | 'cancelled' | 'error'> {
     if (!this.canPurchaseInApp()) {
       await this.logBilling('purchase_unavailable');
@@ -323,32 +343,29 @@ export class SubscriptionService {
     }
     try {
       await this.logBilling('purchase_start', {
-        packageId: aPackage.identifier,
-        productId: aPackage.product.identifier,
+        productId: product.productId,
+        kind: product.kind,
+        planIdentifier: product.planIdentifier ?? null,
       });
-      const { customerInfo } = await Purchases.purchasePackage({ aPackage });
-      this.applyCustomerInfo(customerInfo);
+      await purchaseStoreProduct(product);
+      await this.syncEntitlementFromStore();
       await this.logBilling('purchase_success', {
-        packageId: aPackage.identifier,
+        productId: product.productId,
         subscribed: this.isSubscribed(),
       });
       return 'success';
     } catch (err) {
-      if (
-        isPurchasesError(err) &&
-        err.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR
-      ) {
+      if (isPurchaseCancelledError(err)) {
         await this.logBilling('purchase_cancelled', {
-          packageId: aPackage.identifier,
+          productId: product.productId,
         });
         return 'cancelled';
       }
       await this.logBilling(
         'purchase_error',
         {
-          packageId: aPackage.identifier,
+          productId: product.productId,
           message: err instanceof Error ? err.message : String(err),
-          code: isPurchasesError(err) ? err.code : undefined,
         },
         'error',
       );
@@ -356,96 +373,50 @@ export class SubscriptionService {
     }
   }
 
-  private async registerCustomerInfoListener(): Promise<void> {
-    if (this.customerInfoListenerId) {
+  private async registerTransactionListener(): Promise<void> {
+    if (this.transactionListenerRegistered || this.billingPlatformSig() !== 'ios') {
       return;
     }
-    this.customerInfoListenerId = await Purchases.addCustomerInfoUpdateListener(
-      (customerInfo) => {
-        this.applyCustomerInfo(customerInfo);
-      },
-    );
-  }
-
-  private applyOfferings(offerings: PurchasesOfferings): void {
-    const offeringId = environment.revenueCatOfferingId?.trim();
-    const offering =
-      (offeringId ? offerings.all[offeringId] : undefined) ??
-      offerings.current ??
-      null;
-
-    if (!offering) {
-      this.monthlyPackageSig.set(null);
-      this.lifetimePackageSig.set(null);
-      this.monthlyPriceSig.set(null);
-      this.lifetimePriceSig.set(null);
-      return;
-    }
-
-    const monthly =
-      offering.monthly ??
-      offering.availablePackages.find(
-        (p) =>
-          p.identifier === environment.monthlyPackageIdentifierFallback ||
-          p.packageType === PACKAGE_TYPE.MONTHLY,
-      ) ??
-      null;
-
-    const lifetime =
-      offering.lifetime ??
-      offering.availablePackages.find(
-        (p) =>
-          p.identifier === environment.lifetimePackageIdentifierFallback ||
-          p.packageType === PACKAGE_TYPE.LIFETIME,
-      ) ??
-      null;
-
-    this.monthlyPackageSig.set(monthly);
-    this.lifetimePackageSig.set(lifetime);
-    this.monthlyPriceSig.set(monthly?.product.priceString ?? null);
-    this.lifetimePriceSig.set(lifetime?.product.priceString ?? null);
-  }
-
-  private applyCustomerInfo(info: CustomerInfo): void {
-    const id = environment.premiumEntitlementId;
-    const ent = info.entitlements.active[id] as PurchasesEntitlementInfo | undefined;
-    const active = Boolean(ent?.isActive);
-    this.hasEntitlementSig.set(active);
-    void this.logBilling('customer_info_applied', {
-      entitlementId: id,
-      active,
-      productId: ent?.productIdentifier ?? null,
-      periodType: ent?.periodType ?? null,
-      expirationDate: ent?.expirationDate ?? null,
-      willRenew: ent?.willRenew ?? null,
-      activeEntitlements: Object.keys(info.entitlements.active),
+    this.transactionListenerRegistered = true;
+    await NativePurchases.addListener('transactionUpdated', () => {
+      void this.syncEntitlementFromStore();
     });
-    if (!ent || !active) {
+  }
+
+  private async syncEntitlementFromStore(): Promise<void> {
+    const purchases = await fetchActivePurchases();
+    this.applyPurchases(purchases);
+  }
+
+  private applyPurchases(purchases: Transaction[]): void {
+    const premium = resolvePremiumFromTransactions(purchases);
+    this.hasEntitlementSig.set(premium.active);
+    void this.logBilling('entitlement_applied', {
+      active: premium.active,
+      productId: premium.productId,
+      expiresIso: premium.expiresIso,
+      willCancel: premium.willCancel,
+    });
+
+    if (!premium.active) {
       this.premiumKindSig.set('none');
       this.premiumExpiresIsoSig.set(null);
       this.premiumProductIdSig.set(null);
       return;
     }
-    this.premiumKindSig.set(this.resolvePremiumKind(ent));
-    this.premiumExpiresIsoSig.set(ent.expirationDate ?? null);
-    this.premiumProductIdSig.set(ent.productIdentifier ?? null);
-  }
 
-  private resolvePremiumKind(ent: PurchasesEntitlementInfo): PremiumKind {
-    const productId = (ent.productIdentifier ?? '').toLowerCase();
-    if (productId.includes('lifetime') || productId.includes('forever')) {
-      return 'lifetime';
+    const productId = premium.productId ?? '';
+    if (productId.includes('lifetime')) {
+      this.premiumKindSig.set('lifetime');
+    } else if (premium.isTrial) {
+      this.premiumKindSig.set('trial');
+    } else if (premium.isIntro) {
+      this.premiumKindSig.set('intro');
+    } else {
+      this.premiumKindSig.set('subscription');
     }
-    switch (ent.periodType) {
-      case 'TRIAL':
-        return 'trial';
-      case 'INTRO':
-        return 'intro';
-      case 'NORMAL':
-        return ent.willRenew === false && !ent.expirationDate ? 'lifetime' : 'subscription';
-      default:
-        return 'unknown';
-    }
+    this.premiumExpiresIsoSig.set(premium.expiresIso);
+    this.premiumProductIdSig.set(premium.productId);
   }
 
   private async syncDebugPremiumFromStorage(): Promise<void> {
@@ -472,25 +443,5 @@ export class SubscriptionService {
     level: 'info' | 'warn' | 'error' = 'info',
   ): Promise<void> {
     await this.appLog.log('billing', event, data, level);
-  }
-
-  private detectStoreConfigured(): boolean {
-    if (this.billingPlatformSig() === 'ios') {
-      return Boolean(environment.revenueCatIosKey?.trim());
-    }
-    if (this.billingPlatformSig() === 'android') {
-      return Boolean(environment.revenueCatAndroidKey?.trim());
-    }
-    return false;
-  }
-
-  private apiKeyForPlatform(): string {
-    if (this.billingPlatformSig() === 'ios') {
-      return environment.revenueCatIosKey.trim();
-    }
-    if (this.billingPlatformSig() === 'android') {
-      return environment.revenueCatAndroidKey.trim();
-    }
-    throw new Error('Purchases unsupported on this platform');
   }
 }
