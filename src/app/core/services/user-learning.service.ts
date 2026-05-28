@@ -14,6 +14,7 @@ export class UserLearningService {
   private events: LearningEvent[] = [];
   private mastery = new Map<string, CountryMastery>();
   private hydrated = false;
+  private correctTodayCache: { date: string; count: number } | null = null;
   private persistTimer: ReturnType<typeof setTimeout> | null = null;
   private persistInFlight: Promise<void> | null = null;
 
@@ -33,6 +34,7 @@ export class UserLearningService {
       }
     }
     this.hydrated = true;
+    this.correctTodayCache = null;
   }
 
   async recordAttempt(
@@ -60,16 +62,8 @@ export class UserLearningService {
       lastAt: at,
     };
     this.mastery.set(countryId, next);
+    this.invalidateCorrectTodayCache();
     this.schedulePersist();
-  }
-
-  /** Writes pending learning data immediately (e.g. before reading daily goal). */
-  async flushPersist(): Promise<void> {
-    if (this.persistTimer !== null) {
-      clearTimeout(this.persistTimer);
-      this.persistTimer = null;
-    }
-    await this.persistNow();
   }
 
   getMastery(countryId: string): CountryMastery | undefined {
@@ -87,15 +81,21 @@ export class UserLearningService {
   }
 
   countCorrectToday(): number {
+    const today = new Date().toISOString().slice(0, 10);
+    if (this.correctTodayCache?.date === today) {
+      return this.correctTodayCache.count;
+    }
     const start = new Date();
     start.setHours(0, 0, 0, 0);
     const t0 = start.getTime();
-    return this.events.filter((e) => {
+    const count = this.events.filter((e) => {
       if (!e.correct) {
         return false;
       }
       return new Date(e.at).getTime() >= t0;
     }).length;
+    this.correctTodayCache = { date: today, count };
+    return count;
   }
 
   /** Consecutive calendar days with at least one correct answer (including today). */
@@ -139,20 +139,48 @@ export class UserLearningService {
     return best;
   }
 
+  /** Flush debounced writes (e.g. before app background). */
+  async flushPersist(): Promise<void> {
+    if (this.persistTimer !== null) {
+      clearTimeout(this.persistTimer);
+      this.persistTimer = null;
+    }
+    if (this.persistInFlight) {
+      await this.persistInFlight;
+      return;
+    }
+    await this.writePersist();
+  }
+
+  async reset(): Promise<void> {
+    if (this.persistTimer !== null) {
+      clearTimeout(this.persistTimer);
+      this.persistTimer = null;
+    }
+    if (this.persistInFlight) {
+      await this.persistInFlight;
+    }
+    this.events = [];
+    this.mastery.clear();
+    this.hydrated = false;
+    this.correctTodayCache = null;
+    await this.storage.remove(EVENTS_KEY);
+    await this.storage.remove(MASTERY_KEY);
+  }
+
   private schedulePersist(): void {
     if (this.persistTimer !== null) {
       clearTimeout(this.persistTimer);
     }
     this.persistTimer = setTimeout(() => {
       this.persistTimer = null;
-      void this.persistNow();
+      void this.writePersist();
     }, PERSIST_DEBOUNCE_MS);
   }
 
-  private async persistNow(): Promise<void> {
+  private async writePersist(): Promise<void> {
     if (this.persistInFlight) {
       await this.persistInFlight;
-      return;
     }
     this.persistInFlight = (async () => {
       await this.storage.set(EVENTS_KEY, this.events);
@@ -165,16 +193,7 @@ export class UserLearningService {
     }
   }
 
-  async reset(): Promise<void> {
-    if (this.persistTimer !== null) {
-      clearTimeout(this.persistTimer);
-      this.persistTimer = null;
-    }
-    await this.persistInFlight;
-    this.events = [];
-    this.mastery.clear();
-    this.hydrated = false;
-    await this.storage.remove(EVENTS_KEY);
-    await this.storage.remove(MASTERY_KEY);
+  private invalidateCorrectTodayCache(): void {
+    this.correctTodayCache = null;
   }
 }

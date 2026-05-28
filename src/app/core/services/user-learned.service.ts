@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { StorageService } from './storage.service';
 
 const MARKS_KEY = 'flagfield_learned_marks_v1';
+const PERSIST_DEBOUNCE_MS = 400;
 
 interface LearnedMarks {
   countries: string[];
@@ -18,6 +19,12 @@ export class UserLearnedService {
   private facts = new Set<string>();
   private hydrated = false;
   private marksRevision = 0;
+  private persistTimer: ReturnType<typeof setTimeout> | null = null;
+  private persistInFlight: Promise<void> | null = null;
+
+  getMarksRevision(): number {
+    return this.marksRevision;
+  }
 
   async hydrate(): Promise<void> {
     if (this.hydrated) {
@@ -34,13 +41,15 @@ export class UserLearnedService {
   async markCountryLearned(iso2: string): Promise<void> {
     await this.hydrate();
     this.countries.add(iso2.toUpperCase());
-    await this.persist();
+    this.bumpMarksRevision();
+    this.schedulePersist();
   }
 
   async unmarkCountryLearned(iso2: string): Promise<void> {
     await this.hydrate();
     this.countries.delete(iso2.toUpperCase());
-    await this.persist();
+    this.bumpMarksRevision();
+    this.schedulePersist();
   }
 
   isCountryMarked(iso2: string): boolean {
@@ -50,13 +59,15 @@ export class UserLearnedService {
   async markFactLearned(factId: string): Promise<void> {
     await this.hydrate();
     this.facts.add(factId);
-    await this.persist();
+    this.bumpMarksRevision();
+    this.schedulePersist();
   }
 
   async unmarkFactLearned(factId: string): Promise<void> {
     await this.hydrate();
     this.facts.delete(factId);
-    await this.persist();
+    this.bumpMarksRevision();
+    this.schedulePersist();
   }
 
   isFactMarked(factId: string): boolean {
@@ -74,10 +85,6 @@ export class UserLearnedService {
   }
 
   /** Countries in collection or with at least one marked fact. */
-  getMarksRevision(): number {
-    return this.marksRevision;
-  }
-
   async getLearnedCountryIsos(): Promise<Set<string>> {
     await this.hydrate();
     const out = new Set(this.countries);
@@ -90,18 +97,61 @@ export class UserLearnedService {
     return out;
   }
 
-  private async persist(): Promise<void> {
-    await this.storage.set(MARKS_KEY, {
-      countries: [...this.countries],
-      facts: [...this.facts],
-    });
-    this.marksRevision += 1;
+  async flushPersist(): Promise<void> {
+    if (this.persistTimer !== null) {
+      clearTimeout(this.persistTimer);
+      this.persistTimer = null;
+    }
+    if (this.persistInFlight) {
+      await this.persistInFlight;
+      return;
+    }
+    await this.writePersist();
   }
 
   async reset(): Promise<void> {
+    if (this.persistTimer !== null) {
+      clearTimeout(this.persistTimer);
+      this.persistTimer = null;
+    }
+    if (this.persistInFlight) {
+      await this.persistInFlight;
+    }
     this.countries = new Set();
     this.facts = new Set();
     this.hydrated = false;
+    this.marksRevision = 0;
     await this.storage.remove(MARKS_KEY);
+  }
+
+  private bumpMarksRevision(): void {
+    this.marksRevision += 1;
+  }
+
+  private schedulePersist(): void {
+    if (this.persistTimer !== null) {
+      clearTimeout(this.persistTimer);
+    }
+    this.persistTimer = setTimeout(() => {
+      this.persistTimer = null;
+      void this.writePersist();
+    }, PERSIST_DEBOUNCE_MS);
+  }
+
+  private async writePersist(): Promise<void> {
+    if (this.persistInFlight) {
+      await this.persistInFlight;
+    }
+    this.persistInFlight = (async () => {
+      await this.storage.set(MARKS_KEY, {
+        countries: [...this.countries],
+        facts: [...this.facts],
+      });
+    })();
+    try {
+      await this.persistInFlight;
+    } finally {
+      this.persistInFlight = null;
+    }
   }
 }

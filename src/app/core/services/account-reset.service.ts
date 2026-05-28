@@ -44,6 +44,11 @@ export class AccountResetService {
   async resetAccount(): Promise<void> {
     await this.appLog.log('account', 'Account reset started');
 
+    await this.userLearned.flushPersist();
+    await this.userLearning.flushPersist();
+    await this.userLearned.reset();
+    await this.userLearning.reset();
+
     for (const key of PROGRESS_STORAGE_KEYS) {
       await this.storage.remove(key);
     }
@@ -56,8 +61,6 @@ export class AccountResetService {
     await this.appSettings.save(nextSettings);
 
     await this.sessionAccess.reset();
-    await this.userLearned.reset();
-    await this.userLearning.reset();
     await this.learningPath.resetProgress();
     await this.dailyGoal.reset();
     await this.displayText.clearAll();

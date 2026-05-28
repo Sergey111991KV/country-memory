@@ -1,4 +1,4 @@
-export const FLAGFIELD_KO: Record<string, string> = {
+{
   "home.title": "플래그필드",
   "home.heroTitle": "살아있는 지구에서 나라 배우기",
   "home.heroSubShort": "지구본, 지도, 깃발 퀴즈 — 호기심 많은 어린이와 여행자를 위한 짧은 세션.",
@@ -443,5 +443,5 @@ export const FLAGFIELD_KO: Record<string, string> = {
   "aboutDeveloper.blockDonateHint": "팁 (선택 사항) — 앱 내 구매가 아닌 브라우저에서 열립니다.",
   "aboutDeveloper.openLink": "열기",
   "aboutDeveloper.emailSupport": "이메일 지원",
-  "aboutDeveloper.linkUnavailable": "이 빌드에 대해 링크가 구성되지 않았습니다.",
-};
+  "aboutDeveloper.linkUnavailable": "이 빌드에 대해 링크가 구성되지 않았습니다."
+}

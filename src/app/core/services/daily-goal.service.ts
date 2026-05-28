@@ -35,7 +35,7 @@ export class DailyGoalService {
       target: this.defaultTarget,
       progress: Math.min(progress, this.defaultTarget),
     };
-    await this.storage.set(KEY, state);
+    await this.writeStateIfChanged(state);
     return state;
   }
 
@@ -45,33 +45,37 @@ export class DailyGoalService {
       ...state,
       progress: Math.min(state.target, state.progress + 1),
     };
-    await this.storage.set(KEY, next);
+    await this.writeStateIfChanged(next);
     return next;
   }
 
   async syncFromLearning(): Promise<DailyGoalState> {
-    await this.learning.flushPersist();
     await this.learning.hydrate();
     const today = this.todayKey();
-    const progress = Math.min(this.defaultTarget, this.learning.countCorrectToday());
-    const existing = await this.storage.get<DailyGoalState>(KEY);
-    if (
-      existing?.date === today &&
-      existing.target === this.defaultTarget &&
-      existing.progress === progress
-    ) {
-      return existing;
-    }
+    const correct = this.learning.countCorrectToday();
     const state: DailyGoalState = {
       date: today,
       target: this.defaultTarget,
-      progress,
+      progress: Math.min(this.defaultTarget, correct),
     };
-    await this.storage.set(KEY, state);
+    await this.writeStateIfChanged(state);
     return state;
   }
 
   async reset(): Promise<void> {
     await this.storage.remove(KEY);
+  }
+
+  private async writeStateIfChanged(state: DailyGoalState): Promise<void> {
+    const raw = await this.storage.get<DailyGoalState>(KEY);
+    if (
+      raw &&
+      raw.date === state.date &&
+      raw.target === state.target &&
+      raw.progress === state.progress
+    ) {
+      return;
+    }
+    await this.storage.set(KEY, state);
   }
 }

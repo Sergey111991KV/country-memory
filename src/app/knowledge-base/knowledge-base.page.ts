@@ -1,8 +1,14 @@
-import { Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+} from '@angular/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
 import { ViewWillEnter } from '@ionic/angular';
 
+import type { AppLang } from '../core/i18n/messages';
 import type { Country, CountryFact, CountryProfileField } from '../core/data/country.types';
 import type { CountryLearnStatus, KnowledgeCollectionDef } from '../core/data/knowledge-manifest.types';
 import type { FactLearnStateId } from '../core/data/knowledge-manifest.types';
@@ -15,6 +21,7 @@ import { UserLearnedService } from '../core/services/user-learned.service';
 
 export interface CountryMarkRow {
   country: Country;
+  displayName: string;
   status: CountryLearnStatus;
   expanded: boolean;
   fields: CountryProfileField[];
@@ -23,24 +30,34 @@ export interface CountryMarkRow {
   factStates: Map<string, FactLearnStateId>;
 }
 
+export interface CollectionCardStats {
+  engaged: number;
+  total: number;
+  saved: number;
+}
+
 @Component({
   selector: 'app-knowledge-base',
   templateUrl: './knowledge-base.page.html',
   styleUrls: ['./knowledge-base.page.scss'],
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KnowledgeBasePage implements ViewWillEnter {
   readonly catalog = inject(CountriesCatalogService);
-  readonly locale = inject(LocaleService);
+  protected readonly locale = inject(LocaleService);
   readonly manifest = inject(KnowledgeManifestService);
 
   private readonly countryKnowledge = inject(CountryKnowledgeService);
   private readonly userLearned = inject(UserLearnedService);
   private readonly learnStatus = inject(CountryLearnStatusService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   loading = true;
   collections: KnowledgeCollectionDef[] = [];
   countryRows: CountryMarkRow[] = [];
+  displayCountryRows: CountryMarkRow[] = [];
+  readonly collectionStatsMap = new Map<string, CollectionCardStats>();
   searchQuery = '';
   continentFilter: string | null = null;
   learnedSet = new Set<string>();
@@ -50,49 +67,35 @@ export class KnowledgeBasePage implements ViewWillEnter {
   summaryMarksKnown = 0;
   summaryMarksTotal = 0;
 
+  private rowsCacheReady = false;
+  private lastMarksRevision = -1;
+  private lastBuiltLanguage: AppLang | null = null;
+
   ionViewWillEnter(): void {
     void this.refresh();
   }
 
-  filteredCountryRows(): CountryMarkRow[] {
-    let rows = this.countryRows;
-    if (this.continentFilter) {
-      rows = rows.filter((r) => r.country.continent === this.continentFilter);
-    }
-    const q = this.searchQuery.trim().toLowerCase();
-    if (!q) {
-      return rows;
-    }
-    return rows.filter((row) => {
-      const name = this.catalog
-        .localizedName(row.country, this.locale.language)
-        .toLowerCase();
-      return name.includes(q) || row.country.iso2.toLowerCase().includes(q);
-    });
+  collectionStats(col: KnowledgeCollectionDef): CollectionCardStats {
+    return (
+      this.collectionStatsMap.get(col.continent) ?? {
+        engaged: 0,
+        total: 0,
+        saved: 0,
+      }
+    );
   }
 
-  collectionEngagedCount(col: KnowledgeCollectionDef): number {
-    return this.countryRows.filter(
-      (r) =>
-        r.country.continent === col.continent &&
-        (r.status.inQuizPool || r.status.id === 'collection'),
-    ).length;
-  }
-
-  collectionSavedCount(col: KnowledgeCollectionDef): number {
-    return this.countryRows.filter(
-      (r) => r.country.continent === col.continent && r.status.id === 'collection',
-    ).length;
-  }
-
-  collectionTotalCount(col: KnowledgeCollectionDef): number {
-    return this.catalog.getAll().filter((c) => c.continent === col.continent).length;
+  onSearchQueryChange(): void {
+    this.applyListFilter();
+    this.cdr.markForCheck();
   }
 
   clearCollectionFilter(): void {
     void this.tapHaptic();
     this.continentFilter = null;
     this.searchQuery = '';
+    this.applyListFilter();
+    this.cdr.markForCheck();
   }
 
   isAllRegionsActive(): boolean {
@@ -130,14 +133,32 @@ export class KnowledgeBasePage implements ViewWillEnter {
     );
   }
 
+  trackCollection(_index: number, col: KnowledgeCollectionDef): string {
+    return col.continent;
+  }
+
+  trackCountryRow(_index: number, row: CountryMarkRow): string {
+    return row.country.iso2;
+  }
+
+  trackField(_index: number, field: CountryProfileField): string {
+    return field.id;
+  }
+
+  trackFact(_index: number, fact: CountryFact): string {
+    return fact.id;
+  }
+
   selectCountry(row: CountryMarkRow): void {
     if (row.expanded) {
       row.expanded = false;
+      this.cdr.markForCheck();
       return;
     }
     for (const r of this.countryRows) {
       r.expanded = r === row;
     }
+    this.cdr.markForCheck();
   }
 
   filterByCollection(col: KnowledgeCollectionDef): void {
@@ -145,6 +166,8 @@ export class KnowledgeBasePage implements ViewWillEnter {
     this.continentFilter =
       this.continentFilter === col.continent ? null : col.continent;
     this.searchQuery = '';
+    this.applyListFilter();
+    this.cdr.markForCheck();
   }
 
   isCollectionActive(col: KnowledgeCollectionDef): boolean {
@@ -160,11 +183,12 @@ export class KnowledgeBasePage implements ViewWillEnter {
   }
 
   collectionCardAriaLabel(col: KnowledgeCollectionDef): string {
+    const stats = this.collectionStats(col);
     const title = this.locale.translate(col.titleKey);
     const meta = this.locale.translate('knowledge.collectionCardMeta', {
-      engaged: this.collectionEngagedCount(col),
-      total: this.collectionTotalCount(col),
-      saved: this.collectionSavedCount(col),
+      engaged: stats.engaged,
+      total: stats.total,
+      saved: stats.saved,
     });
     if (this.isCollectionActive(col)) {
       return `${title}, ${meta}, ${this.locale.translate('knowledge.collectionSelected')}`;
@@ -214,37 +238,107 @@ export class KnowledgeBasePage implements ViewWillEnter {
     row.fieldStates = this.buildFieldStateMap(row.fields);
     row.factStates = this.buildFactStateMap(row.facts);
     this.learnedSet = await this.userLearned.getLearnedCountryIsos();
-    row.status = await this.learnStatus.getCountryStatus(
+    row.status = this.learnStatus.getCountryStatusSync(
       row.country.iso2,
       this.learnedSet,
     );
+    this.lastMarksRevision = this.userLearned.getMarksRevision();
     this.updateSummary();
+    this.rebuildCollectionStats();
+    this.applyListFilter();
+    this.cdr.markForCheck();
   }
 
   async refresh(): Promise<void> {
-    this.loading = true;
+    const showLoading = !this.rowsCacheReady;
+    if (showLoading) {
+      this.loading = true;
+      this.cdr.markForCheck();
+    }
     try {
       await this.manifest.ensureLoaded();
       await this.catalog.ensureLoaded();
       await this.countryKnowledge.ensureLoaded();
       await this.userLearned.hydrate();
+
+      const marksRevision = this.userLearned.getMarksRevision();
+      const language = this.locale.language;
+      const canReuseRows =
+        this.rowsCacheReady &&
+        this.lastMarksRevision === marksRevision &&
+        this.lastBuiltLanguage === language &&
+        this.countryRows.length > 0;
+
       this.collections = this.manifest.getCollections();
+
+      if (canReuseRows) {
+        this.rebuildCollectionStats();
+        this.applyListFilter();
+        return;
+      }
+
       this.learnedSet = await this.userLearned.getLearnedCountryIsos();
       const countries = [...this.catalog.getAll()].sort((a, b) =>
         this.catalog
-          .localizedName(a, this.locale.language)
-          .localeCompare(
-            this.catalog.localizedName(b, this.locale.language),
-            this.locale.language,
-          ),
+          .localizedName(a, language)
+          .localeCompare(this.catalog.localizedName(b, language), language),
       );
-      this.countryRows = [];
-      for (const country of countries) {
-        this.countryRows.push(await this.buildCountryRow(country));
-      }
+      this.countryRows = countries.map((country) => this.buildCountryRow(country, language));
+      this.lastMarksRevision = marksRevision;
+      this.lastBuiltLanguage = language;
+      this.rowsCacheReady = true;
       this.updateSummary();
+      this.rebuildCollectionStats();
+      this.applyListFilter();
     } finally {
       this.loading = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  private applyListFilter(): void {
+    let rows = this.countryRows;
+    if (this.continentFilter) {
+      rows = rows.filter((r) => r.country.continent === this.continentFilter);
+    }
+    const q = this.searchQuery.trim().toLowerCase();
+    if (q) {
+      rows = rows.filter((row) => {
+        const name = row.displayName.toLowerCase();
+        return name.includes(q) || row.country.iso2.toLowerCase().includes(q);
+      });
+    }
+    this.displayCountryRows = rows;
+  }
+
+  private rebuildCollectionStats(): void {
+    this.collectionStatsMap.clear();
+    const totalsByContinent = new Map<string, number>();
+    for (const country of this.catalog.getAll()) {
+      totalsByContinent.set(
+        country.continent,
+        (totalsByContinent.get(country.continent) ?? 0) + 1,
+      );
+    }
+    for (const col of this.collections) {
+      let engaged = 0;
+      let saved = 0;
+      for (const row of this.countryRows) {
+        if (row.country.continent !== col.continent) {
+          continue;
+        }
+        if (row.status.id === 'collection') {
+          saved += 1;
+        }
+        if (row.status.inQuizPool || row.status.id === 'collection') {
+          engaged += 1;
+        }
+      }
+      this.collectionStatsMap.set(col.continent, {
+        engaged,
+        saved,
+        total: totalsByContinent.get(col.continent) ?? 0,
+      });
     }
   }
 
@@ -274,16 +368,16 @@ export class KnowledgeBasePage implements ViewWillEnter {
     this.summaryMarksTotal = marksTotal;
   }
 
-  private async buildCountryRow(country: Country): Promise<CountryMarkRow> {
-    const status = await this.learnStatus.getCountryStatus(
+  private buildCountryRow(country: Country, language: AppLang): CountryMarkRow {
+    const status = this.learnStatus.getCountryStatusSync(
       country.iso2,
       this.learnedSet,
     );
-    const lang = this.locale.language;
-    const fields = this.countryKnowledge.getProfileFields(country, lang);
+    const fields = this.countryKnowledge.getProfileFields(country, language);
     const facts = this.countryKnowledge.getTriviaFacts(country.iso2);
     return {
       country,
+      displayName: this.catalog.localizedName(country, language),
       status,
       expanded: false,
       fields,
@@ -307,11 +401,15 @@ export class KnowledgeBasePage implements ViewWillEnter {
 
   private async syncRow(row: CountryMarkRow): Promise<void> {
     this.learnedSet = await this.userLearned.getLearnedCountryIsos();
-    row.status = await this.learnStatus.getCountryStatus(
+    row.status = this.learnStatus.getCountryStatusSync(
       row.country.iso2,
       this.learnedSet,
     );
+    this.lastMarksRevision = this.userLearned.getMarksRevision();
     this.updateSummary();
+    this.rebuildCollectionStats();
+    this.applyListFilter();
+    this.cdr.markForCheck();
   }
 
   private async tapHaptic(style: ImpactStyle = ImpactStyle.Light): Promise<void> {

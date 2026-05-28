@@ -1,4 +1,4 @@
-export const FLAGFIELD_JA: Record<string, string> = {
+{
   "home.title": "フラッグフィールド",
   "home.heroTitle": "生きている地球で国を学ぼう",
   "home.heroSubShort": "地球儀、地図、旗のクイズ—好奇心旺盛な子供や旅行者向けの短いセッション。",
@@ -443,5 +443,5 @@ export const FLAGFIELD_JA: Record<string, string> = {
   "aboutDeveloper.blockDonateHint": "オプションのヒント—アプリ内購入ではなく、ブラウザーで開きます。",
   "aboutDeveloper.openLink": "開く",
   "aboutDeveloper.emailSupport": "メールサポート",
-  "aboutDeveloper.linkUnavailable": "このビルド用にリンクが構成されていません。",
-};
+  "aboutDeveloper.linkUnavailable": "このビルド用にリンクが構成されていません。"
+}
