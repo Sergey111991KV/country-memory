@@ -1,4 +1,4 @@
-export const FLAGFIELD_VI: Record<string, string> = {
+{
   "home.title": "Flagfield",
   "home.heroTitle": "Tìm hiểu các quốc gia trên thế giới",
   "home.heroSubShort": "Bài kiểm tra toàn cầu, bản đồ và cờ — các buổi học ngắn dành cho trẻ em và du khách tò mò.",
@@ -443,5 +443,5 @@ export const FLAGFIELD_VI: Record<string, string> = {
   "aboutDeveloper.blockDonateHint": "Mẹo tùy chọn — mở trong trình duyệt của bạn, không phải mua hàng trong ứng dụng.",
   "aboutDeveloper.openLink": "Mở",
   "aboutDeveloper.emailSupport": "Hỗ trợ qua email",
-  "aboutDeveloper.linkUnavailable": "Liên kết không được định cấu hình cho bản dựng này.",
-};
+  "aboutDeveloper.linkUnavailable": "Liên kết không được định cấu hình cho bản dựng này."
+}

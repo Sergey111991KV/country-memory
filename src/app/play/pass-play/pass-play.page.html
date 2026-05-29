@@ -14,6 +14,21 @@
   <h1 class="pass-play-page__title">{{ 'passPlay.title' | i18n:null:lang}}</h1>
   <p class="pass-play-page__lead">{{ leadKey | i18n:null:lang}}</p>
 
+  <fieldset class="pass-play-page__scoring">
+    <legend class="pass-play-page__label">{{ 'passPlay.scoringLabel' | i18n:null:lang}}</legend>
+    <ion-segment
+      [value]="scoringStyle"
+      (ionChange)="onScoringStyleChange($event)"
+    >
+      <ion-segment-button value="turns">
+        <ion-label>{{ 'passPlay.scoringTurns' | i18n:null:lang}}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="buzzer">
+        <ion-label>{{ 'passPlay.scoringBuzzer' | i18n:null:lang}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </fieldset>
+
   <div class="pass-play-page__players">
     <label
       class="pass-play-page__field"

@@ -13,9 +13,7 @@ export type CourseLaunchId =
   | 'continent-oceania'
   | 'continent-americas'
   | 'capitals-free'
-  | 'capitals-world'
-  | 'facts-starter'
-  | 'facts-world';
+  | 'capitals-world';
 
 export interface CourseLaunchDef {
   id: CourseLaunchId;
@@ -102,20 +100,6 @@ export class CourseLaunchService {
       subKey: 'course.capitals.worldSub',
       kind: 'challenge',
       challengeMode: 'country_pick_capital',
-    },
-    {
-      id: 'facts-starter',
-      icon: 'course-facts',
-      titleKey: 'course.facts.starter',
-      subKey: 'course.facts.starterSub',
-      kind: 'facts_drill',
-    },
-    {
-      id: 'facts-world',
-      icon: 'course-facts',
-      titleKey: 'course.facts.world',
-      subKey: 'course.facts.worldSub',
-      kind: 'facts_drill',
     },
   ];
 

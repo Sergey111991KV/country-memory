@@ -39,12 +39,12 @@ describe('play mode catalog', () => {
 
   it('lists expected mode counts when subscribed', () => {
     const modes = buildPlayModesByCategory(true, courseLaunches);
-    expect(modes.recognition.length).toBe(5);
-    expect(modes.recall.length).toBe(7);
-    expect(modes.course.length).toBe(10); // learning_path + 9 launches
+    expect(modes.recognition.length).toBe(4);
+    expect(modes.recall.length).toBe(6);
+    expect(modes.course.length).toBe(8); // learning_path + 7 launches
     expect(modes.explore.length).toBe(2 + EXPLORE_FILTER_DEFS.length);
-    expect(modes.together.length).toBe(6);
-    expect(flattenPlayModes(modes).length).toBe(35);
+    expect(modes.together.length).toBe(3);
+    expect(flattenPlayModes(modes).length).toBe(28);
   });
 
   it('keeps recall off the wheel but available as side category', () => {
@@ -57,7 +57,7 @@ describe('play mode catalog', () => {
       'together',
     ]);
     expect(recall.id).toBe('recall');
-    expect(recall.modeCount).toBe(7);
+    expect(recall.modeCount).toBe(6);
   });
 
   it('marks explore locked for free tier', () => {

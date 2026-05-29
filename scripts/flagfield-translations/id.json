@@ -1,4 +1,4 @@
-export const FLAGFIELD_ID: Record<string, string> = {
+{
   "home.title": "Flagfield",
   "home.heroTitle": "Pelajari negara - negara di dunia yang hidup",
   "home.heroSubShort": "Kuis Globe, map, dan flag — sesi singkat untuk anak - anak dan wisatawan yang penasaran.",
@@ -443,5 +443,5 @@ export const FLAGFIELD_ID: Record<string, string> = {
   "aboutDeveloper.blockDonateHint": "Tips opsional — terbuka di browser Anda, bukan pembelian dalam aplikasi.",
   "aboutDeveloper.openLink": "Buka",
   "aboutDeveloper.emailSupport": "Dukungan email",
-  "aboutDeveloper.linkUnavailable": "Tautan tidak dikonfigurasi untuk build ini.",
-};
+  "aboutDeveloper.linkUnavailable": "Tautan tidak dikonfigurasi untuk build ini."
+}

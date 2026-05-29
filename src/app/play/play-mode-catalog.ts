@@ -8,9 +8,9 @@ import type {
   PlayModeSlide,
 } from './play-mode.types';
 
+/** Map-based find lives under Explore → map_find (Premium). */
 const RECOGNITION_MODES: FreeChallengeMode[] = [
   'flag_pick_country',
-  'flag_find_map',
   'flag_type_country',
   'capital_pick_country',
   'country_pick_capital',
@@ -182,45 +182,6 @@ export function buildPlayModesByCategory(
       subKey: 'passPlay.modeMixedSub',
       categoryId: 'together',
       action: { type: 'pass_play', mode: 'country_pick_capital' },
-      needsPlayGuard: true,
-    },
-    {
-      id: 'pass_play_speed_flags',
-      icon: 'mode-pass-speed',
-      titleKey: 'passPlay.modeSpeedFlags',
-      subKey: 'passPlay.modeSpeedSub',
-      categoryId: 'together',
-      action: {
-        type: 'pass_play',
-        mode: 'flag_pick_country',
-        scoringStyle: 'buzzer',
-      },
-      needsPlayGuard: true,
-    },
-    {
-      id: 'pass_play_speed_capitals',
-      icon: 'mode-pass-speed',
-      titleKey: 'passPlay.modeSpeedCapitals',
-      subKey: 'passPlay.modeSpeedSub',
-      categoryId: 'together',
-      action: {
-        type: 'pass_play',
-        mode: 'capital_pick_country',
-        scoringStyle: 'buzzer',
-      },
-      needsPlayGuard: true,
-    },
-    {
-      id: 'pass_play_speed_mixed',
-      icon: 'mode-pass-speed',
-      titleKey: 'passPlay.modeSpeedMixed',
-      subKey: 'passPlay.modeSpeedSub',
-      categoryId: 'together',
-      action: {
-        type: 'pass_play',
-        mode: 'country_pick_capital',
-        scoringStyle: 'buzzer',
-      },
       needsPlayGuard: true,
     },
   ];

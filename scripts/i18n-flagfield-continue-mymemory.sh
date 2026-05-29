@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Resume / finish Flagfield translations (MyMemory — stable; Lingva often 403/500).
+# Finish remaining Flagfield locales via MyMemory (when Google IP is blocked).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -15,19 +15,14 @@ echo "$$" >"$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 export SKIP_EXISTING=1
-export DELAY_MS="${DELAY_MS:-1000}"
+export DELAY_MS="${DELAY_MS:-2000}"
 
-# Remaining locales (it partial; tr–ur missing)
-LANGS=(it tr vi id pl nl bn ur)
+LANGS=(vi id pl nl bn ur)
 
 for lang in "${LANGS[@]}"; do
-  echo "========== $lang =========="
+  echo "========== $lang (MyMemory) =========="
   node scripts/translate-flagfield-mymemory.mjs "$lang" || true
   node scripts/build-flagfield-locales.mjs
 done
 
-echo "Fixing placeholder glitches in es, de, fr…"
-node scripts/fix-flagfield-placeholders.mjs es de fr || true
-node scripts/build-flagfield-locales.mjs
-
-echo "All done."
+echo "Done."

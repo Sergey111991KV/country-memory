@@ -21,10 +21,13 @@ export function playDockSlotStepDeg(slotCount: number): number {
   return slotCount > 0 ? 360 / slotCount : 0;
 }
 
+/** Default wheel clones (2 = half the DOM nodes vs 3, still infinite scroll). */
+export const PLAY_DOCK_WHEEL_COPIES = 2;
+
 /** Build cloned slots around 360° (top = −90°). */
 export function buildPlayDockWheelSlots(
   tileCount: number,
-  copies = 3,
+  copies = PLAY_DOCK_WHEEL_COPIES,
 ): PlayDockWheelSlot[] {
   if (tileCount <= 0) {
     return [];
@@ -47,7 +50,7 @@ export function buildPlayDockWheelSlots(
 
 export function playDockMiddleSlotRange(
   count: number,
-  copies = 3,
+  copies = PLAY_DOCK_WHEEL_COPIES,
 ): { start: number; end: number } {
   const middleCopy = Math.floor(copies / 2);
   const start = count * middleCopy;
@@ -57,7 +60,7 @@ export function playDockMiddleSlotRange(
 export function playDockMiddleSlotIndex(
   logicalIndex: number,
   tileCount: number,
-  copies = 3,
+  copies = PLAY_DOCK_WHEEL_COPIES,
 ): number {
   return playDockMiddleSlotRange(tileCount, copies).start + logicalIndex;
 }
@@ -94,7 +97,7 @@ export function snapPlayDockSlotIndex(
   wheelDeg: number,
   dragDelta: number,
   tileCount: number,
-  copies = 3,
+  copies = PLAY_DOCK_WHEEL_COPIES,
 ): number {
   if (slots.length === 0) {
     return 0;

@@ -3,11 +3,13 @@ import { TestBed } from '@angular/core/testing';
 import { DailyGoalService } from './daily-goal.service';
 import { StorageService } from './storage.service';
 import { UserLearningService } from './user-learning.service';
+import { PerfLogService } from './perf-log.service';
 
 describe('DailyGoalService', () => {
   let service: DailyGoalService;
   let storage: jasmine.SpyObj<StorageService>;
   let learning: jasmine.SpyObj<UserLearningService>;
+  let perf: jasmine.SpyObj<PerfLogService>;
 
   beforeEach(() => {
     storage = jasmine.createSpyObj<StorageService>('StorageService', ['get', 'set', 'remove']);
@@ -15,6 +17,8 @@ describe('DailyGoalService', () => {
       'hydrate',
       'countCorrectToday',
     ]);
+    perf = jasmine.createSpyObj<PerfLogService>('PerfLogService', ['span', 'mark']);
+    perf.span.and.returnValue({ end: jasmine.createSpy('end') });
     learning.hydrate.and.resolveTo();
     learning.countCorrectToday.and.returnValue(3);
 
@@ -23,6 +27,7 @@ describe('DailyGoalService', () => {
         DailyGoalService,
         { provide: StorageService, useValue: storage },
         { provide: UserLearningService, useValue: learning },
+        { provide: PerfLogService, useValue: perf },
       ],
     });
     service = TestBed.inject(DailyGoalService);

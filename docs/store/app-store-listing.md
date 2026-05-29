@@ -80,7 +80,7 @@ geography,flags,countries,globe,map,quiz,learn,world,capitals,education,trivia,a
 
 Copy template: [URLS.template.txt](URLS.template.txt)
 
-- **Privacy Policy:** `https://addeo.github.io/flagfield-privacy/en`  
+- **Privacy Policy:** `https://addeo.github.io/flagfield-privacy/`  
 - **Terms:** `https://addeo.github.io/flagfield-terms`  
 - **Support:** `mailto:supp0rt.serg@yandex.com`
 

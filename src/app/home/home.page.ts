@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ViewWillEnter } from '@ionic/angular';
 
@@ -10,12 +10,14 @@ import { LocaleService } from '../core/services/locale.service';
 import { PlayPoolService } from '../core/services/play-pool.service';
 import { PlaySessionService } from '../core/services/play-session.service';
 import { SubscriptionService } from '../core/services/subscription.service';
+import { PerfLogService } from '../core/services/perf-log.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage implements OnInit, ViewWillEnter {
   private readonly displayText = inject(DisplayTextService);
@@ -26,6 +28,8 @@ export class HomePage implements OnInit, ViewWillEnter {
   readonly sub = inject(SubscriptionService);
   readonly locale = inject(LocaleService);
   private readonly router = inject(Router);
+  private readonly perf = inject(PerfLogService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   heroTitleDisplay = '';
   heroSubShortDisplay = '';
@@ -45,6 +49,7 @@ export class HomePage implements OnInit, ViewWillEnter {
   }
 
   async refresh(): Promise<void> {
+    const span = this.perf.span('Home', 'refresh');
     await this.sub.init();
     await this.displayText.ensureLoaded();
     this.heroTitleDisplay = this.displayText.effective('home.heroTitle');
@@ -61,6 +66,8 @@ export class HomePage implements OnInit, ViewWillEnter {
         : 0;
     const free = await this.playPool.getFreePool();
     this.freeCountryCount = free.length;
+    this.cdr.markForCheck();
+    span.end({ dailyDone: this.dailyDone, freeCountries: this.freeCountryCount });
   }
 
   async play(): Promise<void> {

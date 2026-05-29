@@ -15,12 +15,19 @@ export class UserKnowledgeService {
   private readonly knowledge = inject(CountryKnowledgeService);
   private readonly userLearned = inject(UserLearnedService);
 
+  private statsCache: { key: string; stats: KnowledgeStats } | null = null;
+
   async computeStats(
     playableCountries: Country[],
     _masteryList: CountryMastery[],
   ): Promise<KnowledgeStats> {
     await this.userLearned.hydrate();
     await this.knowledge.ensureLoaded();
+
+    const cacheKey = `${this.userLearned.getMarksRevision()}:${playableCountries.length}`;
+    if (this.statsCache?.key === cacheKey) {
+      return this.statsCache.stats;
+    }
 
     const totals = this.knowledge.getCatalogTotals(playableCountries);
     const learnedCountries = playableCountries.filter((c) =>
@@ -70,15 +77,7 @@ export class UserKnowledgeService {
       }
     }
 
-    const byCategory: KnowledgeCategoryStat[] = [
-      {
-        id: 'trivia' as FactCategory,
-        learned: factsLearned,
-        total: totals.factsTotal,
-      },
-    ];
-
-    return {
+    const stats: KnowledgeStats = {
       countriesLearned: learnedCountries.length,
       countriesTotal: playableCountries.length,
       factsLearned,
@@ -95,7 +94,15 @@ export class UserKnowledgeService {
       populationsTotal: totals.populationsTotal,
       areasLearned: 0,
       areasTotal: 0,
-      byCategory,
+      byCategory: [
+        {
+          id: 'trivia' as FactCategory,
+          learned: factsLearned,
+          total: totals.factsTotal,
+        },
+      ] satisfies KnowledgeCategoryStat[],
     };
+    this.statsCache = { key: cacheKey, stats };
+    return stats;
   }
 }

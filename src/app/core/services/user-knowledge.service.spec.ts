@@ -47,4 +47,13 @@ describe('UserKnowledgeService', () => {
     expect(stats.factsLearned).toBe(1);
     expect(stats.capitalsLearned).toBe(1);
   });
+
+  it('reuses cached stats when marks revision is unchanged', async () => {
+    await TestBed.inject(CountriesCatalogService).ensureLoaded();
+    await knowledge.ensureLoaded();
+    const countries = TestBed.inject(CountriesCatalogService).getAll().slice(0, 5);
+    const first = await service.computeStats(countries, []);
+    const second = await service.computeStats(countries, []);
+    expect(second).toBe(first);
+  });
 });

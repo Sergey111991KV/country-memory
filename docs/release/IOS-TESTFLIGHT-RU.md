@@ -5,7 +5,7 @@
 ## Перед сборкой
 
 1. В `src/environments/environment.prod.local.ts` (или через `npm run env:init` + правки):
-   - `privacyPolicyUrl`: `https://addeo.github.io/flagfield-privacy/en`
+   - `privacyPolicyUrl`: `https://addeo.github.io/flagfield-privacy/`
    - `termsOfUseUrl`: `https://addeo.github.io/flagfield-terms`
    - `supportEmail`: `supp0rt.serg@yandex.com`
    - ключи RevenueCat, если нужны покупки в тесте
@@ -68,7 +68,7 @@ npm run cap:open:ios
 
 | Поле | URL |
 |------|-----|
-| Privacy Policy | https://addeo.github.io/flagfield-privacy/en |
+| Privacy Policy | https://addeo.github.io/flagfield-privacy/ |
 | Terms | https://addeo.github.io/flagfield-terms |
 | Support URL | mailto:supp0rt.serg@yandex.com |
 

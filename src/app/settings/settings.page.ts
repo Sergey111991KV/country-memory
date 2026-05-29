@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, ToastController, ViewWillEnter } from '@ionic/angular';
 
@@ -36,11 +36,13 @@ export interface SettingsSupportBlock {
   templateUrl: 'settings.page.html',
   styleUrls: ['settings.page.scss'],
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsPage implements OnInit, ViewWillEnter {
   private readonly appSettings = inject(AppSettingsService);
   private readonly toastCtrl = inject(ToastController);
   protected readonly i18n = inject(LocaleService);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -285,8 +287,10 @@ export class SettingsPage implements OnInit, ViewWillEnter {
       return;
     }
     this.logsBusy = true;
+    this.cdr.markForCheck();
     const result = await this.appLog.downloadLogFile();
     this.logsBusy = false;
+    this.cdr.markForCheck();
     const key =
       result === 'ok' ? 'support.downloadLogsOk' : 'support.downloadLogsFail';
     const t = await this.toastCtrl.create({
@@ -381,6 +385,7 @@ export class SettingsPage implements OnInit, ViewWillEnter {
     this.colorPalette = settings.colorPalette;
     applyBodyTypographyClass(settings.bodyTypography);
     applyColorPaletteClass(settings.colorPalette);
+    this.cdr.markForCheck();
   }
 
   private applyPanelFromRoute(): void {

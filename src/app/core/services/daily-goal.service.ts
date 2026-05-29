@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import { StorageService } from './storage.service';
 import { UserLearningService } from './user-learning.service';
+import { PerfLogService } from './perf-log.service';
 
 const KEY = 'flagfield_daily_goal_v1';
 
@@ -15,6 +16,7 @@ export interface DailyGoalState {
 export class DailyGoalService {
   private readonly storage = inject(StorageService);
   private readonly learning = inject(UserLearningService);
+  private readonly perf = inject(PerfLogService);
 
   readonly defaultTarget = 5;
 
@@ -50,6 +52,7 @@ export class DailyGoalService {
   }
 
   async syncFromLearning(): Promise<DailyGoalState> {
+    const span = this.perf.span('DailyGoal', 'syncFromLearning');
     await this.learning.hydrate();
     const today = this.todayKey();
     const correct = this.learning.countCorrectToday();
@@ -58,7 +61,8 @@ export class DailyGoalService {
       target: this.defaultTarget,
       progress: Math.min(this.defaultTarget, correct),
     };
-    await this.writeStateIfChanged(state);
+    const wrote = await this.writeStateIfChanged(state);
+    span.end({ progress: state.progress, wrote });
     return state;
   }
 
@@ -66,7 +70,7 @@ export class DailyGoalService {
     await this.storage.remove(KEY);
   }
 
-  private async writeStateIfChanged(state: DailyGoalState): Promise<void> {
+  private async writeStateIfChanged(state: DailyGoalState): Promise<boolean> {
     const raw = await this.storage.get<DailyGoalState>(KEY);
     if (
       raw &&
@@ -74,8 +78,13 @@ export class DailyGoalService {
       raw.target === state.target &&
       raw.progress === state.progress
     ) {
-      return;
+      this.perf.mark('DailyGoal', 'storage skip (unchanged)', {
+        progress: state.progress,
+      });
+      return false;
     }
     await this.storage.set(KEY, state);
+    this.perf.mark('DailyGoal', 'storage write', { progress: state.progress });
+    return true;
   }
 }

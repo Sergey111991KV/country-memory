@@ -18,6 +18,7 @@ import { CountryLearnStatusService } from '../core/services/country-learn-status
 import { KnowledgeManifestService } from '../core/services/knowledge-manifest.service';
 import { LocaleService } from '../core/services/locale.service';
 import { UserLearnedService } from '../core/services/user-learned.service';
+import { PerfLogService } from '../core/services/perf-log.service';
 
 export interface CountryMarkRow {
   country: Country;
@@ -52,6 +53,7 @@ export class KnowledgeBasePage implements ViewWillEnter {
   private readonly userLearned = inject(UserLearnedService);
   private readonly learnStatus = inject(CountryLearnStatusService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly perf = inject(PerfLogService);
 
   loading = true;
   collections: KnowledgeCollectionDef[] = [];
@@ -250,6 +252,7 @@ export class KnowledgeBasePage implements ViewWillEnter {
   }
 
   async refresh(): Promise<void> {
+    const totalSpan = this.perf.span('KnowledgeBase', 'refresh');
     const showLoading = !this.rowsCacheReady;
     if (showLoading) {
       this.loading = true;
@@ -274,9 +277,15 @@ export class KnowledgeBasePage implements ViewWillEnter {
       if (canReuseRows) {
         this.rebuildCollectionStats();
         this.applyListFilter();
+        totalSpan.end({
+          reused: true,
+          rows: this.countryRows.length,
+          visible: this.displayCountryRows.length,
+        });
         return;
       }
 
+      const buildSpan = this.perf.span('KnowledgeBase', 'buildRows');
       this.learnedSet = await this.userLearned.getLearnedCountryIsos();
       const countries = [...this.catalog.getAll()].sort((a, b) =>
         this.catalog
@@ -284,12 +293,18 @@ export class KnowledgeBasePage implements ViewWillEnter {
           .localeCompare(this.catalog.localizedName(b, language), language),
       );
       this.countryRows = countries.map((country) => this.buildCountryRow(country, language));
+      buildSpan.end({ rows: this.countryRows.length });
       this.lastMarksRevision = marksRevision;
       this.lastBuiltLanguage = language;
       this.rowsCacheReady = true;
       this.updateSummary();
       this.rebuildCollectionStats();
       this.applyListFilter();
+      totalSpan.end({
+        reused: false,
+        rows: this.countryRows.length,
+        visible: this.displayCountryRows.length,
+      });
     } finally {
       this.loading = false;
       this.cdr.markForCheck();

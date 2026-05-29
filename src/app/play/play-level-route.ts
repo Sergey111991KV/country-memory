@@ -49,6 +49,17 @@ export function resolveLevelLaunchPlan(level: LearningLevelDef): LevelLaunchPlan
     return plan;
   }
 
+  const flagsAndCapitals =
+    topics.includes('flags') && topics.includes('capitals');
+  if (flagsAndCapitals) {
+    const plan: LevelLaunchPlan = {
+      commands: ['/tabs/play/challenge', 'flag_pick_country'],
+      meta: { kind: 'continent_mixed', levelId: level.id },
+    };
+    playDebug('LevelRoute', 'flagsAndCapitals', plan);
+    return plan;
+  }
+
   const plan: LevelLaunchPlan = {
     commands: ['/tabs/play/challenge', 'flag_pick_country'],
     meta: { kind: 'default', levelId: level.id },

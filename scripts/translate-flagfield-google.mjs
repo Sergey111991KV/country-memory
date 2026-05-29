@@ -33,14 +33,87 @@ const TARGETS = {
 };
 
 const DELAY_MS = Number(process.env.DELAY_MS ?? 400);
+const RATE_LIMIT_WAIT_MS = Number(process.env.RATE_LIMIT_WAIT_MS ?? 90_000);
+const PLACEHOLDER_RE = /\{\{[^}]+\}\}/g;
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function translateOne(text, to) {
-  const { text: out } = await translate(text, { from: 'en', to });
+function shieldForTranslation(text) {
+  const tokens = [];
+  const shielded = text.replace(PLACEHOLDER_RE, (match) => {
+    const token = `⟦PH${tokens.length}⟧`;
+    tokens.push(match);
+    return token;
+  });
+  return { shielded, tokens };
+}
+
+function restoreFromTranslation(text, tokens) {
+  let out = text;
+  for (let i = 0; i < tokens.length; i++) {
+    out = out.replaceAll(`⟦PH${i}⟧`, tokens[i]);
+    out = out.replaceAll(`__PH_${i}__`, tokens[i]);
+  }
   return out;
+}
+
+function isRateLimited(err) {
+  const msg = String(err?.message ?? err);
+  return (
+    msg.includes('Too Many Requests') ||
+    msg.includes('429') ||
+    msg.includes('RESOURCE_EXHAUSTED')
+  );
+}
+
+async function translateViaMyMemory(text, target) {
+  const url = new URL('https://api.mymemory.translated.net/get');
+  url.searchParams.set('q', text);
+  url.searchParams.set('langpair', `en|${target}`);
+  const res = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+  if (res.status === 429) {
+    await sleep(60_000);
+    return translateViaMyMemory(text, target);
+  }
+  if (!res.ok) {
+    throw new Error(`MyMemory HTTP ${res.status}`);
+  }
+  const body = await res.json();
+  if (body.quotaFinished) {
+    throw new Error('MyMemory daily quota finished');
+  }
+  const out = (body.responseData?.translatedText ?? text).trim();
+  if (out.includes('MYMEMORY WARNING')) {
+    throw new Error('MyMemory warning in response');
+  }
+  return out;
+}
+
+async function translateOne(text, to, depth = 0) {
+  if (depth > 4) {
+    throw new Error('Rate limit retries exhausted');
+  }
+  try {
+    const { text: out } = await translate(text, { from: 'en', to });
+    return out;
+  } catch (err) {
+    if (isRateLimited(err)) {
+      if (depth === 0) {
+        try {
+          console.warn('  Google rate limited — trying MyMemory');
+          return await translateViaMyMemory(text, to);
+        } catch (mmErr) {
+          console.warn(`  MyMemory fallback failed: ${mmErr.message}`);
+        }
+      }
+      console.warn(`  rate limited — waiting ${RATE_LIMIT_WAIT_MS / 1000}s`);
+      await sleep(RATE_LIMIT_WAIT_MS);
+      return translateOne(text, to, depth + 1);
+    }
+    throw err;
+  }
 }
 
 async function translateLang(lang, en) {
@@ -59,9 +132,11 @@ async function translateLang(lang, en) {
       i++;
       continue;
     }
+    const { shielded, tokens } = shieldForTranslation(en[key]);
     for (let attempt = 0; attempt < 4; attempt++) {
       try {
-        existing[key] = await translateOne(en[key], to);
+        const raw = await translateOne(shielded, to);
+        existing[key] = restoreFromTranslation(raw, tokens);
         break;
       } catch (err) {
         console.warn(`  ${key} retry ${attempt + 1}: ${err.message}`);

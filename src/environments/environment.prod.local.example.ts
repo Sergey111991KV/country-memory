@@ -23,14 +23,14 @@ export const environment = {
   billingDebugEnabled: false,
   debugVerbose: false,
 
-  privacyPolicyUrl: 'https://addeo.github.io/flagfield-privacy/en',
+  privacyPolicyUrl: 'https://addeo.github.io/flagfield-privacy/',
   termsOfUseUrl: 'https://addeo.github.io/flagfield-terms',
   manageSubscriptionsUrlIos: 'https://apps.apple.com/account/subscriptions',
   manageSubscriptionsUrlAndroid:
     'https://play.google.com/store/account/subscriptions?package=com.flagfield.learn',
 
   supportEmail: 'supp0rt.serg@yandex.com',
-  appVersion: '1.0.1',
+  appVersion: '1.0.2',
   donateUrl: `${PUBLIC_SITE}/donate`,
   developerWebsiteUrl: PUBLIC_SITE,
 };

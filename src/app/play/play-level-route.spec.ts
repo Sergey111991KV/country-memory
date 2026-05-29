@@ -29,6 +29,20 @@ describe('resolveLevelLaunchPlan', () => {
     expect(plan.meta.mixFlags).toBeTrue();
   });
 
+  it('routes flags and capitals levels with mixed challenge', () => {
+    const plan = resolveLevelLaunchPlan({
+      id: 'level-1',
+      order: 1,
+      title: { en: 'WE flags', ru: 'WE' },
+      subtitle: { en: 'Sub', ru: 'Sub' },
+      countryIsos: ['FR', 'DE'],
+      topics: ['flags', 'capitals'],
+    });
+    expect(plan.commands).toEqual(['/tabs/play/challenge', 'flag_pick_country']);
+    expect(plan.meta.kind).toBe('continent_mixed');
+    expect(plan.meta.levelId).toBe('level-1');
+  });
+
   it('routes capitals-only to capital challenge', () => {
     const plan = resolveLevelLaunchPlan({
       id: 'cap-only',

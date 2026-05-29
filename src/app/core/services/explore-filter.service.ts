@@ -3,13 +3,9 @@ import { Injectable, inject } from '@angular/core';
 import type { ExploreFilterId } from '../data/explore-filters';
 import { EXPLORE_TOP_N } from '../data/explore-filters';
 import type { Country } from '../data/country.types';
-import {
-  type GlobeCountryFeature,
-  filterPoliticalCountryFeatures,
-  iso2FromNaturalEarth,
-} from '../utils/globe-geo';
 import { CountriesCatalogService } from './countries-catalog.service';
 import { CountryKnowledgeService } from './country-knowledge.service';
+import { GeoJsonCacheService } from './geo-json-cache.service';
 import { PlayPoolService } from './play-pool.service';
 
 const SPANISH_LANG = /spanish|español|castellano/i;
@@ -19,8 +15,7 @@ export class ExploreFilterService {
   private readonly catalog = inject(CountriesCatalogService);
   private readonly knowledge = inject(CountryKnowledgeService);
   private readonly playPool = inject(PlayPoolService);
-
-  private gdpByIso: Map<string, number> | null = null;
+  private readonly geoCache = inject(GeoJsonCacheService);
 
   async getMatchingCountries(filterId: ExploreFilterId): Promise<Country[]> {
     await this.catalog.ensureLoaded();
@@ -85,24 +80,6 @@ export class ExploreFilterService {
   }
 
   private async loadGdpByIso(): Promise<Map<string, number>> {
-    if (this.gdpByIso) {
-      return this.gdpByIso;
-    }
-    const map = new Map<string, number>();
-    const res = await fetch('assets/geo/countries.geojson');
-    if (res.ok) {
-      const collection = (await res.json()) as { features?: GlobeCountryFeature[] };
-      const features = filterPoliticalCountryFeatures(collection.features ?? []);
-      for (const f of features) {
-        const iso = iso2FromNaturalEarth(f.properties);
-        const raw = f.properties?.GDP_MD;
-        const gdp = typeof raw === 'number' ? raw : Number(raw);
-        if (iso && Number.isFinite(gdp) && gdp > 0) {
-          map.set(iso, gdp);
-        }
-      }
-    }
-    this.gdpByIso = map;
-    return map;
+    return this.geoCache.getGdpByIso();
   }
 }

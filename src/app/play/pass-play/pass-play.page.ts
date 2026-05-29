@@ -48,7 +48,7 @@ export class PassPlayPage implements ViewWillEnter {
       return;
     }
     this.mode = mode;
-    this.scoringStyle = this.playSession.pendingPassPlayScoring;
+    this.scoringStyle = 'turns';
     if (!this.playerNames[0]?.trim()) {
       this.playerNames[0] = this.locale.translate('passPlay.playerDefault1');
     }
@@ -94,6 +94,11 @@ export class PassPlayPage implements ViewWillEnter {
 
   get canStart(): boolean {
     return this.playerNames.filter((n) => n.trim().length > 0).length >= 2;
+  }
+
+  onScoringStyleChange(ev: CustomEvent): void {
+    const v = String(ev.detail.value);
+    this.scoringStyle = v === 'buzzer' ? 'buzzer' : 'turns';
   }
 
   addPlayer(): void {

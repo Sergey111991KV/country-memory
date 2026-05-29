@@ -9,6 +9,7 @@ import { DailyGoalService } from '../../core/services/daily-goal.service';
 import { LocaleService } from '../../core/services/locale.service';
 import { PlayPoolService } from '../../core/services/play-pool.service';
 import { PlaySessionService } from '../../core/services/play-session.service';
+import { LearningPathService } from '../../core/services/learning-path.service';
 import { PlaySessionCompleteService } from '../../core/services/play-session-complete.service';
 import { UserLearningService } from '../../core/services/user-learning.service';
 import {
@@ -52,6 +53,7 @@ export class FlagChallengePage implements ViewDidEnter {
   private readonly learning = inject(UserLearningService);
   private readonly dailyGoal = inject(DailyGoalService);
   private readonly sessionComplete = inject(PlaySessionCompleteService);
+  private readonly learningPath = inject(LearningPathService);
   private readonly subscription = inject(SubscriptionService);
   private readonly sessionAccess = inject(SessionAccessService);
 
@@ -279,6 +281,11 @@ export class FlagChallengePage implements ViewDidEnter {
 
   private async startMapMode(): Promise<void> {
     this.bootStarted = true;
+    await this.subscription.init();
+    if (!this.subscription.isSubscribed()) {
+      void this.router.navigate(['/paywall'], { replaceUrl: true });
+      return;
+    }
     const allowed = await ensurePlaySessionAccess(
       this.subscription,
       this.sessionAccess,
@@ -440,6 +447,17 @@ export class FlagChallengePage implements ViewDidEnter {
     }
     if (correct && !this.passPlay) {
       await this.dailyGoal.bumpProgress();
+      await this.recordLearningPathProgress();
     }
+  }
+
+  private async recordLearningPathProgress(): Promise<void> {
+    const levelId = this.playSession.levelId;
+    if (!levelId) {
+      return;
+    }
+    await this.learningPath.ensureLoaded();
+    const progress = await this.learningPath.recordCorrect(levelId);
+    playDebug('FlagChallenge', 'level progress', { levelId, progress });
   }
 }

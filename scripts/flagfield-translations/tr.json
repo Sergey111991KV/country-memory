@@ -1,4 +1,4 @@
-export const FLAGFIELD_TR: Record<string, string> = {
+{
   "home.title": "Bayrak Alanı",
   "home.heroTitle": "Yaşayan bir dünyada ülkeleri öğrenin",
   "home.heroSubShort": "Dünya, harita ve bayrak testi — meraklı çocuklar ve gezginler için kısa oturumlar.",
@@ -443,5 +443,5 @@ export const FLAGFIELD_TR: Record<string, string> = {
   "aboutDeveloper.blockDonateHint": "İsteğe bağlı ipucu: Tarayıcınızda açılır, uygulama içi satın alma işleminde değil.",
   "aboutDeveloper.openLink": "Açık",
   "aboutDeveloper.emailSupport": "E-posta desteği",
-  "aboutDeveloper.linkUnavailable": "Bağlantı bu yapı için yapılandırılmadı.",
-};
+  "aboutDeveloper.linkUnavailable": "Bağlantı bu yapı için yapılandırılmadı."
+}

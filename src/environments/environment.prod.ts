@@ -14,7 +14,7 @@ export const environment = {
   billingDebugEnabled: false,
   /** Production: no console debug traces */
   debugVerbose: false,
-  privacyPolicyUrl: 'https://addeo.github.io/flagfield-privacy/en',
+  privacyPolicyUrl: 'https://addeo.github.io/flagfield-privacy/',
   termsOfUseUrl: 'https://addeo.github.io/flagfield-terms',
   manageSubscriptionsUrlIos: 'https://apps.apple.com/account/subscriptions',
   manageSubscriptionsUrlAndroid:
@@ -23,7 +23,7 @@ export const environment = {
   /** Shown on Settings — contact for help */
   supportEmail: 'supp0rt.serg@yandex.com',
 
-  appVersion: '1.0.1',
+  appVersion: '1.0.2',
   donateUrl: '',
   developerWebsiteUrl: 'https://addeo.github.io',
 };

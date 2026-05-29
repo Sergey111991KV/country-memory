@@ -32,6 +32,8 @@ import {
 import { PlaySessionCompleteService } from '../../core/services/play-session-complete.service';
 import { PlaySessionService } from '../../core/services/play-session.service';
 import { SessionAccessService } from '../../core/services/session-access.service';
+import { GeoJsonCacheService } from '../../core/services/geo-json-cache.service';
+import { PerfLogService } from '../../core/services/perf-log.service';
 import { ensurePlaySessionAccess } from '../../core/utils/play-access';
 import { buildSoloSessionResult } from '../../core/utils/play-session-result-builders';
 
@@ -65,6 +67,8 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private readonly toastCtrl = inject(ToastController);
   private readonly alertCtrl = inject(AlertController);
   private readonly ngZone = inject(NgZone);
+  private readonly perf = inject(PerfLogService);
+  private readonly geoCache = inject(GeoJsonCacheService);
 
   loading = true;
   loadError = false;
@@ -234,18 +238,14 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   }
 
   private async boot(): Promise<void> {
+    const totalSpan = this.perf.span('MapQuest', 'boot');
     try {
+      const catalogSpan = this.perf.span('MapQuest', 'catalog');
       await this.catalog.ensureLoaded();
-      const geoRes = await fetch('assets/geo/countries.geojson');
-      if (!geoRes.ok) {
-        throw new Error(`GeoJSON HTTP ${geoRes.status}`);
-      }
-      const collection = (await geoRes.json()) as {
-        features?: GlobeCountryFeature[];
-      };
-      const allFeatures = filterPoliticalCountryFeatures(
-        (collection.features ?? []) as GlobeCountryFeature[],
-      );
+      catalogSpan.end();
+      const geoSpan = this.perf.span('MapQuest', 'geoJson');
+      const allFeatures = await this.geoCache.getPoliticalFeatures();
+      geoSpan.end({ features: allFeatures.length });
       const mapIso = new Set(
         allFeatures
           .map((f) => iso2FromNaturalEarth(f.properties))
@@ -264,9 +264,15 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
         throw new Error('No playable countries');
       }
       await this.waitForMapHost();
+      const mapSpan = this.perf.span('MapQuest', 'initMap');
       this.initMap();
+      mapSpan.end({ playable: this.playable.length });
       this.pickNewTarget();
       this.loading = false;
+      totalSpan.end({
+        playable: this.playable.length,
+        geoFeatures: this.geoFeatures.length,
+      });
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);
       console.error('Map Quest boot failed:', detail, err);

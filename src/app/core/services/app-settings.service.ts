@@ -48,6 +48,8 @@ export function applyColorPaletteClass(palette: ColorPalette): void {
 export class AppSettingsService {
   private readonly storage = inject(StorageService);
 
+  private cached: AppSettings | null = null;
+
   private defaultSettings(): AppSettings {
     return {
       primaryPlayerName: DEFAULT_PLAYER,
@@ -58,9 +60,13 @@ export class AppSettingsService {
   }
 
   async load(): Promise<AppSettings> {
+    if (this.cached) {
+      return this.cached;
+    }
     const raw = await this.storage.get<Partial<AppSettings>>(KEY);
     const base = this.defaultSettings();
     if (!raw) {
+      this.cached = base;
       return base;
     }
     const heroTypography =
@@ -83,15 +89,17 @@ export class AppSettingsService {
       typeof raw.primaryPlayerName === 'string' && raw.primaryPlayerName.trim()
         ? raw.primaryPlayerName.trim()
         : base.primaryPlayerName;
-    return {
+    this.cached = {
       primaryPlayerName: name,
       heroTypography,
       bodyTypography,
       colorPalette,
     };
+    return this.cached;
   }
 
   async save(next: AppSettings): Promise<void> {
+    this.cached = next;
     await this.storage.set(KEY, next);
   }
 }

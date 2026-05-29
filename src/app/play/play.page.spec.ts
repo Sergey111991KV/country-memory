@@ -149,7 +149,7 @@ describe('PlayPage launchMode', () => {
       buildPlayModesByCategory(true, courseLaunches),
     );
 
-    expect(modes.length).toBe(35);
+    expect(modes.length).toBe(28);
 
     for (const slide of modes) {
       router.navigate.calls.reset();
@@ -159,17 +159,6 @@ describe('PlayPage launchMode', () => {
         .withContext(`mode ${slide.id}`)
         .toHaveBeenCalled();
     }
-  });
-
-  it('sets pool and navigates for course facts-starter (facts drill)', async () => {
-    const slide = flattenPlayModes(
-      buildPlayModesByCategory(true, courseLaunches),
-    ).find((m) => m.id === 'facts-starter');
-    expect(slide).toBeDefined();
-    expect(slide!.action.type).toBe('facts_drill');
-    playSession.clear();
-    await component.launchMode(slide!);
-    expect(router.navigate).toHaveBeenCalledWith(['/tabs/play/facts-drill']);
   });
 
   it('sets free pool for recognition flag_pick_country', async () => {

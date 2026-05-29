@@ -40,7 +40,7 @@
         {{ 'knowledge.factsKnown' | i18n:{ learned: factsLearnedTotal, total: factsTotal }:lang}}
       </p>
       <div class="progress-stats-track">
-        <ng-container *ngFor="let row of statRows; let last = last">
+        <ng-container *ngFor="let row of statRows; let last = last; trackBy: trackStatRow">
           <div class="progress-stats-node">
             <span
               class="progress-stats-node__dot"
@@ -60,7 +60,7 @@
       <div class="progress-chapter-track" role="list">
         <span class="progress-chapter-line" aria-hidden="true"></span>
         <div
-          *ngFor="let dot of pathDots; let i = index"
+          *ngFor="let dot of pathDots; let i = index; trackBy: trackPathDot"
           class="progress-chapter-dot"
           [class.progress-chapter-dot--active]="dot.active"
           [class.progress-chapter-dot--done]="dot.completed"
@@ -77,7 +77,7 @@
       <h2 id="progress-recent-heading" class="progress-kicker">{{ 'progress.recent' | i18n:null:lang}}</h2>
       <p *ngIf="recent.length === 0" class="progress-empty">{{ 'progress.empty' | i18n:null:lang}}</p>
       <ion-list *ngIf="recent.length" class="progress-recent-list" lines="none">
-        <ion-item *ngFor="let row of recent" class="progress-recent-item">
+        <ion-item *ngFor="let row of recent; trackBy: trackRecent" class="progress-recent-item">
           <ion-icon
             slot="start"
             [name]="row.correct ? 'checkmark-circle' : 'close-circle'"

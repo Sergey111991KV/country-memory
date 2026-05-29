@@ -25,7 +25,7 @@ export const environment = {
    * Public HTTPS links (replace host/path before release).
    * Must not use example.com — those hosts keep legal buttons disabled.
    */
-  privacyPolicyUrl: 'https://addeo.github.io/flagfield-privacy/en',
+  privacyPolicyUrl: 'https://addeo.github.io/flagfield-privacy/',
   termsOfUseUrl: 'https://addeo.github.io/flagfield-terms',
   /** Apple subscription management (required context for auto-renewable subs) */
   manageSubscriptionsUrlIos: 'https://apps.apple.com/account/subscriptions',
@@ -37,7 +37,7 @@ export const environment = {
   supportEmail: 'supp0rt.serg@yandex.com',
 
   /** Shown on About — sync with package.json for store builds */
-  appVersion: '1.0.1',
+  appVersion: '1.0.2',
 
   /**
    * Optional HTTPS tip link (Ko-fi, PayPal.me, etc.). Empty or placeholder host

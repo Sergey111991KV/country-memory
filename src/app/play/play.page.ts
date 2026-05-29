@@ -37,6 +37,7 @@ import { PlayPoolService } from '../core/services/play-pool.service';
 import { PlaySessionService } from '../core/services/play-session.service';
 import { SessionAccessService } from '../core/services/session-access.service';
 import { SubscriptionService } from '../core/services/subscription.service';
+import { PerfLogService } from '../core/services/perf-log.service';
 import { ensurePlaySessionAccess } from '../core/utils/play-access';
 import {
   buildPlayDockWheelSlots,
@@ -87,6 +88,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
   private readonly playSession = inject(PlaySessionService);
   readonly sub = inject(SubscriptionService);
   readonly sessionAccess = inject(SessionAccessService);
+  private readonly perf = inject(PerfLogService);
 
   readonly freeGamesLimit = environment.freeGamesLimit;
 
@@ -116,6 +118,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
 
   private playDockDragStartX = 0;
   private playDockDragStartWheelDeg = 0;
+  private playDockDragRaf: number | null = null;
   private lastRefreshSnapshot: PlayRefreshSnapshot | null = null;
 
   ngOnInit(): void {
@@ -231,13 +234,14 @@ export class PlayPage implements OnInit, ViewWillEnter {
     const deltaX = event.clientX - this.playDockDragStartX;
     this.playDockWheelDeg = this.playDockDragStartWheelDeg + deltaX * 0.38;
     this.updatePlayDockFocusedSlot();
-    this.cdr.markForCheck();
+    this.schedulePlayDockDragCheck();
   }
 
   onPlayDockPointerEnd(event: PointerEvent): void {
     if (!this.playDockDragging) {
       return;
     }
+    this.cancelPlayDockDragCheck();
     const target = event.currentTarget;
     if (target instanceof HTMLElement && target.hasPointerCapture(event.pointerId)) {
       target.releasePointerCapture(event.pointerId);
@@ -278,6 +282,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
   }
 
   async refresh(options?: { fromViewEnter?: boolean }): Promise<void> {
+    const span = this.perf.span('PlayHub', 'refresh');
     await this.sub.init();
     await this.sessionAccess.hydrate();
     await this.displayText.ensureLoaded();
@@ -316,6 +321,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
       this.refreshSnapshotsEqual(this.lastRefreshSnapshot, snapshot)
     ) {
       this.cdr.markForCheck();
+      span.end({ skipped: true, reason: 'snapshot' });
       return;
     }
 
@@ -347,6 +353,12 @@ export class PlayPage implements OnInit, ViewWillEnter {
     this.rebuildPlayDockWheel();
     this.snapPlayDockToLogical(this.activeSlideIndex, false);
     this.cdr.markForCheck();
+    span.end({
+      skipped: false,
+      dockLevel: this.dockLevel,
+      tiles: this.playDockTileCount,
+      slots: this.playDockWheelSlots.length,
+    });
   }
 
   private refreshSnapshotsEqual(
@@ -571,6 +583,24 @@ export class PlayPage implements OnInit, ViewWillEnter {
 
   private wait(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private schedulePlayDockDragCheck(): void {
+    if (this.playDockDragRaf !== null) {
+      return;
+    }
+    this.playDockDragRaf = requestAnimationFrame(() => {
+      this.playDockDragRaf = null;
+      this.cdr.markForCheck();
+    });
+  }
+
+  private cancelPlayDockDragCheck(): void {
+    if (this.playDockDragRaf === null) {
+      return;
+    }
+    cancelAnimationFrame(this.playDockDragRaf);
+    this.playDockDragRaf = null;
   }
 
   private guardPlayAccess(): Promise<boolean> {

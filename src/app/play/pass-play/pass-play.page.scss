@@ -15,6 +15,16 @@
   line-height: 1.45;
 }
 
+.pass-play-page__scoring {
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border: none;
+
+  ion-segment {
+    margin-top: 0.35rem;
+  }
+}
+
 .pass-play-page__players {
   display: flex;
   flex-direction: column;

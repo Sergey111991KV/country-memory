@@ -32,8 +32,8 @@ describe('CourseLaunchService', () => {
     service = TestBed.inject(CourseLaunchService);
   });
 
-  it('defines 9 course quick launches (5 continents + capitals + facts)', () => {
-    expect(service.launches.length).toBe(9);
+  it('defines 7 course quick launches (5 continents + capitals)', () => {
+    expect(service.launches.length).toBe(7);
   });
 
   it('resolves continent-africa pool from catalog', async () => {
@@ -59,12 +59,6 @@ describe('CourseLaunchService', () => {
     for (const launch of challenge) {
       expect(launch.challengeMode).toBeDefined();
     }
-  });
-
-  it('maps facts launches to facts_drill kind', () => {
-    const facts = service.launches.filter((l) => l.id.startsWith('facts-'));
-    expect(facts.length).toBe(2);
-    expect(facts.every((l) => l.kind === 'facts_drill')).toBeTrue();
   });
 
   it('marks europe and asia as mixed continent drills', () => {

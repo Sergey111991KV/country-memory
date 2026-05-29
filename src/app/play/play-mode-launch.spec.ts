@@ -55,7 +55,7 @@ describe('resolvePlayModeLaunch', () => {
   }
 
   it('defines a subscribed route for every hub mode', () => {
-    expect(subscribedModes.length).toBe(35);
+    expect(subscribedModes.length).toBe(28);
     for (const slide of subscribedModes) {
       const launch = launchForSlide(slide);
       expect(launch.kind)
@@ -72,7 +72,6 @@ describe('resolvePlayModeLaunch', () => {
   describe('recognition (free challenge)', () => {
     const modes = [
       'flag_pick_country',
-      'flag_find_map',
       'flag_type_country',
       'capital_pick_country',
       'country_pick_capital',

@@ -21,6 +21,7 @@ import type { Country } from '../../core/data/country.types';
 import { CountriesCatalogService } from '../../core/services/countries-catalog.service';
 import { DailyGoalService } from '../../core/services/daily-goal.service';
 import { ExploreFilterService } from '../../core/services/explore-filter.service';
+import { GeoJsonCacheService } from '../../core/services/geo-json-cache.service';
 import { LocaleService } from '../../core/services/locale.service';
 import { PlaySessionCompleteService } from '../../core/services/play-session-complete.service';
 import { SessionAccessService } from '../../core/services/session-access.service';
@@ -29,7 +30,6 @@ import { UserLearningService } from '../../core/services/user-learning.service';
 import {
   type GlobeCountryFeature,
   type GlobePolygonColorState,
-  filterPoliticalCountryFeatures,
   iso2FromNaturalEarth,
   politicalCapColor,
   politicalStrokeColor,
@@ -66,6 +66,7 @@ export class MapMarkPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private readonly toastCtrl = inject(ToastController);
   private readonly alertCtrl = inject(AlertController);
   private readonly ngZone = inject(NgZone);
+  private readonly geoCache = inject(GeoJsonCacheService);
 
   filterId: ExploreFilterId = 'lang_spanish';
   loading = true;
@@ -246,16 +247,7 @@ export class MapMarkPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
         expectedCount: this.expectedCount,
       });
 
-      const geoRes = await fetch('assets/geo/countries.geojson');
-      if (!geoRes.ok) {
-        throw new Error(`GeoJSON HTTP ${geoRes.status}`);
-      }
-      const collection = (await geoRes.json()) as {
-        features?: GlobeCountryFeature[];
-      };
-      const allFeatures = filterPoliticalCountryFeatures(
-        (collection.features ?? []) as GlobeCountryFeature[],
-      );
+      const allFeatures = await this.geoCache.getPoliticalFeatures();
       const mapIso = new Set(
         allFeatures
           .map((f) => iso2FromNaturalEarth(f.properties))
