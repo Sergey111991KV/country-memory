@@ -1,4 +1,4 @@
-export const FLAGFIELD_BN: Record<string, string> = {
+{
   "home.title": "ফ্ল্যাগফিল্ড",
   "home.heroTitle": "একটি জীবন্ত বিশ্বে দেশগুলি শিখুন",
   "home.heroSubShort": "গ্লোব, মানচিত্র এবং পতাকা কুইজ — কৌতূহলী শিশু এবং ভ্রমণকারীদের জন্য সংক্ষিপ্ত সেশন ।",
@@ -443,5 +443,5 @@ export const FLAGFIELD_BN: Record<string, string> = {
   "aboutDeveloper.blockDonateHint": "ঐচ্ছিক বকশিস — অ্যাপ-মধ্যস্থ কেনাকাটা নয়, আপনার ব্রাউজারে খোলে ।",
   "aboutDeveloper.openLink": "খুলুন",
   "aboutDeveloper.emailSupport": "ইমেল সাপোর্ট",
-  "aboutDeveloper.linkUnavailable": "এই বিল্ডের জন্য লিঙ্ক কনফিগার করা হয়নি ।",
-};
+  "aboutDeveloper.linkUnavailable": "এই বিল্ডের জন্য লিঙ্ক কনফিগার করা হয়নি ।"
+}

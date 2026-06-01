@@ -1,5 +1,6 @@
 @let lang = locale.langSig();
 <ion-content class="play-hub page-safe-top" [fullscreen]="true">
+  <div class="play-layout">
   <div class="play-shell" [ngClass]="'typography-' + heroTypography">
     <header class="play-hero">
       <img
@@ -46,6 +47,12 @@
         <p class="play-daily__meta-line">{{ 'play.dailyPoolLine' | i18n:{ n: freeCountryCount }:lang}}</p>
       </div>
       <p *ngIf="sub.isSubscribedSig()" class="play-daily__meta play-daily__premium">{{ 'home.premiumActive' | i18n:null:lang}}</p>
+      <div *ngIf="!sub.isSubscribedSig() && !atGameLimit" class="play-daily__premium-cta">
+        <ion-button expand="block" fill="clear" color="warning" size="small" (click)="openPaywall()">
+          <app-icon slot="start" icon="ui-premium" size="sm"></app-icon>
+          {{ 'home.getPremiumCta' | i18n:null:lang}}
+        </ion-button>
+      </div>
     </section>
 
     <ion-card *ngIf="atGameLimit" class="play-limit-card mem-surface">
@@ -57,13 +64,6 @@
         </ion-button>
       </ion-card-content>
     </ion-card>
-
-    <div *ngIf="!sub.isSubscribedSig() && !atGameLimit" class="play-premium-row">
-      <ion-button expand="block" fill="clear" color="warning" (click)="openPaywall()">
-        <app-icon slot="start" icon="ui-premium" size="sm"></app-icon>
-        {{ 'home.getPremiumCta' | i18n:null:lang}}
-      </ion-button>
-    </div>
   </div>
 
   <aside
@@ -87,6 +87,16 @@
     </div>
 
     <div class="play-mode-dock__row">
+      <button
+        type="button"
+        class="play-mode-dock__step play-mode-dock__step--prev"
+        [disabled]="!canStepPlayDock"
+        (click)="stepPlayDock(-1)"
+        [attr.aria-label]="'play.dockStepPrev' | i18n:null:lang"
+      >
+        <ion-icon name="chevron-back" aria-hidden="true"></ion-icon>
+      </button>
+
       <div
         class="play-mode-dock__arc"
         [class.play-mode-dock__arc--exit]="dockPhase === 'exit'"
@@ -101,6 +111,7 @@
           role="list"
           [attr.aria-label]="dockSliderAriaKey | i18n:null:lang"
           [class.play-mode-dock__wheel--dragging]="playDockDragging"
+          [class.play-mode-dock__wheel--animating]="playDockAnimating"
           [style.transform]="'rotate(' + playDockWheelDeg + 'deg)'"
         >
           <div
@@ -145,6 +156,17 @@
         </div>
         <div class="play-mode-dock__arc-mask" aria-hidden="true"></div>
       </div>
+
+      <button
+        type="button"
+        class="play-mode-dock__step play-mode-dock__step--next"
+        [disabled]="!canStepPlayDock"
+        (click)="stepPlayDock(1)"
+        [attr.aria-label]="'play.dockStepNext' | i18n:null:lang"
+      >
+        <ion-icon name="chevron-forward" aria-hidden="true"></ion-icon>
+      </button>
     </div>
   </aside>
+  </div>
 </ion-content>

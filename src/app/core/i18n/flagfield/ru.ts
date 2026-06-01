@@ -69,6 +69,8 @@ export const FLAGFIELD_RU: Record<string, string> = {
   'play.limitLater': 'Не сейчас',
   'common.ok': 'OK',
   'play.categoriesSliderAria': 'Карусель категорий игры',
+  'play.dockStepPrev': 'Предыдущий режим',
+  'play.dockStepNext': 'Следующий режим',
   'play.modesSliderAria': 'Карусель режимов игры',
   'play.modesSliderDots': 'Страницы режимов',
   'play.categoryModesCount': '{{n}} режимов',

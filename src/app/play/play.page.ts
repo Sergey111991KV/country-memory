@@ -115,6 +115,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
   playDockFocusedSlotIndex = 0;
   playDockWheelDeg = 0;
   playDockDragging = false;
+  playDockAnimating = false;
 
   private playDockDragStartX = 0;
   private playDockDragStartWheelDeg = 0;
@@ -156,13 +157,19 @@ export class PlayPage implements OnInit, ViewWillEnter {
       : this.categoryModes.length;
   }
 
+  get canStepPlayDock(): boolean {
+    return this.dockPhase === 'idle' && this.playDockTileCount > 1;
+  }
+
   trackPlayDockSlot(_index: number, slot: PlayDockWheelSlot): number {
     return slot.slotIndex;
   }
 
   playDockSpokeTransform(slotIndex: number): string {
     const angle = this.playDockWheelSlots[slotIndex]?.angle ?? 0;
-    return `rotate(${angle}deg) translateY(calc(-1 * var(--play-arc-radius)))`;
+    const focus = playDockFocusFromAngle(angle + this.playDockWheelDeg);
+    const lateralLift = (1 - focus) * 20;
+    return `rotate(${angle}deg) translateY(calc(-1 * var(--play-arc-radius) + ${lateralLift}px))`;
   }
 
   playDockSlotFocus(slotIndex: number): number {
@@ -259,6 +266,9 @@ export class PlayPage implements OnInit, ViewWillEnter {
   }
 
   onPlayDockCardClick(slotIndex: number): void {
+    if (this.playDockAnimating) {
+      return;
+    }
     const slot = this.playDockWheelSlots[slotIndex];
     if (!slot) {
       return;
@@ -279,6 +289,16 @@ export class PlayPage implements OnInit, ViewWillEnter {
     if (mode) {
       void this.launchMode(mode);
     }
+  }
+
+  stepPlayDock(direction: -1 | 1): void {
+    if (!this.canStepPlayDock) {
+      return;
+    }
+    const count = this.playDockTileCount;
+    const next = (this.activeSlideIndex + direction + count) % count;
+    this.snapPlayDockToLogical(next, true);
+    this.cdr.markForCheck();
   }
 
   async refresh(options?: { fromViewEnter?: boolean }): Promise<void> {
@@ -547,6 +567,9 @@ export class PlayPage implements OnInit, ViewWillEnter {
     if (!slot) {
       return;
     }
+    if (animate) {
+      this.beginPlayDockSnap();
+    }
     const middleSlotIndex = playDockMiddleSlotIndex(
       slot.logicalIndex,
       this.playDockTileCount,
@@ -601,6 +624,14 @@ export class PlayPage implements OnInit, ViewWillEnter {
     }
     cancelAnimationFrame(this.playDockDragRaf);
     this.playDockDragRaf = null;
+  }
+
+  private beginPlayDockSnap(): void {
+    this.playDockAnimating = true;
+    window.setTimeout(() => {
+      this.playDockAnimating = false;
+      this.cdr.markForCheck();
+    }, 560);
   }
 
   private guardPlayAccess(): Promise<boolean> {

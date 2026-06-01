@@ -1,4 +1,4 @@
-export const FLAGFIELD_NL: Record<string, string> = {
+{
   "home.title": "Flagfield",
   "home.heroTitle": "Leer landen op een levende wereldbol",
   "home.heroSubShort": "Globe-, kaart- en vlagquiz — korte sessies voor nieuwsgierige kinderen en reizigers.",
@@ -443,5 +443,5 @@ export const FLAGFIELD_NL: Record<string, string> = {
   "aboutDeveloper.blockDonateHint": "Optionele tip — wordt geopend in je browser, niet bij een aankoop in de app.",
   "aboutDeveloper.openLink": "Openen",
   "aboutDeveloper.emailSupport": "Support via e-mail",
-  "aboutDeveloper.linkUnavailable": "Link niet geconfigureerd voor deze build.",
-};
+  "aboutDeveloper.linkUnavailable": "Link niet geconfigureerd voor deze build."
+}

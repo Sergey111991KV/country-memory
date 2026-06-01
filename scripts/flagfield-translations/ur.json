@@ -1,4 +1,4 @@
-export const FLAGFIELD_UR: Record<string, string> = {
+{
   "home.title": "فلیگ فیلڈ",
   "home.heroTitle": "زندہ دنیا کے ممالک سیکھیں",
   "home.heroSubShort": "گلوب، نقشہ، اور پرچم کوئز — متجسس بچوں اور مسافروں کے لئے مختصر سیشن ۔",
@@ -443,5 +443,5 @@ export const FLAGFIELD_UR: Record<string, string> = {
   "aboutDeveloper.blockDonateHint": "اختیاری ٹپ — آپ کے براؤزر میں کھلتی ہے، ایپ میں خریداری نہیں ۔",
   "aboutDeveloper.openLink": "کھولیں",
   "aboutDeveloper.emailSupport": "ای میل سپورٹ",
-  "aboutDeveloper.linkUnavailable": "لنک اس تعمیر کے لیے تشکیل شدہ نہیں ہے ۔",
-};
+  "aboutDeveloper.linkUnavailable": "لنک اس تعمیر کے لیے تشکیل شدہ نہیں ہے ۔"
+}

@@ -161,7 +161,7 @@ export function resolvePlayDockSnapWheel(
   return best;
 }
 
-export function playDockFocusFromAngle(angleDeg: number, focusSpanDeg = 20): number {
+export function playDockFocusFromAngle(angleDeg: number, focusSpanDeg = 26): number {
   const distance = Math.min(focusSpanDeg, Math.abs(normalizeAngleDeg(angleDeg)));
   return Math.max(0, 1 - distance / focusSpanDeg);
 }

@@ -69,6 +69,8 @@ export const FLAGFIELD_EN: Record<string, string> = {
   'play.limitLater': 'Not now',
   'common.ok': 'OK',
   'play.categoriesSliderAria': 'Game categories carousel',
+  'play.dockStepPrev': 'Previous mode',
+  'play.dockStepNext': 'Next mode',
   'play.modesSliderAria': 'Game modes carousel',
   'play.modesSliderDots': 'Mode pages',
   'play.categoryModesCount': '{{n}} modes',
