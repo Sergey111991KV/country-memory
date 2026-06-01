@@ -167,9 +167,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
 
   playDockSpokeTransform(slotIndex: number): string {
     const angle = this.playDockWheelSlots[slotIndex]?.angle ?? 0;
-    const focus = playDockFocusFromAngle(angle + this.playDockWheelDeg);
-    const lateralLift = (1 - focus) * 20;
-    return `rotate(${angle}deg) translateY(calc(-1 * var(--play-arc-radius) + ${lateralLift}px))`;
+    return `rotate(${angle}deg) translateY(calc(-1 * var(--play-arc-radius) + var(--play-arc-spoke-lift, -20px)))`;
   }
 
   playDockSlotFocus(slotIndex: number): number {

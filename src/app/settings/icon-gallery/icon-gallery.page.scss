@@ -4,7 +4,7 @@
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ion-color-warning-contrast, #fff);
@@ -34,7 +34,7 @@
 .icon-gallery__heading {
   margin: 0 0 var(--app-space-2);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ion-color-medium);
@@ -43,7 +43,7 @@
 .icon-gallery__subheading {
   margin: var(--app-space-3) 0 var(--app-space-2);
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: color-mix(in srgb, var(--ion-color-primary) 70%, var(--ion-text-color));
@@ -113,7 +113,7 @@
   overflow: hidden;
   max-width: 100%;
   font-size: 0.62rem;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.15;
 }
 
@@ -151,7 +151,7 @@
 
 .icon-gallery__svg-link {
   font-size: 0.62rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--ion-color-primary);
   text-decoration: none;
 }

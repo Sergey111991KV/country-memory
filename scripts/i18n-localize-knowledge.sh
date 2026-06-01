@@ -15,7 +15,7 @@ echo "$$" >"$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 export SKIP_EXISTING=1
-export DELAY_MS="${DELAY_MS:-2000}"
+export DELAY_MS="${DELAY_MS:-3500}"
 export SAVE_EVERY="${SAVE_EVERY:-15}"
 export RATE_LIMIT_WAIT_MS="${RATE_LIMIT_WAIT_MS:-90000}"
 

@@ -242,7 +242,7 @@ body {
   background: var(--surface);
 }
 .brand {
-  font-weight: 700;
+  font-weight: 500;
   font-size: 1.125rem;
   color: var(--text);
   text-decoration: none;

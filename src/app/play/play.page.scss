@@ -1,12 +1,12 @@
 .play-hub {
   --play-tab-bar-offset: var(--app-tab-bar-height);
   --play-arc-radius: 168px;
-  --play-arc-sink: 138px;
-  --play-arc-window: 176px;
-  --play-arc-rise: 40px;
+  --play-arc-sink: 152px;
+  --play-arc-window: 192px;
+  --play-arc-spoke-lift: -20px;
   --play-step-bottom: 41px;
   --play-dock-nav-height: 40px;
-  --play-dock-height: calc(var(--play-arc-window) - var(--play-arc-rise) + 4px);
+  --play-dock-height: calc(var(--play-arc-window) + 4px);
   --play-dock-height-modes: calc(var(--play-dock-height) + var(--play-dock-nav-height));
   --background: var(--ion-background-color);
   font-family: var(--app-font-ui);
@@ -25,6 +25,7 @@
   flex: 1 1 auto;
   min-height: 100%;
   width: 100%;
+  justify-content: flex-start;
 }
 
 .play-shell {
@@ -39,7 +40,7 @@
 .play-hero {
   text-align: center;
   padding-top: var(--app-space-2);
-  margin-bottom: var(--app-space-4);
+  margin-bottom: var(--app-space-3);
 }
 
 .play-hero__mark {
@@ -51,7 +52,7 @@
 .play-hero__brand {
   margin: 0 0 var(--app-space-2);
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ion-color-primary);
@@ -60,7 +61,7 @@
 .play-hero__title {
   margin: 0 0 var(--app-space-3);
   font-size: clamp(1.5rem, 2.5vw, 1.85rem);
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--game-ink, var(--ion-text-color));
@@ -95,7 +96,7 @@
   background: var(--ion-background-color);
   border: 1px solid color-mix(in srgb, var(--ion-color-primary) 22%, transparent);
   box-shadow: 0 8px 24px color-mix(in srgb, var(--ion-color-primary) 8%, transparent);
-  margin-bottom: var(--app-space-4);
+  margin-bottom: var(--app-space-3);
 }
 
 html.ion-palette-dark .play-daily {
@@ -125,7 +126,7 @@ html.ion-palette-dark .play-daily {
 .play-daily__title {
   margin: 0;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ion-color-medium-shade, var(--ion-color-medium));
@@ -136,7 +137,7 @@ html.ion-palette-dark .play-daily {
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--ion-color-success-contrast, #fff);
   background: var(--ion-color-success, #16a34a);
 }
@@ -200,7 +201,7 @@ html.ion-palette-dark .play-daily {
 
   ion-button {
     margin: 0;
-    font-weight: 700;
+    font-weight: 500;
     text-transform: none;
   }
 }
@@ -232,12 +233,31 @@ html.ion-palette-dark .play-daily {
 .play-mode-dock {
   position: relative;
   flex: 0 0 auto;
-  margin-top: auto;
+  margin-top: var(--app-space-5);
+  margin-bottom: auto;
   z-index: 20;
-  padding: var(--app-space-2) 4px var(--app-space-1);
+  padding: var(--app-space-3) 4px var(--app-space-2);
   pointer-events: none;
-  isolation: isolate;
   background: transparent;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    transform: translate(-50%, -50%);
+    width: min(100%, 26rem);
+    height: 15rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center,
+      color-mix(in srgb, var(--ion-color-primary) 22%, transparent) 0%,
+      color-mix(in srgb, var(--ion-color-secondary) 8%, transparent) 42%,
+      transparent 72%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
 
   &--modes {
     --play-dock-height: var(--play-dock-height-modes);
@@ -274,13 +294,15 @@ html.ion-palette-dark .play-daily {
   text-align: center;
   padding-right: 72px;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: color-mix(in srgb, #a78bfa 85%, #ffffff);
 }
 
 .play-mode-dock__row {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -336,9 +358,7 @@ html.ion-palette-dark .play-daily {
   max-width: min(100%, 22rem);
   z-index: 1;
   height: var(--play-arc-window);
-  margin-bottom: calc(-1 * var(--play-arc-rise));
   overflow: hidden;
-  clip-path: inset(0 0 0 0);
   touch-action: pan-x;
   pointer-events: auto;
   transition: opacity 0.28s ease;
@@ -436,18 +456,19 @@ html.ion-palette-dark .play-daily {
     transform 0.45s cubic-bezier(0.34, 1.08, 0.44, 1);
 
   &--active {
-    --play-dock-card-width: 132px;
-    width: 132px;
-    height: 132px;
-    margin-left: -66px;
+    --play-dock-card-width: 142px;
+    width: 142px;
+    height: 142px;
+    margin-left: -71px;
     opacity: 1 !important;
     filter: none !important;
     z-index: 100;
     border-width: 3px;
-    border-color: color-mix(in srgb, #ec4899 70%, transparent);
+    border-color: color-mix(in srgb, #ec4899 78%, transparent);
     box-shadow:
-      0 14px 32px color-mix(in srgb, #ec4899 30%, transparent),
-      0 0 0 3px color-mix(in srgb, #a78bfa 42%, transparent);
+      0 18px 40px color-mix(in srgb, #ec4899 38%, transparent),
+      0 0 0 4px color-mix(in srgb, #a78bfa 48%, transparent),
+      0 0 48px color-mix(in srgb, #ec4899 22%, transparent);
   }
 
   &--locked {
@@ -524,7 +545,7 @@ html.ion-palette-dark .play-daily {
   line-clamp: 2;
   overflow: hidden;
   max-width: 100%;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 0.58rem;
   line-height: 1.15;
 }
@@ -543,9 +564,9 @@ html.ion-palette-dark .play-daily {
 @media (min-width: 768px) {
   .play-mode-dock__arc {
     --play-arc-radius: 164px;
-    --play-arc-sink: 134px;
-    --play-arc-window: 172px;
-    --play-arc-rise: 38px;
+    --play-arc-sink: 148px;
+    --play-arc-window: 188px;
+    --play-arc-spoke-lift: -20px;
   }
 
   .play-shell {
@@ -566,10 +587,10 @@ html.ion-palette-dark .play-daily {
     --play-dock-card-width: 96px;
 
     &--active {
-      --play-dock-card-width: 128px;
-      width: 128px;
-      height: 128px;
-      margin-left: -64px;
+      --play-dock-card-width: 136px;
+      width: 136px;
+      height: 136px;
+      margin-left: -68px;
     }
   }
 }

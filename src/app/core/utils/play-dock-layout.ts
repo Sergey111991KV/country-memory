@@ -1,10 +1,10 @@
 /** Shared Play dock wheel geometry (keep in sync with play.page.scss). */
 export const PLAY_DOCK_LAYOUT = {
   arcRadius: 168,
-  arcSink: 138,
-  arcWindow: 176,
+  arcSink: 152,
+  arcWindow: 192,
   inactiveCard: 100,
-  activeCard: 132,
+  activeCard: 142,
   activeGlow: 3,
 } as const;
 

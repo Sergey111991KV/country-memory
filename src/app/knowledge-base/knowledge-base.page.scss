@@ -48,7 +48,7 @@
 .knowledge-header h1 {
   margin: 0 0 6px;
   font-size: clamp(1.5rem, 2.5vw, 2rem);
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: none;
   color: #fff;
@@ -118,7 +118,7 @@
 .knowledge-kicker {
   margin: 0 0 var(--app-space-3);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--kb-text-muted);
@@ -294,7 +294,7 @@
 
   &__num {
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--kb-text-muted);
   }
 
@@ -386,7 +386,7 @@
     right: 12px;
     bottom: 28px;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 500;
     color: #fff;
   }
 
@@ -503,7 +503,7 @@
   &__value {
     margin-top: 4px;
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 500;
     color: #fff;
   }
 }
@@ -585,7 +585,7 @@
     h3 {
       margin: 0 0 4px;
       font-size: 0.95rem;
-      font-weight: 700;
+      font-weight: 500;
       color: #fff;
     }
   }
@@ -631,7 +631,7 @@
   background: var(--kb-gradient);
   color: #fff;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: transform 0.25s ease, opacity 0.25s ease;
 
@@ -662,7 +662,7 @@
   &__title {
     margin: 0 0 var(--app-space-2);
     font-size: 0.68rem;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--kb-accent-cyan);
@@ -697,7 +697,7 @@
 
   &__label {
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--kb-text-muted);

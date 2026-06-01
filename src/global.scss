@@ -9,10 +9,8 @@
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
 
-html,
-body {
-  height: 100%;
-  margin: 0;
+html.ion-palette-dark body {
+  background: #16122b;
 }
 
 .page-safe-top {
@@ -257,7 +255,7 @@ ion-modal.win-celebrate-modal-shell .win-celebrate-content {
 .win-celebrate-title {
   margin: 0 0 var(--app-space-2);
   font-size: 1.35rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--ion-text-color);
 }
 
@@ -293,7 +291,7 @@ ion-toggle:focus-visible {
 .app-section-kicker {
   margin: 0 0 6px;
   font-size: 0.76rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ion-color-primary-shade, var(--ion-color-primary));
@@ -343,7 +341,7 @@ ion-popover.knowledge-hints-popover {
   flex: 1;
   margin: 0;
   font-size: 1.28rem;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0.02em;
 }

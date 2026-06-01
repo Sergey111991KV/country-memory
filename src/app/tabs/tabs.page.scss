@@ -9,7 +9,7 @@ ion-tabs {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--ion-background-color);
+  background: #16122b;
 }
 
 ion-tab-bar {
@@ -27,17 +27,6 @@ ion-tab-bar {
   padding-left: max(10px, env(safe-area-inset-left, 0px));
   padding-right: max(10px, env(safe-area-inset-right, 0px));
   box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
-}
-
-ion-tab-bar::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(-1 * env(safe-area-inset-bottom, 0px));
-  height: env(safe-area-inset-bottom, 0px);
-  background: #16122b;
-  pointer-events: none;
 }
 
 ion-tab-button {
