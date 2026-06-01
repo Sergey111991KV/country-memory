@@ -39,7 +39,7 @@
 .knowledge-header__brand {
   margin: 0 0 4px;
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--kb-accent-cyan);
@@ -88,7 +88,7 @@
 
 .knowledge-glass-btn__count {
   font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 500;
   line-height: 1;
   color: #ffffff;
   text-shadow: 0 0 20px color-mix(in srgb, #a78bfa 55%, transparent);
@@ -97,7 +97,7 @@
 .knowledge-glass-btn__label {
   margin-top: 4px;
   font-size: 0.62rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--kb-accent-cyan);
@@ -139,7 +139,7 @@
   background: none;
   color: var(--kb-accent-cyan);
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   padding: 4px 0;
 }
@@ -167,7 +167,7 @@
   background: var(--kb-card);
   color: #fff;
   font-size: 0.68rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   text-align: center;
   cursor: pointer;
@@ -233,7 +233,7 @@
   &__value {
     margin: 0;
     font-size: 2rem;
-    font-weight: 800;
+    font-weight: 500;
     line-height: 1;
     background: var(--kb-gradient);
     -webkit-background-clip: text;
@@ -441,7 +441,7 @@
 .knowledge-summary-line {
   margin: 0 0 var(--app-space-2);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #fff;
 }
 
@@ -608,7 +608,7 @@
   padding: 4px 8px;
   border-radius: 999px;
   font-size: 0.68rem;
-  font-weight: 600;
+  font-weight: 500;
   background: color-mix(in srgb, #ffffff 8%, transparent);
   color: var(--kb-text-muted);
 

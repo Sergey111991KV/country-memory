@@ -57,7 +57,7 @@
 .session-result-hero__title {
   margin: 0 0 var(--app-space-2);
   font-size: clamp(1.5rem, 5vw, 2rem);
-  font-weight: 800;
+  font-weight: 500;
   line-height: 1.15;
 }
 
@@ -125,7 +125,7 @@
 
 .session-result-row__score {
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--ion-color-medium);
   white-space: nowrap;
 }
@@ -159,7 +159,7 @@
 
 .session-result-solo__value {
   font-size: 2rem;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .session-result-solo__line {

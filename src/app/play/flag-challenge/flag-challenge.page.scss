@@ -7,7 +7,7 @@
   padding: 0.5rem 0.75rem;
   border-radius: 12px;
   text-align: center;
-  font-weight: 600;
+  font-weight: 500;
   background: color-mix(in srgb, #a78bfa 18%, transparent);
   border: 1px solid color-mix(in srgb, #ec4899 35%, transparent);
 }
@@ -38,7 +38,7 @@
     color-mix(in srgb, #ec4899 18%, transparent)
   );
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 500;
   color: var(--ion-text-color);
   cursor: pointer;
   transition: transform 0.12s ease;
@@ -70,7 +70,7 @@
     flex: 1;
     margin: 0;
     font-size: 1.05rem;
-    font-weight: 600;
+    font-weight: 500;
   }
 }
 

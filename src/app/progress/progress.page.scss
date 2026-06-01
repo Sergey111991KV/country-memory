@@ -81,7 +81,7 @@
   &__value {
     margin: 0;
     font-size: 1.5rem;
-    font-weight: 800;
+    font-weight: 500;
     line-height: 1;
     color: #fff;
   }
@@ -109,7 +109,7 @@
 .progress-summary {
   margin: 0 0 var(--app-space-3);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   background: var(--pr-gradient);
   -webkit-background-clip: text;
   background-clip: text;
@@ -251,7 +251,7 @@
 .progress-recent__country {
   margin: 0;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .progress-recent__mode {

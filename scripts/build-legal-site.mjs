@@ -251,7 +251,7 @@ body {
   margin-left: 1rem;
   color: var(--accent);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
 }
 .site-nav a[aria-current="page"] {
   text-decoration: underline;
