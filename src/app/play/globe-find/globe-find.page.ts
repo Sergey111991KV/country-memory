@@ -23,12 +23,11 @@ import { LocaleService } from '../../core/services/locale.service';
 import { UserLearningService } from '../../core/services/user-learning.service';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import {
-  GLOBE_BUMP_TEXTURE,
   GLOBE_MAX_PIXEL_RATIO,
   GLOBE_POLITICAL_CURVATURE_DEG,
   GLOBE_POLITICAL_TEXTURE,
   type GlobeCountryFeature,
-  filterPoliticalCountryFeatures,
+  type GlobePolygonColorState,
   iso2FromNaturalEarth,
   politicalCapColor,
   politicalStrokeColor,
@@ -37,12 +36,19 @@ import { countryFeatureFromObject } from '../../core/utils/globe-pick';
 import { PlaySessionCompleteService } from '../../core/services/play-session-complete.service';
 import { PlaySessionService } from '../../core/services/play-session.service';
 import { SessionAccessService } from '../../core/services/session-access.service';
+import { CountryKnowledgeService } from '../../core/services/country-knowledge.service';
 import { GeoJsonCacheService } from '../../core/services/geo-json-cache.service';
 import { PerfLogService } from '../../core/services/perf-log.service';
+import {
+  globeFeatureBBoxSpanKm,
+  globeFlyAltitude,
+  globeRevealMinControlDistance,
+} from '../../core/utils/globe-fly-altitude';
 import { ensurePlaySessionAccess } from '../../core/utils/play-access';
 import { ensureThreeGlobal } from '../../core/utils/three-global';
 import { buildSoloSessionResult } from '../../core/utils/play-session-result-builders';
 import { GlobeRenderLoop } from '../../core/utils/globe-render-loop';
+import { refreshGlobePolygonColors } from '../../core/utils/globe-polygon-colors';
 
 type ThreeNamespace = typeof import('three');
 type ThreeGlobeApi = Object3D & {
@@ -65,6 +71,12 @@ type PickPhase = 'pick' | 'feedback';
 
 const ROUNDS_PER_SESSION = 10;
 const POLYGON_ALTITUDE = 0.022;
+const ORBIT_MIN_DISTANCE_PLAY = 180;
+const ORBIT_MAX_DISTANCE = 480;
+
+interface GlobeFlyOptions {
+  reveal?: boolean;
+}
 
 @Component({
   selector: 'app-globe-find',
@@ -90,6 +102,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private readonly ngZone = inject(NgZone);
   private readonly perf = inject(PerfLogService);
   private readonly geoCache = inject(GeoJsonCacheService);
+  private readonly knowledge = inject(CountryKnowledgeService);
 
   loading = true;
   loadError = false;
@@ -98,10 +111,6 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   phase: PickPhase = 'pick';
   feedbackCorrect = false;
   round = 1;
-  searchQuery = '';
-  searchHits: Country[] = [];
-  /** Set when the current selection came from search (for learning analytics). */
-  private pickedViaSearch = false;
 
   private playable: Country[] = [];
   private geoFeatures: GlobeCountryFeature[] = [];
@@ -116,6 +125,17 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private flyRafId = 0;
   private resizeObserver: ResizeObserver | null = null;
   private lastPolygonStyleKey = '';
+  private polygonColorsDirty = false;
+  private readonly polygonStyleState: GlobePolygonColorState = {
+    selectedIso: null,
+    feedbackCorrectIso: null,
+    feedbackWrongIso: null,
+    phase: 'pick',
+  };
+  private readonly capColorFn = (f: GlobeCountryFeature): string =>
+    politicalCapColor(f, this.polygonStyleState);
+  private readonly strokeColorFn = (f: GlobeCountryFeature): string =>
+    politicalStrokeColor(f, this.polygonStyleState);
   private readonly onVisibilityChange = (): void => {
     const hidden = document.hidden;
     this.renderLoop?.setPaused(hidden);
@@ -173,20 +193,15 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   }
 
   ionViewWillLeave(): void {
+    this.cancelFlyAnimation();
     this.renderLoop?.stop();
     this.renderLoop = null;
-    if (this.flyRafId) {
-      cancelAnimationFrame(this.flyRafId);
-      this.flyRafId = 0;
-    }
   }
 
   ngOnDestroy(): void {
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    this.cancelFlyAnimation();
     this.renderLoop?.stop();
-    if (this.flyRafId) {
-      cancelAnimationFrame(this.flyRafId);
-    }
     const canvas = this.renderer?.domElement;
     if (canvas) {
       canvas.removeEventListener('pointerdown', this.onCanvasPointerDown);
@@ -215,30 +230,6 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     return this.phase === 'feedback';
   }
 
-  onSearchInput(ev: CustomEvent): void {
-    const q = String(ev.detail.value ?? '')
-      .trim()
-      .toLowerCase();
-    this.searchQuery = q;
-    if (!q) {
-      this.searchHits = [];
-      return;
-    }
-    const lang = this.locale.language;
-    this.searchHits = this.playable
-      .filter((c) => this.catalog.localizedName(c, lang).toLowerCase().includes(q))
-      .slice(0, 8);
-  }
-
-  onSearchPick(country: Country): void {
-    this.searchQuery = this.catalog.localizedName(country, this.locale.language);
-    this.searchHits = [];
-    this.pickedViaSearch = true;
-    this.selectedIso = country.iso2;
-    this.refreshPolygonColors();
-    this.flyToCountry(country);
-  }
-
   async verify(): Promise<void> {
     if (!this.target || !this.selectedIso) {
       const t = await this.toastCtrl.create({
@@ -255,12 +246,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.phase = 'feedback';
     this.refreshPolygonColors();
 
-    await this.learning.recordAttempt(
-      'globe_find',
-      this.target.iso2,
-      correct,
-      this.pickedViaSearch,
-    );
+    await this.learning.recordAttempt('globe_find', this.target.iso2, correct, false);
     this.playSession.recordAnswer(correct);
     if (correct) {
       await this.dailyGoal.bumpProgress();
@@ -288,7 +274,8 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     if (!this.target) {
       return;
     }
-    this.flyToCountry(this.target);
+    this.globeHost?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    this.flyToCountry(this.target, 1600, { reveal: true });
   }
 
   goBack(): void {
@@ -311,6 +298,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     try {
       const catalogSpan = this.perf.span('GlobeQuest', 'catalog');
       await this.catalog.ensureLoaded();
+      await this.knowledge.ensureLoaded();
       catalogSpan.end();
       const geoSpan = this.perf.span('GlobeQuest', 'geoJson');
       const allFeatures = await this.geoCache.getPoliticalFeatures();
@@ -363,7 +351,11 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       if (this.globeHost?.nativeElement) {
         return;
       }
-      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      await new Promise<void>((resolve) => {
+        this.ngZone.runOutsideAngular(() => {
+          requestAnimationFrame(() => resolve());
+        });
+      });
     }
     throw new Error('Globe host element missing');
   }
@@ -394,7 +386,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.camera.position.z = 320;
 
     this.renderer = new THREE.WebGLRenderer({
-      antialias: window.devicePixelRatio < 2,
+      antialias: false,
       alpha: true,
       powerPreference: 'high-performance',
     });
@@ -409,12 +401,11 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
     globe
       .globeImageUrl(GLOBE_POLITICAL_TEXTURE)
-      .bumpImageUrl(GLOBE_BUMP_TEXTURE)
       .showAtmosphere(false)
       .polygonsData(this.geoFeatures)
-      .polygonCapColor((f) => this.colorForFeature(f))
+      .polygonCapColor(this.capColorFn)
       .polygonSideColor(() => 'rgba(30, 41, 59, 0.35)')
-      .polygonStrokeColor((f) => this.strokeForFeature(f))
+      .polygonStrokeColor(this.strokeColorFn)
       .polygonAltitude(() => POLYGON_ALTITUDE)
       .polygonCapCurvatureResolution(GLOBE_POLITICAL_CURVATURE_DEG)
       .polygonsTransitionDuration(0)
@@ -431,11 +422,16 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
     this.controls = new OrbitControlsCtor(this.camera, this.renderer.domElement);
     this.controls.enablePan = false;
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.12;
-    this.controls.minDistance = 180;
-    this.controls.maxDistance = 480;
-    this.controls.addEventListener('change', () => this.renderLoop?.requestRender());
+    this.controls.enableDamping = false;
+    this.controls.minDistance = ORBIT_MIN_DISTANCE_PLAY;
+    this.controls.maxDistance = ORBIT_MAX_DISTANCE;
+    this.controls.addEventListener('change', () => {
+      const g = this.globe as ThreeGlobeApi | null;
+      if (g && this.camera) {
+        g.setPointOfView(this.camera);
+      }
+      this.renderLoop?.requestRender();
+    });
 
     const canvas = this.renderer.domElement;
     canvas.addEventListener('pointerdown', this.onCanvasPointerDown);
@@ -461,6 +457,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     if (!this.renderer || !this.scene || !this.camera) {
       return;
     }
+    this.applyPolygonColorRefresh();
     this.controls?.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -480,33 +477,26 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.renderer.setSize(width, height);
   }
 
-  private polygonColorState() {
-    return {
-      selectedIso: this.selectedIso,
-      feedbackCorrectIso: this.feedbackCorrectIso,
-      feedbackWrongIso: this.feedbackWrongIso,
-      phase: this.phase,
-    };
-  }
-
-  private colorForFeature(f: GlobeCountryFeature): string {
-    return politicalCapColor(f, this.polygonColorState());
-  }
-
-  private strokeForFeature(f: GlobeCountryFeature): string {
-    return politicalStrokeColor(f, this.polygonColorState());
-  }
-
   private refreshPolygonColors(): void {
     const styleKey = `${this.phase}|${this.selectedIso}|${this.feedbackCorrectIso}|${this.feedbackWrongIso}`;
     if (styleKey === this.lastPolygonStyleKey) {
       return;
     }
     this.lastPolygonStyleKey = styleKey;
-    const g = this.globe as ThreeGlobeApi | null;
-    g?.polygonCapColor((f) => this.colorForFeature(f));
-    g?.polygonStrokeColor((f) => this.strokeForFeature(f));
+    this.polygonStyleState.selectedIso = this.selectedIso;
+    this.polygonStyleState.feedbackCorrectIso = this.feedbackCorrectIso;
+    this.polygonStyleState.feedbackWrongIso = this.feedbackWrongIso;
+    this.polygonStyleState.phase = this.phase;
+    this.polygonColorsDirty = true;
     this.renderLoop?.requestRender();
+  }
+
+  private applyPolygonColorRefresh(): void {
+    if (!this.polygonColorsDirty || !this.globe) {
+      return;
+    }
+    this.polygonColorsDirty = false;
+    refreshGlobePolygonColors(this.globe, this.polygonStyleState);
   }
 
   private pickCountryAtPointer(clientX: number, clientY: number): void {
@@ -547,7 +537,6 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     const idx = Math.floor(Math.random() * this.playable.length);
     this.target = this.playable[idx] ?? null;
     this.selectedIso = null;
-    this.pickedViaSearch = false;
     this.phase = 'pick';
     this.feedbackCorrect = false;
     this.feedbackCorrectIso = null;
@@ -556,49 +545,82 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     if (this.target) {
       this.flyToCountry(this.target, 800);
     }
+    if (this.controls) {
+      this.controls.minDistance = ORBIT_MIN_DISTANCE_PLAY;
+    }
   }
 
-  private flyToCountry(country: Country, ms = 1200): void {
+  private flyToCountry(country: Country, ms = 1200, options?: GlobeFlyOptions): void {
     const g = this.globe as ThreeGlobeApi | null;
     const THREE = this.threeLib;
     if (!g?.getCoords || !this.camera || !this.controls || !THREE) {
       return;
     }
-    const end = g.getCoords(country.lat, country.lng, 2.35);
+    const feature = this.featureForCountry(country);
+    const areaKm2 = this.knowledge.getEntry(country.iso2)?.areaKm2;
+    const spanKm = globeFeatureBBoxSpanKm(feature, country.lat);
+    const relAltitude = globeFlyAltitude({
+      areaKm2,
+      spanKm,
+      reveal: options?.reveal,
+    });
+    const end = g.getCoords(country.lat, country.lng, relAltitude);
     const endPos = new THREE.Vector3(end.x, end.y, end.z);
     const start = this.camera.position.clone();
 
     const apply = (): void => {
+      if (options?.reveal) {
+        this.controls!.minDistance = globeRevealMinControlDistance(endPos.length());
+      }
       this.controls!.target.set(0, 0, 0);
       this.controls!.update();
+    };
+    const syncPov = (): void => {
+      apply();
       g.setPointOfView(this.camera!);
     };
 
     if (ms <= 0) {
       this.camera.position.copy(endPos);
-      apply();
+      syncPov();
       this.renderLoop?.requestRender();
       return;
     }
 
-    if (this.flyRafId) {
-      cancelAnimationFrame(this.flyRafId);
-    }
+    this.cancelFlyAnimation();
     const t0 = performance.now();
     const tick = (now: number): void => {
       const t = Math.min(1, (now - t0) / ms);
       const eased = t * (2 - t);
       this.camera!.position.lerpVectors(start, endPos, eased);
       apply();
-      this.drawFrame();
+      this.applyPolygonColorRefresh();
+      this.controls?.update();
+      this.renderer!.render(this.scene!, this.camera!);
       if (t < 1) {
-        this.flyRafId = requestAnimationFrame(tick);
+        this.flyRafId = this.renderLoop!.scheduleFrame(tick);
       } else {
         this.flyRafId = 0;
+        syncPov();
       }
     };
-    this.ngZone.runOutsideAngular(() => {
-      this.flyRafId = requestAnimationFrame(tick);
-    });
+    this.flyRafId = this.renderLoop!.scheduleFrame(tick);
+  }
+
+  private featureForCountry(country: Country): GlobeCountryFeature | undefined {
+    const iso = country.iso2.toUpperCase();
+    return this.geoFeatures.find((f) => iso2FromNaturalEarth(f.properties) === iso);
+  }
+
+  private cancelFlyAnimation(): void {
+    if (!this.flyRafId) {
+      return;
+    }
+    if (this.renderLoop) {
+      this.renderLoop.cancelFrame(this.flyRafId);
+    } else {
+      cancelAnimationFrame(this.flyRafId);
+    }
+    this.flyRafId = 0;
   }
 }

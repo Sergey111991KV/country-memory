@@ -67,6 +67,12 @@ export class SubscriptionService {
       this.storeConfiguredSig(),
   );
 
+  readonly canSimulateBillingSig = computed(() => this.canSimulateBilling());
+
+  readonly canSubscribeMonthlySig = computed(
+    () => this.canSimulateBilling() || (this.canPurchaseInApp() && !!this.monthlyProductSig()),
+  );
+
   async init(): Promise<void> {
     if (this.initialized) {
       return;
@@ -142,6 +148,18 @@ export class SubscriptionService {
     );
   }
 
+  /** Test / dev: simulate monthly Premium when the store is unavailable or devMockBilling is on. */
+  canSimulateBilling(): boolean {
+    if (!this.canUseBillingDebug()) {
+      return false;
+    }
+    return environment.devMockBilling || !this.canPurchaseInApp();
+  }
+
+  canSubscribeMonthly(): boolean {
+    return this.canSubscribeMonthlySig();
+  }
+
   debugPremiumActive(): boolean {
     return this.debugPremiumSig();
   }
@@ -161,6 +179,21 @@ export class SubscriptionService {
       }
     }
     await this.logBilling('debug_premium_toggled', { active: next });
+    if (next) {
+      this.applyMockMonthlySubscription();
+    } else if (!this.hasEntitlementSig()) {
+      this.premiumKindSig.set('unknown');
+      this.premiumExpiresIsoSig.set(null);
+      this.premiumProductIdSig.set(null);
+    }
+  }
+
+  private applyMockMonthlySubscription(): void {
+    this.premiumKindSig.set('subscription');
+    const expires = new Date();
+    expires.setMonth(expires.getMonth() + 1);
+    this.premiumExpiresIsoSig.set(expires.toISOString());
+    this.premiumProductIdSig.set('flagfield_premium_monthly_mock');
   }
 
   async setDebugPremium(active: boolean): Promise<void> {
@@ -224,27 +257,48 @@ export class SubscriptionService {
   }
 
   async purchaseMonthly(): Promise<'success' | 'cancelled' | 'error'> {
-    const product = this.monthlyProductSig();
-    if (!product) {
-      return 'error';
+    if (this.canPurchaseInApp()) {
+      const product = this.monthlyProductSig();
+      if (!product) {
+        return 'error';
+      }
+      return this.purchaseProduct(product);
     }
-    return this.purchaseProduct(product);
+    if (this.canSimulateBilling()) {
+      return this.simulateMonthlyPurchase();
+    }
+    await this.logBilling('purchase_unavailable');
+    return 'error';
   }
 
   async purchaseLifetime(): Promise<'success' | 'cancelled' | 'error'> {
-    const product = this.lifetimeProductSig();
-    if (!product) {
+    await this.logBilling('purchase_lifetime_unavailable');
+    return 'error';
+  }
+
+  /** Dev / test: grant monthly Premium without App Store / Play Billing. */
+  async simulateMonthlyPurchase(): Promise<'success' | 'cancelled' | 'error'> {
+    if (!this.canSimulateBilling()) {
       return 'error';
     }
-    return this.purchaseProduct(product);
+    this.debugPremiumSig.set(true);
+    this.applyMockMonthlySubscription();
+    await this.storage.set(DEBUG_PREMIUM_KEY, true);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(LEGACY_DEV_PREMIUM_KEY, '1');
+    }
+    await this.logBilling('simulate_monthly_purchase', {
+      expiresIso: this.premiumExpiresIsoSig(),
+    });
+    return 'success';
   }
 
   async restore(): Promise<'success' | 'empty' | 'error'> {
+    if (this.canSimulateBilling() && this.debugPremiumActive()) {
+      await this.logBilling('restore_skipped_debug_premium');
+      return 'success';
+    }
     if (!this.canPurchaseInApp()) {
-      if (this.debugPremiumActive()) {
-        await this.logBilling('restore_skipped_debug_premium');
-        return 'success';
-      }
       await this.logBilling('restore_unavailable');
       return 'error';
     }
@@ -431,9 +485,7 @@ export class SubscriptionService {
     const active = stored === true || legacy;
     this.debugPremiumSig.set(active);
     if (active) {
-      this.premiumKindSig.set('unknown');
-      this.premiumExpiresIsoSig.set(null);
-      this.premiumProductIdSig.set('billing_debug');
+      this.applyMockMonthlySubscription();
     }
   }
 

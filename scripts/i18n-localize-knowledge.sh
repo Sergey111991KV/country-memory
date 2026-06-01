@@ -15,7 +15,9 @@ echo "$$" >"$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 export SKIP_EXISTING=1
-export DELAY_MS="${DELAY_MS:-3500}"
+export MT_LINGVA_ONLY=1
+export LINGVA_MIRRORS='https://lingva.ml'
+export DELAY_MS="${DELAY_MS:-1200}"
 export SAVE_EVERY="${SAVE_EVERY:-15}"
 export RATE_LIMIT_WAIT_MS="${RATE_LIMIT_WAIT_MS:-90000}"
 

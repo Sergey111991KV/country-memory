@@ -23,7 +23,6 @@ export class PaywallPage implements OnInit, ViewWillEnter {
   private readonly legal = inject(LegalLinksService);
   protected readonly locale = inject(LocaleService);
 
-  readonly devMockBilling = environment.devMockBilling;
   readonly billingDebugEnabled = this.sub.canUseBillingDebug();
   readonly isNative = Capacitor.isNativePlatform();
   readonly freeGamesLimit = environment.freeGamesLimit;
@@ -54,21 +53,11 @@ export class PaywallPage implements OnInit, ViewWillEnter {
   }
 
   async subscribeMonthly(): Promise<void> {
-    if (this.busy || !this.sub.canPurchaseInApp()) {
+    if (this.busy || !this.sub.canSubscribeMonthly()) {
       return;
     }
     this.busy = true;
     const result = await this.sub.purchaseMonthly();
-    this.busy = false;
-    await this.handlePurchaseResult(result);
-  }
-
-  async buyLifetime(): Promise<void> {
-    if (this.busy || !this.sub.canPurchaseInApp()) {
-      return;
-    }
-    this.busy = true;
-    const result = await this.sub.purchaseLifetime();
     this.busy = false;
     await this.handlePurchaseResult(result);
   }

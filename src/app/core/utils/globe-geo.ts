@@ -21,9 +21,10 @@ export const GLOBE_POLITICAL_TEXTURE = 'assets/globe/earth-dark.jpg';
 export const GLOBE_BUMP_TEXTURE = 'assets/globe/earth-topology.png';
 
 /** Higher value = coarser caps, fewer triangles (default in three-globe is 5). */
-export const GLOBE_POLITICAL_CURVATURE_DEG = 14;
+export const GLOBE_POLITICAL_CURVATURE_DEG = 24;
 
-export const GLOBE_MAX_PIXEL_RATIO = 1.5;
+/** Cap DPR for the 3D globe (full device DPR is costly on mobile). */
+export const GLOBE_MAX_PIXEL_RATIO = 1;
 
 const CONTINENT_FILL: Record<string, string> = {
   Africa: 'rgba(210, 180, 120, 0.92)',

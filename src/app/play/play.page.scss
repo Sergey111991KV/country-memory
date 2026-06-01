@@ -13,23 +13,10 @@
 }
 
 .play-hub::part(scroll) {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-  padding-bottom: var(--play-tab-bar-offset);
-}
-
-.play-layout {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 100%;
-  width: 100%;
-  justify-content: flex-start;
+  padding-bottom: calc(var(--play-dock-height-modes) + var(--play-tab-bar-offset) + var(--app-space-3));
 }
 
 .play-shell {
-  flex: 0 0 auto;
   width: 100%;
   max-width: min(100%, 48rem);
   margin-inline: auto;
@@ -175,8 +162,13 @@ html.ion-palette-dark .play-daily {
   transition: width 0.35s ease;
 }
 
+.play-daily__status {
+  min-height: 3.25rem;
+  margin-top: var(--app-space-3);
+}
+
 .play-daily__meta {
-  margin: var(--app-space-3) 0 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -190,19 +182,26 @@ html.ion-palette-dark .play-daily {
 }
 
 .play-daily__premium {
-  margin: var(--app-space-3) 0 0;
+  margin: 0;
   font-size: 0.88rem;
   color: var(--ion-color-success);
   font-weight: 500;
 }
 
-.play-daily__premium-cta {
+.play-premium-row {
+  min-height: 44px;
   margin-top: var(--app-space-2);
+  margin-bottom: var(--app-space-2);
 
   ion-button {
     margin: 0;
     font-weight: 500;
     text-transform: none;
+  }
+
+  &--subscribed {
+    visibility: hidden;
+    pointer-events: none;
   }
 }
 
@@ -231,14 +230,15 @@ html.ion-palette-dark .play-daily {
 
 /* —— Bottom mode dock (circular wheel) —— */
 .play-mode-dock {
-  position: relative;
-  flex: 0 0 auto;
-  margin-top: var(--app-space-5);
-  margin-bottom: auto;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--play-tab-bar-offset);
   z-index: 20;
   padding: var(--app-space-3) 4px var(--app-space-2);
   pointer-events: none;
   background: transparent;
+  isolation: isolate;
 
   &::before {
     content: '';
@@ -428,11 +428,11 @@ html.ion-palette-dark .play-daily {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   width: var(--play-dock-card-width);
   height: var(--play-dock-card-width);
   margin-left: calc(-0.5 * var(--play-dock-card-width));
-  padding: 10px 8px;
+  padding: 8px 6px 6px;
   border: 2px solid color-mix(in srgb, #a78bfa 28%, transparent);
   border-radius: 50%;
   background: color-mix(in srgb, #1e1835 92%, #000000);
@@ -499,43 +499,19 @@ html.ion-palette-dark .play-daily {
   pointer-events: none;
 }
 
-.play-mode-dock__icon-shell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 4.5rem;
-  height: 4.5rem;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 35% 30%,
-    color-mix(in srgb, #ffffff 14%, transparent),
-    color-mix(in srgb, #a78bfa 10%, transparent) 55%,
-    transparent 72%
-  );
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #ffffff 18%, transparent),
-    0 4px 12px color-mix(in srgb, #000000 22%, transparent);
-}
-
 .play-mode-dock__icon {
   flex-shrink: 0;
-  filter: drop-shadow(0 2px 6px color-mix(in srgb, #000000 25%, transparent));
-}
-
-.play-mode-dock__card--active .play-mode-dock__icon-shell {
-  width: 5.2rem;
-  height: 5.2rem;
+  filter: drop-shadow(0 2px 8px color-mix(in srgb, #a78bfa 35%, transparent));
 }
 
 .play-mode-dock__card--active .play-mode-dock__icon ::ng-deep .app-icon--dock-lg {
-  width: 4rem;
-  height: 4rem;
+  width: 5rem;
+  height: 5rem;
 }
 
 .play-mode-dock__card:not(.play-mode-dock__card--active) .play-mode-dock__icon ::ng-deep .app-icon--dock-lg {
-  width: 3.2rem;
-  height: 3.2rem;
+  width: 4rem;
+  height: 4rem;
 }
 
 .play-mode-dock__title {
@@ -552,13 +528,6 @@ html.ion-palette-dark .play-daily {
 
 .play-mode-dock__card--active .play-mode-dock__title {
   font-size: 0.66rem;
-}
-
-.play-mode-dock__count {
-  font-size: 0.52rem;
-  font-weight: 500;
-  color: var(--ion-color-medium);
-  line-height: 1.1;
 }
 
 @media (min-width: 768px) {
@@ -591,6 +560,16 @@ html.ion-palette-dark .play-daily {
       width: 136px;
       height: 136px;
       margin-left: -68px;
+    }
+
+    &--active .play-mode-dock__icon ::ng-deep .app-icon--dock-lg {
+      width: 4.75rem;
+      height: 4.75rem;
+    }
+
+    &:not(.play-mode-dock__card--active) .play-mode-dock__icon ::ng-deep .app-icon--dock-lg {
+      width: 3.75rem;
+      height: 3.75rem;
     }
   }
 }

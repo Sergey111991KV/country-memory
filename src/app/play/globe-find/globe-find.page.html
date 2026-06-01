@@ -31,24 +31,6 @@
         {{ 'globe.hintSelected' | i18n:null:lang}}
       </p>
     </section>
-
-    <ion-searchbar
-      class="globe-search"
-      [placeholder]="'globe.searchPlaceholder' | i18n:null:lang"
-      [debounce]="200"
-      (ionInput)="onSearchInput($event)"
-      [value]="searchQuery"
-    ></ion-searchbar>
-
-    <ion-list *ngIf="searchHits.length" class="globe-search-hits" lines="none">
-      <ion-item
-        *ngFor="let c of searchHits"
-        button
-        (click)="onSearchPick(c)"
-      >
-        <ion-label>{{ catalog.localizedName(c, locale.language) }}</ion-label>
-      </ion-item>
-    </ion-list>
   </ng-container>
 
   <!-- Always in DOM so Three.js can mount while data loads -->

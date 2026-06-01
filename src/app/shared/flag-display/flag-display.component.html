@@ -19,6 +19,7 @@
     (pointercancel)="onPointerCancel()"
   >
     <svg
+      #windSvg
       *ngIf="animate && !imageError && src"
       class="flag-wind-svg"
       aria-hidden="true"
@@ -32,17 +33,7 @@
             numOctaves="2"
             seed="3"
             result="noise"
-          >
-            <animate
-              attributeName="baseFrequency"
-              dur="5.5s"
-              calcMode="spline"
-              keyTimes="0;0.35;0.7;1"
-              keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1"
-              values="0.012 0.032;0.018 0.048;0.014 0.042;0.012 0.032"
-              repeatCount="indefinite"
-            />
-          </feTurbulence>
+          />
           <feGaussianBlur in="noise" stdDeviation="2.2" result="smoothNoise" />
           <feDisplacementMap
             in="SourceGraphic"
@@ -50,31 +41,22 @@
             scale="8"
             xChannelSelector="R"
             yChannelSelector="G"
-          >
-            <animate
-              attributeName="scale"
-              dur="5.5s"
-              calcMode="spline"
-              keyTimes="0;0.5;1"
-              keySplines="0.42 0 0.58 1;0.42 0 0.58 1"
-              values="6;13;6"
-              repeatCount="indefinite"
-            />
-          </feDisplacementMap>
+          />
         </filter>
       </defs>
     </svg>
-    <img
-      *ngIf="animate && !imageError && src"
-      class="flag-wind__img"
-      [src]="src"
-      [style.filter]="windFilterStyle"
-      alt=""
-      loading="lazy"
-      decoding="async"
-      draggable="false"
-      (error)="onImageError()"
-    />
+    <div *ngIf="animate && !imageError && src" class="flag-wind__motion">
+      <img
+        class="flag-wind__img"
+        [src]="src"
+        [style.filter]="windFilterStyle"
+        alt=""
+        loading="lazy"
+        decoding="async"
+        draggable="false"
+        (error)="onImageError()"
+      />
+    </div>
     <img
       *ngIf="!animate && !imageError && src"
       [src]="src"

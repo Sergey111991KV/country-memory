@@ -1,9 +1,24 @@
 /**
- * Shared machine-translation helpers (Google + MyMemory fallback).
+ * Shared machine-translation helpers (Lingva → Google → MyMemory).
  */
 import { translate } from '@vitalets/google-translate-api';
 
 const PLACEHOLDER_RE = /\{\{[^}]+\}\}/g;
+
+function lingvaMirrors() {
+  const fromEnv = process.env.LINGVA_MIRRORS?.split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return fromEnv?.length
+    ? fromEnv
+    : [
+        'https://lingva.ml',
+        'https://translate.plausibility.cloud',
+        'https://lingva.garudalinux.org',
+      ];
+}
+
+let lingvaMirrorCursor = 0;
 
 const TARGETS = {
   es: 'es',
@@ -82,6 +97,42 @@ function isRateLimited(err) {
   );
 }
 
+export async function translateViaLingva(text, lang) {
+  const target = lang === 'zh' ? 'zh' : lang;
+  const errors = [];
+  const mirrors = lingvaMirrors();
+  for (let i = 0; i < mirrors.length; i++) {
+    const idx = (lingvaMirrorCursor + i) % mirrors.length;
+    const base = mirrors[idx];
+    const url = `${base}/api/v1/en/${target}/${encodeURIComponent(text)}`;
+    try {
+      const res = await fetch(url, {
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': 'FlagfieldLocalize/1.0',
+        },
+        signal: AbortSignal.timeout(60_000),
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} from ${base}`);
+      }
+      const body = await res.json();
+      if (body.error) {
+        throw new Error(String(body.error));
+      }
+      const out = body.translation ?? body.result ?? text;
+      if (typeof out !== 'string' || out.includes('MYMEMORY WARNING')) {
+        throw new Error(`Bad translation: ${String(out).slice(0, 80)}`);
+      }
+      lingvaMirrorCursor = (idx + 1) % mirrors.length;
+      return out.trim();
+    } catch (err) {
+      errors.push(err.message);
+    }
+  }
+  throw new Error(errors.join(' | '));
+}
+
 export async function translateViaGoogle(text, lang, depth = 0) {
   if (depth > 4) {
     throw new Error('Google rate limit retries exhausted');
@@ -133,10 +184,14 @@ export async function translateViaMyMemory(text, lang, depth = 0) {
 
 export async function translateEnTo(lang, enText) {
   const { shielded, tokens } = shieldForTranslation(enText);
-  const providers = [
-    () => translateViaGoogle(shielded, lang),
-    () => translateViaMyMemory(shielded, lang),
-  ];
+  const providers =
+    process.env.MT_LINGVA_ONLY === '1'
+      ? [() => translateViaLingva(shielded, lang)]
+      : [
+          () => translateViaLingva(shielded, lang),
+          () => translateViaGoogle(shielded, lang),
+          () => translateViaMyMemory(shielded, lang),
+        ];
   for (let attempt = 0; attempt < 4; attempt++) {
     for (const run of providers) {
       try {

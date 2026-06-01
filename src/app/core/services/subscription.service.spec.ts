@@ -10,7 +10,7 @@ describe('SubscriptionService', () => {
   let sessionAccess: SessionAccessService;
   let storage: StorageService;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [I18nModule],
     });
@@ -18,6 +18,7 @@ describe('SubscriptionService', () => {
     sessionAccess = TestBed.inject(SessionAccessService);
     storage = TestBed.inject(StorageService);
     localStorage.removeItem('flagfield_dev_premium');
+    await storage.remove('flagfield_billing_debug_premium');
   });
 
   it('should create', () => {
@@ -41,6 +42,17 @@ describe('SubscriptionService', () => {
     await service.init();
     expect(service.billingPlatformSig()).toBe('web');
     expect(service.canPurchaseInApp()).toBeFalse();
+  });
+
+  it('should simulate monthly purchase in test mode', async () => {
+    await service.init();
+    expect(service.canSimulateBilling()).toBeTrue();
+    expect(service.canSubscribeMonthly()).toBeTrue();
+    const result = await service.purchaseMonthly();
+    expect(result).toBe('success');
+    expect(service.isSubscribed()).toBeTrue();
+    expect(service.premiumKindSig()).toBe('subscription');
+    expect(service.premiumExpiresIsoSig()).toBeTruthy();
   });
 
   it('should resolve manage subscription url by platform signal', () => {

@@ -1,4 +1,14 @@
-import { Component, Input, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 import { CountriesCatalogService } from '../../core/services/countries-catalog.service';
@@ -10,6 +20,8 @@ export type FlagDisplaySize = 'hero' | 'card';
 
 const LONG_PRESS_MS = 550;
 const MOVE_CANCEL_PX = 12;
+const WIND_ANIM_MS = 5500;
+const WIND_ANIM_EASING = 'cubic-bezier(0.42, 0.08, 0.58, 0.92)';
 
 let windFilterSeq = 0;
 
@@ -19,7 +31,7 @@ let windFilterSeq = 0;
   styleUrls: ['./flag-display.component.scss'],
   standalone: false,
 })
-export class FlagDisplayComponent {
+export class FlagDisplayComponent implements AfterViewInit, OnChanges, OnDestroy {
   private readonly flags = inject(FlagAssetsService);
   private readonly catalog = inject(CountriesCatalogService);
   readonly locale = inject(LocaleService);
@@ -33,9 +45,12 @@ export class FlagDisplayComponent {
 
   readonly windFilterId = `flag-wind-${++windFilterSeq}`;
 
+  @ViewChild('windSvg') private windSvg?: ElementRef<SVGSVGElement>;
+
   imageError = false;
   holdHintVisible = false;
 
+  private windAnimations: Animation[] = [];
   private pressTimer: ReturnType<typeof setTimeout> | null = null;
   private pressStartX = 0;
   private pressStartY = 0;
@@ -56,8 +71,24 @@ export class FlagDisplayComponent {
     return this.locale.translate('flag.holdExplore');
   }
 
+  ngAfterViewInit(): void {
+    this.scheduleWindSync();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['animate'] || changes['iso2']) {
+      this.scheduleWindSync();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.cancelWindAnimations();
+    this.clearPressTimer();
+  }
+
   onImageError(): void {
     this.imageError = true;
+    this.cancelWindAnimations();
   }
 
   onPointerDown(ev: PointerEvent): void {
@@ -102,6 +133,56 @@ export class FlagDisplayComponent {
       clearTimeout(this.pressTimer);
       this.pressTimer = null;
     }
+  }
+
+  private scheduleWindSync(): void {
+    queueMicrotask(() => this.syncWindAnimations());
+  }
+
+  private syncWindAnimations(): void {
+    this.cancelWindAnimations();
+    if (!this.animate || this.imageError || !this.src) {
+      return;
+    }
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    const svg = this.windSvg?.nativeElement;
+    if (!svg) {
+      return;
+    }
+    const timing: KeyframeAnimationOptions = {
+      duration: WIND_ANIM_MS,
+      iterations: Infinity,
+      easing: WIND_ANIM_EASING,
+    };
+    const turbulence = svg.querySelector('feTurbulence');
+    if (turbulence) {
+      this.windAnimations.push(
+        turbulence.animate(
+          [
+            { baseFrequency: '0.012 0.032' },
+            { baseFrequency: '0.018 0.048' },
+            { baseFrequency: '0.014 0.042' },
+            { baseFrequency: '0.012 0.032' },
+          ],
+          timing,
+        ),
+      );
+    }
+    const displacement = svg.querySelector('feDisplacementMap');
+    if (displacement) {
+      this.windAnimations.push(
+        displacement.animate([{ scale: 6 }, { scale: 13 }, { scale: 6 }], timing),
+      );
+    }
+  }
+
+  private cancelWindAnimations(): void {
+    for (const anim of this.windAnimations) {
+      anim.cancel();
+    }
+    this.windAnimations = [];
   }
 
   private async onLongPress(): Promise<void> {

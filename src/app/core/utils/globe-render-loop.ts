@@ -2,7 +2,7 @@ import { NgZone } from '@angular/core';
 
 /**
  * Coalesced on-demand render scheduling outside Angular zone.
- * Avoids a 60fps loop and zone.js [Violation] rAF warnings when idle.
+ * Pair with `__Zone_disable_requestAnimationFrame` in zone-flags for WebGL pages.
  */
 export class GlobeRenderLoop {
   private rafId = 0;
@@ -43,6 +43,18 @@ export class GlobeRenderLoop {
         }
       });
     });
+  }
+
+  scheduleFrame(callback: (now: number) => void): number {
+    let id = 0;
+    this.ngZone.runOutsideAngular(() => {
+      id = requestAnimationFrame((now) => callback(now));
+    });
+    return id;
+  }
+
+  cancelFrame(id: number): void {
+    cancelAnimationFrame(id);
   }
 
   private cancelRaf(): void {

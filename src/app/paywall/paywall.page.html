@@ -26,11 +26,19 @@
     </ion-text>
 
     <ion-text
-      *ngIf="!isNative && !sub.isSubscribed()"
+      *ngIf="!isNative && !sub.isSubscribed() && !sub.canSimulateBillingSig()"
       color="medium"
       class="paywall-warn ion-text-wrap"
     >
       <p>{{ 'paywall.webOnly' | i18n:null:lang}}</p>
+    </ion-text>
+
+    <ion-text
+      *ngIf="sub.canSimulateBillingSig() && !sub.isSubscribed()"
+      color="medium"
+      class="paywall-warn ion-text-wrap"
+    >
+      <p>{{ 'paywall.testModeHint' | i18n:null:lang}}</p>
     </ion-text>
 
     <p
@@ -93,30 +101,16 @@
         expand="block"
         color="primary"
         class="paywall-cta"
-        [disabled]="busy || (sub.canPurchaseInApp() && !sub.monthlyProductSig())"
+        [disabled]="busy || !sub.canSubscribeMonthlySig()"
         (click)="subscribeMonthly()"
       >
-        <span *ngIf="sub.monthlyPriceSig() as price">{{ 'paywall.subscribe' | i18n:null:lang}} — {{ price }}</span>
-        <span *ngIf="!sub.monthlyPriceSig()">{{ 'paywall.subscribe' | i18n:null:lang}}</span>
+        <span *ngIf="sub.canSimulateBillingSig()">{{ 'paywall.subscribeTest' | i18n:null:lang}}</span>
+        <span *ngIf="!sub.canSimulateBillingSig() && sub.monthlyPriceSig() as price">{{ 'paywall.subscribe' | i18n:null:lang}} — {{ price }}</span>
+        <span *ngIf="!sub.canSimulateBillingSig() && !sub.monthlyPriceSig()">{{ 'paywall.subscribe' | i18n:null:lang}}</span>
       </ion-button>
 
-      <ion-button
-        expand="block"
-        fill="outline"
-        color="primary"
-        class="paywall-cta"
-        [disabled]="busy || (sub.canPurchaseInApp() && !sub.lifetimeProductSig())"
-        (click)="buyLifetime()"
-      >
-        <span *ngIf="sub.lifetimePriceSig() as price">{{ 'paywall.lifetime' | i18n:null:lang}} — {{ price }}</span>
-        <span *ngIf="!sub.lifetimePriceSig()">{{ 'paywall.lifetime' | i18n:null:lang}}</span>
-      </ion-button>
-
-      <p class="paywall-fine muted ion-text-wrap">
+      <p *ngIf="sub.canPurchaseInApp()" class="paywall-fine muted ion-text-wrap">
         {{ sub.monthlyFinePrintKey() | i18n:{ store: sub.storeLabel() }:lang}}
-      </p>
-      <p class="paywall-fine muted ion-text-wrap">
-        {{ sub.lifetimeFinePrintKey() | i18n:{ store: sub.storeLabel() }:lang}}
       </p>
     </ng-container>
 
@@ -124,7 +118,7 @@
       expand="block"
       fill="clear"
       (click)="restore()"
-      [disabled]="busy || (!sub.canPurchaseInApp() && !devMockBilling)"
+      [disabled]="busy || (!sub.canPurchaseInApp() && !sub.canSimulateBillingSig())"
     >
       {{ 'paywall.restore' | i18n:null:lang}}
     </ion-button>
@@ -139,7 +133,7 @@
     </ion-button>
 
     <ion-button
-      *ngIf="billingDebugEnabled"
+      *ngIf="billingDebugEnabled && !sub.canSimulateBillingSig()"
       expand="block"
       fill="clear"
       color="medium"

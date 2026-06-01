@@ -115,10 +115,12 @@ export class PlayPage implements OnInit, ViewWillEnter {
   playDockFocusedSlotIndex = 0;
   playDockWheelDeg = 0;
   playDockDragging = false;
+  playDockDragArmed = false;
   playDockAnimating = false;
 
   private playDockDragStartX = 0;
   private playDockDragStartWheelDeg = 0;
+  private playDockTapSlotIndex: number | null = null;
   private playDockDragRaf: number | null = null;
   private lastRefreshSnapshot: PlayRefreshSnapshot | null = null;
 
@@ -187,11 +189,144 @@ export class PlayPage implements OnInit, ViewWillEnter {
   }
 
   playDockIsActiveSlot(slotIndex: number): boolean {
-    const slot = this.playDockWheelSlots[slotIndex];
-    if (!slot || slot.logicalIndex !== this.activeSlideIndex) {
-      return false;
-    }
     return this.playDockSlotFocus(slotIndex) > 0.45;
+  }
+
+  playDockSpokeZIndex(slotIndex: number): number {
+    return Math.round(10 + this.playDockSlotFocus(slotIndex) * 90);
+  }
+
+  private resolvePlayDockSlotIndex(event: PointerEvent): number | null {
+    if (!(event.target instanceof Element)) {
+      return null;
+    }
+    const el = event.target.closest('[data-slot-index]');
+    if (!el) {
+      return null;
+    }
+    const index = Number(el.getAttribute('data-slot-index'));
+    return Number.isFinite(index) ? index : null;
+  }
+
+  onPlayDockPointerDown(event: PointerEvent): void {
+    if (this.dockPhase !== 'idle' || this.playDockTileCount < 2) {
+      playDebug('PlayDock', 'pointerdown ignored', {
+        phase: this.dockPhase,
+        tiles: this.playDockTileCount,
+      });
+      return;
+    }
+    this.playDockDragArmed = true;
+    this.playDockDragStartX = event.clientX;
+    this.playDockDragStartWheelDeg = this.playDockWheelDeg;
+    this.playDockTapSlotIndex = this.resolvePlayDockSlotIndex(event);
+    playDebug('PlayDock', 'pointerdown', {
+      slot: this.playDockTapSlotIndex,
+      dockLevel: this.dockLevel,
+    });
+  }
+
+  onPlayDockPointerMove(event: PointerEvent): void {
+    if (!this.playDockDragArmed && !this.playDockDragging) {
+      return;
+    }
+    const deltaX = event.clientX - this.playDockDragStartX;
+    if (!this.playDockDragging) {
+      if (Math.abs(deltaX) < 8) {
+        return;
+      }
+      const target = event.currentTarget;
+      if (target instanceof HTMLElement) {
+        target.setPointerCapture(event.pointerId);
+      }
+      this.playDockDragging = true;
+      this.playDockTapSlotIndex = null;
+      playDebug('PlayDock', 'drag start', { deltaX });
+    }
+    this.playDockWheelDeg = this.playDockDragStartWheelDeg + deltaX * 0.38;
+    this.updatePlayDockFocusedSlot();
+    this.schedulePlayDockDragCheck();
+  }
+
+  onPlayDockPointerEnd(event: PointerEvent): void {
+    if (!this.playDockDragArmed && !this.playDockDragging) {
+      return;
+    }
+    this.playDockDragArmed = false;
+    this.cancelPlayDockDragCheck();
+    const target = event.currentTarget;
+    if (target instanceof HTMLElement && target.hasPointerCapture(event.pointerId)) {
+      target.releasePointerCapture(event.pointerId);
+    }
+
+    if (this.playDockDragging) {
+      this.playDockDragging = false;
+      const dragDelta = this.playDockWheelDeg - this.playDockDragStartWheelDeg;
+      const snappedSlot = snapPlayDockSlotIndex(
+        this.playDockWheelSlots,
+        this.playDockWheelDeg,
+        dragDelta,
+        this.playDockTileCount,
+      );
+      playDebug('PlayDock', 'drag end snap', {
+        dragDelta,
+        snappedSlot,
+        logicalIndex: this.playDockWheelSlots[snappedSlot]?.logicalIndex,
+      });
+      this.snapPlayDockToSlot(snappedSlot);
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const tapSlot = this.playDockTapSlotIndex;
+    this.playDockTapSlotIndex = null;
+    if (tapSlot !== null) {
+      playDebug('PlayDock', 'tap', { slot: tapSlot });
+      this.onPlayDockCardClick(tapSlot);
+    }
+  }
+
+  onPlayDockCardClick(slotIndex: number): void {
+    if (this.playDockAnimating || this.playDockDragging) {
+      playDebug('PlayDock', 'cardClick ignored', {
+        slotIndex,
+        animating: this.playDockAnimating,
+        dragging: this.playDockDragging,
+      });
+      return;
+    }
+    const slot = this.playDockWheelSlots[slotIndex];
+    if (!slot) {
+      playDebug('PlayDock', 'cardClick ignored', { slotIndex, reason: 'missing slot' });
+      return;
+    }
+    const focus = this.playDockSlotFocus(slotIndex);
+    playDebug('PlayDock', 'cardClick', {
+      slotIndex,
+      logicalIndex: slot.logicalIndex,
+      focus,
+      activeSlideIndex: this.activeSlideIndex,
+      dockLevel: this.dockLevel,
+    });
+    if (focus <= 0.45) {
+      playDebug('PlayDock', 'snap to logical', { logicalIndex: slot.logicalIndex });
+      this.snapPlayDockToLogical(slot.logicalIndex);
+      this.cdr.markForCheck();
+      return;
+    }
+    if (this.dockLevel === 'categories') {
+      const category = this.dockCategoryItems[slot.logicalIndex];
+      if (category) {
+        playDebug('PlayDock', 'open category', { id: category.id });
+        void this.onCategoryTap(category);
+      }
+      return;
+    }
+    const mode = this.categoryModes[slot.logicalIndex];
+    if (mode) {
+      playDebug('PlayDock', 'launch mode', { id: mode.id });
+      void this.launchMode(mode);
+    }
   }
 
   playDockIsLocked(slot: PlayDockWheelSlot): boolean {
@@ -218,83 +353,14 @@ export class PlayPage implements OnInit, ViewWillEnter {
     return this.categoryModes[slot.logicalIndex] ?? null;
   }
 
-  onPlayDockPointerDown(event: PointerEvent): void {
-    if (this.dockPhase !== 'idle' || this.playDockTileCount < 2) {
-      return;
-    }
-    const target = event.currentTarget;
-    if (!(target instanceof HTMLElement)) {
-      return;
-    }
-    target.setPointerCapture(event.pointerId);
-    this.playDockDragging = true;
-    this.playDockDragStartX = event.clientX;
-    this.playDockDragStartWheelDeg = this.playDockWheelDeg;
-  }
-
-  onPlayDockPointerMove(event: PointerEvent): void {
-    if (!this.playDockDragging) {
-      return;
-    }
-    const deltaX = event.clientX - this.playDockDragStartX;
-    this.playDockWheelDeg = this.playDockDragStartWheelDeg + deltaX * 0.38;
-    this.updatePlayDockFocusedSlot();
-    this.schedulePlayDockDragCheck();
-  }
-
-  onPlayDockPointerEnd(event: PointerEvent): void {
-    if (!this.playDockDragging) {
-      return;
-    }
-    this.cancelPlayDockDragCheck();
-    const target = event.currentTarget;
-    if (target instanceof HTMLElement && target.hasPointerCapture(event.pointerId)) {
-      target.releasePointerCapture(event.pointerId);
-    }
-    this.playDockDragging = false;
-    const dragDelta = this.playDockWheelDeg - this.playDockDragStartWheelDeg;
-    const snappedSlot = snapPlayDockSlotIndex(
-      this.playDockWheelSlots,
-      this.playDockWheelDeg,
-      dragDelta,
-      this.playDockTileCount,
-    );
-    this.snapPlayDockToSlot(snappedSlot);
-    this.cdr.markForCheck();
-  }
-
-  onPlayDockCardClick(slotIndex: number): void {
-    if (this.playDockAnimating) {
-      return;
-    }
-    const slot = this.playDockWheelSlots[slotIndex];
-    if (!slot) {
-      return;
-    }
-    if (slot.logicalIndex !== this.activeSlideIndex) {
-      this.snapPlayDockToLogical(slot.logicalIndex);
-      this.cdr.markForCheck();
-      return;
-    }
-    if (this.dockLevel === 'categories') {
-      const category = this.dockCategoryItems[slot.logicalIndex];
-      if (category) {
-        void this.onCategoryTap(category);
-      }
-      return;
-    }
-    const mode = this.categoryModes[slot.logicalIndex];
-    if (mode) {
-      void this.launchMode(mode);
-    }
-  }
-
   stepPlayDock(direction: -1 | 1): void {
     if (!this.canStepPlayDock) {
+      playDebug('PlayDock', 'step ignored', { direction, canStep: false });
       return;
     }
     const count = this.playDockTileCount;
     const next = (this.activeSlideIndex + direction + count) % count;
+    playDebug('PlayDock', 'step', { direction, from: this.activeSlideIndex, to: next });
     this.snapPlayDockToLogical(next, true);
     this.cdr.markForCheck();
   }

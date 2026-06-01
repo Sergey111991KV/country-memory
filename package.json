@@ -18,6 +18,7 @@
     "cap:open:android": "npx cap open android",
     "build:ios:archive": "bash scripts/build-ios-appstore.sh",
     "assets:generate": "npx --yes @capacitor/assets generate --assetPath resources --iconBackgroundColor '#f0f9ff' --iconBackgroundColorDark '#1e3a8a' --splashBackgroundColor '#f0f9ff' --splashBackgroundColorDark '#0f172a'",
+    "assets:play-icons": "node scripts/generate-play-icons.mjs",
     "legal:build": "node scripts/build-legal-site.mjs",
     "env:init": "cp src/environments/environment.prod.local.example.ts src/environments/environment.prod.local.ts",
     "data:knowledge": "node scripts/enrich-country-knowledge.mjs",

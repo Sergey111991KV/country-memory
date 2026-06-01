@@ -406,6 +406,9 @@ export const FLAGFIELD_RU: Record<string, string> = {
   'paywall.back': 'Назад',
   'paywall.connecting': 'Подключение к магазину…',
   'paywall.webOnly': 'Покупки доступны только в приложениях для iOS и Android.',
+  'paywall.testModeHint':
+    'Тестовый режим: нажмите «Подписка», чтобы активировать Premium без реальной оплаты.',
+  'paywall.subscribeTest': 'Подписка на месяц (тест)',
   'paywall.storeBadge': 'Оплата через {{store}}',
   'paywall.heroTitle': 'Исследуй без ограничений',
   'paywall.heroLead':

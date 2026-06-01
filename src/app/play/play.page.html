@@ -1,6 +1,5 @@
 @let lang = locale.langSig();
 <ion-content class="play-hub page-safe-top" [fullscreen]="true">
-  <div class="play-layout">
   <div class="play-shell" [ngClass]="'typography-' + heroTypography">
     <header class="play-hero">
       <img
@@ -42,16 +41,12 @@
       >
         <span class="play-daily__bar-fill" [style.width.%]="dailyProgressPercent"></span>
       </div>
-      <div class="play-daily__meta" *ngIf="!sub.isSubscribedSig()">
-        <p class="play-daily__meta-line">{{ 'paywall.freeGamesLine' | i18n:{ n: freeGamesLeft, limit: freeGamesLimit }:lang}}</p>
-        <p class="play-daily__meta-line">{{ 'play.dailyPoolLine' | i18n:{ n: freeCountryCount }:lang}}</p>
-      </div>
-      <p *ngIf="sub.isSubscribedSig()" class="play-daily__meta play-daily__premium">{{ 'home.premiumActive' | i18n:null:lang}}</p>
-      <div *ngIf="!sub.isSubscribedSig() && !atGameLimit" class="play-daily__premium-cta">
-        <ion-button expand="block" fill="clear" color="warning" size="small" (click)="openPaywall()">
-          <app-icon slot="start" icon="ui-premium" size="sm"></app-icon>
-          {{ 'home.getPremiumCta' | i18n:null:lang}}
-        </ion-button>
+      <div class="play-daily__status">
+        <div class="play-daily__meta" *ngIf="!sub.isSubscribedSig()">
+          <p class="play-daily__meta-line">{{ 'paywall.freeGamesLine' | i18n:{ n: freeGamesLeft, limit: freeGamesLimit }:lang}}</p>
+          <p class="play-daily__meta-line">{{ 'play.dailyPoolLine' | i18n:{ n: freeCountryCount }:lang}}</p>
+        </div>
+        <p *ngIf="sub.isSubscribedSig()" class="play-daily__meta play-daily__premium">{{ 'home.premiumActive' | i18n:null:lang}}</p>
       </div>
     </section>
 
@@ -64,6 +59,19 @@
         </ion-button>
       </ion-card-content>
     </ion-card>
+
+    <div class="play-premium-row" [class.play-premium-row--subscribed]="sub.isSubscribedSig() || atGameLimit">
+      <ion-button
+        *ngIf="!sub.isSubscribedSig() && !atGameLimit"
+        expand="block"
+        fill="clear"
+        color="warning"
+        (click)="openPaywall()"
+      >
+        <app-icon slot="start" icon="ui-premium" size="sm"></app-icon>
+        {{ 'home.getPremiumCta' | i18n:null:lang}}
+      </ion-button>
+    </div>
   </div>
 
   <aside
@@ -119,6 +127,7 @@
             class="play-mode-dock__spoke"
             [class.play-mode-dock__spoke--active]="playDockIsActiveSlot(i)"
             [style.transform]="playDockSpokeTransform(i)"
+            [style.z-index]="playDockSpokeZIndex(i)"
             role="listitem"
           >
             <button
@@ -127,8 +136,8 @@
               [class.play-mode-dock__card--active]="playDockIsActiveSlot(i)"
               [class.play-mode-dock__card--locked]="playDockIsLocked(slot)"
               [style.transform]="playDockCardTransform(i)"
+              [attr.data-slot-index]="i"
               [attr.aria-current]="playDockIsActiveSlot(i) ? 'true' : null"
-              (click)="onPlayDockCardClick(i)"
             >
               <app-icon
                 *ngIf="playDockIsLocked(slot)"
@@ -137,18 +146,11 @@
                 size="sm"
               ></app-icon>
               <ng-container *ngIf="dockLevel === 'categories' && playDockCategory(slot) as category">
-                <span class="play-mode-dock__icon-shell" aria-hidden="true">
-                  <app-icon class="play-mode-dock__icon" [icon]="category.icon" size="dock-lg"></app-icon>
-                </span>
+                <app-icon class="play-mode-dock__icon" [icon]="category.icon" size="dock-lg" aria-hidden="true"></app-icon>
                 <span class="play-mode-dock__title">{{ category.titleKey | i18n:null:lang}}</span>
-                <span class="play-mode-dock__count">
-                  {{ 'play.categoryModesCount' | i18n:{ n: category.modeCount }:lang}}
-                </span>
               </ng-container>
               <ng-container *ngIf="dockLevel === 'modes' && playDockMode(slot) as mode">
-                <span class="play-mode-dock__icon-shell" aria-hidden="true">
-                  <app-icon class="play-mode-dock__icon" [icon]="mode.icon" size="dock-lg"></app-icon>
-                </span>
+                <app-icon class="play-mode-dock__icon" [icon]="mode.icon" size="dock-lg" aria-hidden="true"></app-icon>
                 <span class="play-mode-dock__title">{{ mode.titleKey | i18n:null:lang}}</span>
               </ng-container>
             </button>
@@ -168,5 +170,4 @@
       </button>
     </div>
   </aside>
-  </div>
 </ion-content>
