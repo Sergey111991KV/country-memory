@@ -1,7 +1,8 @@
 /**
- * Shared machine-translation helpers (Lingva → Google → MyMemory).
+ * Shared machine-translation helpers (Google → Lingva → MyMemory).
  */
-import { translate } from '@vitalets/google-translate-api';
+import { translate as translateVitalets } from '@vitalets/google-translate-api';
+import translateGoogleX from 'google-translate-api-x';
 
 const PLACEHOLDER_RE = /\{\{[^}]+\}\}/g;
 
@@ -13,8 +14,12 @@ function lingvaMirrors() {
     ? fromEnv
     : [
         'https://lingva.ml',
+        'https://translate.igna.wtf',
         'https://translate.plausibility.cloud',
-        'https://lingva.garudalinux.org',
+        'https://lingva.lunar.icu',
+        'https://translate.projectsegfau.lt',
+        'https://translate.dr460nf1r3.org',
+        'https://translate.jae.fi',
       ];
 }
 
@@ -69,6 +74,18 @@ export function restoreFromTranslation(text, tokens) {
     out = out.replaceAll(`__PH_${i}__`, tokens[i]);
   }
   return out;
+}
+
+export function isBadTranslation(text, source) {
+  if (!text || text === source) {
+    return true;
+  }
+  const upper = text.toUpperCase();
+  return (
+    upper.includes('MYMEMORY WARNING') ||
+    upper.includes('IS AN INVALID TARGET LANGUAGE') ||
+    upper.includes('QUERY LENGTH LIMIT')
+  );
 }
 
 export function needsTranslation(loc, lang, enText) {
@@ -139,14 +156,34 @@ export async function translateViaGoogle(text, lang, depth = 0) {
   }
   const to = myMemoryCode(lang);
   try {
-    const { text: out } = await translate(text, { from: 'en', to });
-    return out.trim();
+    const result = await translateGoogleX(text, { from: 'en', to });
+    const out = (result.text ?? result).trim();
+    if (!out || isBadTranslation(out, text)) {
+      throw new Error('Empty or invalid Google translation');
+    }
+    return out;
   } catch (err) {
     if (isRateLimited(err)) {
       const wait = Number(process.env.RATE_LIMIT_WAIT_MS ?? 90_000);
       console.warn(`  Google rate limited — waiting ${wait / 1000}s`);
       await sleep(wait);
       return translateViaGoogle(text, lang, depth + 1);
+    }
+    throw err;
+  }
+}
+
+async function translateViaGoogleVitalets(text, lang, depth = 0) {
+  if (depth > 2) {
+    throw new Error('Google (vitalets) rate limit retries exhausted');
+  }
+  const to = myMemoryCode(lang);
+  try {
+    const { text: out } = await translateVitalets(text, { from: 'en', to });
+    return out.trim();
+  } catch (err) {
+    if (isRateLimited(err)) {
+      throw err;
     }
     throw err;
   }
@@ -162,7 +199,12 @@ export async function translateViaMyMemory(text, lang, depth = 0) {
   url.searchParams.set('langpair', `en|${target}`);
 
   const res = await fetch(url, { signal: AbortSignal.timeout(45_000) });
-  if (res.status === 429) {
+  const body = await res.json().catch(() => ({}));
+  if (res.status === 429 || body.quotaFinished) {
+    const out = body.responseData?.translatedText ?? '';
+    if (body.quotaFinished || String(out).includes('MYMEMORY WARNING')) {
+      throw new Error('MyMemory daily quota finished');
+    }
     const wait = Number(process.env.RATE_LIMIT_WAIT_MS ?? 60_000);
     console.warn(`  rate limited — waiting ${wait / 1000}s`);
     await sleep(wait);
@@ -171,33 +213,55 @@ export async function translateViaMyMemory(text, lang, depth = 0) {
   if (!res.ok) {
     throw new Error(`MyMemory HTTP ${res.status}`);
   }
-  const body = await res.json();
   if (body.quotaFinished) {
     throw new Error('MyMemory daily quota finished');
   }
   const out = (body.responseData?.translatedText ?? text).trim();
-  if (out.includes('MYMEMORY WARNING')) {
+  if (isBadTranslation(out, text)) {
     throw new Error('MyMemory warning in response');
   }
   return out;
 }
 
+function skipMyMemory(err) {
+  const msg = String(err?.message ?? err);
+  return msg.includes('quota finished') || msg.includes('MYMEMORY WARNING');
+}
+
+function translationProviders(shielded, lang) {
+  if (process.env.MT_MYMEMORY_ONLY === '1') {
+    return [() => translateViaMyMemory(shielded, lang)];
+  }
+  if (process.env.MT_GOOGLE_ONLY === '1') {
+    return [() => translateViaGoogle(shielded, lang)];
+  }
+  if (process.env.MT_LINGVA_ONLY === '1') {
+    return [() => translateViaLingva(shielded, lang)];
+  }
+  return [
+    () => translateViaGoogle(shielded, lang),
+    () => translateViaLingva(shielded, lang),
+    () => translateViaGoogleVitalets(shielded, lang),
+    () => translateViaMyMemory(shielded, lang),
+  ];
+}
+
 export async function translateEnTo(lang, enText) {
   const { shielded, tokens } = shieldForTranslation(enText);
-  const providers =
-    process.env.MT_LINGVA_ONLY === '1'
-      ? [() => translateViaLingva(shielded, lang)]
-      : [
-          () => translateViaLingva(shielded, lang),
-          () => translateViaGoogle(shielded, lang),
-          () => translateViaMyMemory(shielded, lang),
-        ];
-  for (let attempt = 0; attempt < 4; attempt++) {
+  const providers = translationProviders(shielded, lang);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let skipMemory = false;
     for (const run of providers) {
+      if (skipMemory && run === providers.at(-1)) {
+        continue;
+      }
       try {
         const raw = await run();
         return restoreFromTranslation(raw, tokens);
       } catch (err) {
+        if (skipMyMemory(err)) {
+          skipMemory = true;
+        }
         console.warn(`  ${attempt + 1}: ${err.message}`);
       }
     }

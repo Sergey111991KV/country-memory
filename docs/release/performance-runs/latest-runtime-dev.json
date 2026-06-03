@@ -1,0 +1,37 @@
+{
+  "measuredAt": "2026-06-02T08:42:34.765Z",
+  "environment": "web-dev-playwright",
+  "viewport": "390x844 (iPhone-like)",
+  "base": "http://localhost:4205",
+  "disclaimer": "Dev server, desktop Chromium headless. Proxy for responsiveness — not a substitute for TestFlight on device.",
+  "responsiveness": {
+    "d1_cold_start_play_ms": 1085.5,
+    "d2_tab_knowledge_ms": 400.7,
+    "d4_knowledge_reentry_ms": 140,
+    "d2b_tab_progress_ms": 53.7,
+    "d5_globe_find_boot_ms": 837,
+    "d6_map_find_boot_ms": 763.9,
+    "d7_challenge_boot_ms": 187.6,
+    "d7_challenge_answer_cycle_ms": 949.6,
+    "d3_knowledge_scroll_ms": 749.6,
+    "d3_knowledge_scroll_jank": "none observed (headless)",
+    "d8_carousel_step_ms": 915.3
+  },
+  "perfLogSpans": {
+    "DailyGoal.syncFromLearning": 1.6,
+    "PlayHub.refresh": 75.3,
+    "KnowledgeBase.buildRows": 6,
+    "KnowledgeBase.refresh": 41.6,
+    "Progress.computeStats": 0.8,
+    "Progress.refresh": 4.3,
+    "GlobeQuest.catalog": 17.8,
+    "GlobeQuest.geoJson": 22.7,
+    "GlobeQuest.initGlobe": 152.6,
+    "GlobeQuest.boot": 194.5,
+    "MapQuest.catalog": 33.9,
+    "MapQuest.geoJson": 21.1,
+    "MapQuest.initMap": 36,
+    "MapQuest.boot": 99.5
+  },
+  "perfLogRawCount": 32
+}

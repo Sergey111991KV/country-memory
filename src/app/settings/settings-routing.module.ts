@@ -18,7 +18,7 @@ const routes: Routes = [
   },
   {
     path: 'how-it-works',
-    redirectTo: '/tabs/settings?panel=how-it-works',
+    redirectTo: '/tabs/settings?panel=about',
     pathMatch: 'full',
   },
   {

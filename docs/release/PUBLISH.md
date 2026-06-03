@@ -136,6 +136,8 @@ npm run cap:open:ios      # или cap:open:android
 - [ ] `environment.prod.local.ts` — RevenueCat keys, `devMockBilling: false`  
 - [ ] `npm run build:release` без ошибок  
 - [ ] `npm run test:ci`  
+- [ ] `npm run perf:measure-build` — см. [PERFORMANCE-LOG.md](PERFORMANCE-LOG.md)  
+- [ ] Device QA D1–D10 — [PERFORMANCE.md](PERFORMANCE.md)  
 - [ ] Privacy/Terms в приложении открываются  
 - [ ] Paywall показывает цены (sandbox)  
 - [ ] 10 бесплатных сессий → paywall  

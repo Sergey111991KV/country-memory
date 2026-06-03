@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   APP_LANGS,
+  isBadTranslation,
   needsTranslation,
   sleep,
   translateEnTo,
@@ -92,8 +93,27 @@ function applyLang(data, lang, cache) {
   }
 }
 
-async function fillCache(lang, enStrings, cacheStore, data) {
+function loadData() {
+  return JSON.parse(fs.readFileSync(outPath, 'utf8'));
+}
+
+function persistLang(lang, cache) {
+  const data = loadData();
+  applyLang(data, lang, cache);
+  fs.writeFileSync(outPath, `${JSON.stringify(data)}\n`);
+}
+
+function isTrivialString(en) {
+  return en.length <= 2 || /^[\s\—\-–·]+$/.test(en);
+}
+
+async function fillCache(lang, enStrings, cacheStore) {
   let i = 0;
+  for (const en of enStrings) {
+    if (isTrivialString(en) && !cacheStore.map[en]) {
+      cacheStore.map[en] = en;
+    }
+  }
   const todo = enStrings.filter((en) => !cacheStore.map[en]);
 
   console.log(`  cache: ${Object.keys(cacheStore.map).length} hit, ${todo.length} to translate`);
@@ -101,17 +121,16 @@ async function fillCache(lang, enStrings, cacheStore, data) {
   for (const en of todo) {
     i++;
     try {
-      cacheStore.map[en] = await translateEnTo(lang, en);
+      const out = await translateEnTo(lang, en);
+      if (out && !isBadTranslation(out, en)) {
+        cacheStore.map[en] = out;
+      }
     } catch (err) {
       console.warn(`  skip string (${i}/${todo.length}): ${err.message}`);
-      cacheStore.map[en] = en;
     }
     if (i % 10 === 0 || i === todo.length) {
       saveCache(cacheStore);
-      if (data) {
-        applyLang(data, lang, cacheStore.map);
-        fs.writeFileSync(outPath, `${JSON.stringify(data)}\n`);
-      }
+      persistLang(lang, cacheStore.map);
       console.log(`  translated ${i}/${todo.length}`);
     }
     await sleep(DELAY_MS);
@@ -128,9 +147,8 @@ async function main() {
   for (const lang of toRun) {
     console.log(`\n== country-knowledge → ${lang} ==`);
     const cacheStore = loadCache(lang, data);
-    await fillCache(lang, enStrings, cacheStore, data);
-    applyLang(data, lang, cacheStore.map);
-    fs.writeFileSync(outPath, `${JSON.stringify(data)}\n`);
+    await fillCache(lang, enStrings, cacheStore);
+    persistLang(lang, cacheStore.map);
     console.log(`  applied to ${outPath}`);
   }
 

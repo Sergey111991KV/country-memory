@@ -1,0 +1,37 @@
+{
+  "measuredAt": "2026-06-02T07:28:50.696Z",
+  "environment": "web-dev-proxy",
+  "base": "http://localhost:4205",
+  "note": "Dev server (unminified chunks). Use as regression trend only; native device runs go in PERFORMANCE-LOG.md.",
+  "routes": [
+    {
+      "label": "play_route",
+      "url": "/tabs/play",
+      "status": 404,
+      "ms": 41.8,
+      "bytes": 148
+    },
+    {
+      "label": "countries_json",
+      "url": "/assets/data/countries.json",
+      "status": 200,
+      "ms": 2.7,
+      "bytes": 232127
+    },
+    {
+      "label": "knowledge_route",
+      "url": "/tabs/knowledge",
+      "status": 404,
+      "ms": 1,
+      "bytes": 153
+    },
+    {
+      "label": "progress_route",
+      "url": "/tabs/progress",
+      "status": 404,
+      "ms": 0.6,
+      "bytes": 152
+    }
+  ],
+  "playTabReadyProxyMs": 41.8
+}

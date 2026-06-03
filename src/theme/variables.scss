@@ -21,7 +21,7 @@
   --app-space-6: 32px;
 
   /* Tab bar: min-height + vertical padding (see tabs.page.scss) */
-  --app-tab-bar-height: calc(70px + env(safe-area-inset-bottom, 0px));
+  --app-tab-bar-height: calc(74px + env(safe-area-inset-bottom, 0px));
 
   --ion-color-primary: #3b82f6;
   --ion-color-primary-rgb: 59, 130, 246;

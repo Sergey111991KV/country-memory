@@ -92,7 +92,7 @@ export class ProductInfoPage implements OnInit {
 
   goBack(): void {
     void this.router.navigate(['/tabs/settings'], {
-      queryParams: { panel: 'how-it-works' },
+      queryParams: { panel: 'about' },
     });
   }
 

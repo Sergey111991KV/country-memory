@@ -1,6 +1,6 @@
 import { LineBasicMaterial, Mesh, MeshBasicMaterial, type Object3D } from 'three';
 
-import { refreshGlobePolygonColors } from './globe-polygon-colors';
+import { parseCssRgba, refreshGlobePolygonColors } from './globe-polygon-colors';
 import type { GlobeCountryFeature } from './globe-geo';
 
 function mockPolygonGroup(iso2: string, continent: string): Object3D {
@@ -25,6 +25,17 @@ function mockPolygonGroup(iso2: string, continent: string): Object3D {
   };
   return group as unknown as Object3D;
 }
+
+describe('parseCssRgba', () => {
+  it('parses rgba with alpha', () => {
+    expect(parseCssRgba('rgba(15, 23, 42, 0.55)')).toEqual({
+      r: 15 / 255,
+      g: 23 / 255,
+      b: 42 / 255,
+      a: 0.55,
+    });
+  });
+});
 
 describe('refreshGlobePolygonColors', () => {
   it('updates cap color for selected country without throwing', () => {

@@ -23,8 +23,7 @@ import { LocaleService } from '../../core/services/locale.service';
 import { UserLearningService } from '../../core/services/user-learning.service';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import {
-  GLOBE_MAX_PIXEL_RATIO,
-  GLOBE_POLITICAL_CURVATURE_DEG,
+  GLOBE_BUMP_TEXTURE,
   GLOBE_POLITICAL_TEXTURE,
   type GlobeCountryFeature,
   type GlobePolygonColorState,
@@ -49,6 +48,7 @@ import { ensureThreeGlobal } from '../../core/utils/three-global';
 import { buildSoloSessionResult } from '../../core/utils/play-session-result-builders';
 import { GlobeRenderLoop } from '../../core/utils/globe-render-loop';
 import { refreshGlobePolygonColors } from '../../core/utils/globe-polygon-colors';
+import { VisualQualityService } from '../../core/services/visual-quality.service';
 
 type ThreeNamespace = typeof import('three');
 type ThreeGlobeApi = Object3D & {
@@ -103,6 +103,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private readonly perf = inject(PerfLogService);
   private readonly geoCache = inject(GeoJsonCacheService);
   private readonly knowledge = inject(CountryKnowledgeService);
+  private readonly visualQuality = inject(VisualQualityService);
 
   loading = true;
   loadError = false;
@@ -126,6 +127,10 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private resizeObserver: ResizeObserver | null = null;
   private lastPolygonStyleKey = '';
   private polygonColorsDirty = false;
+  private polygonColorDirtyIsos: Set<string> | null = null;
+  private lastColorSelectedIso: string | null = null;
+  private lastColorFeedbackCorrectIso: string | null = null;
+  private lastColorFeedbackWrongIso: string | null = null;
   private readonly polygonStyleState: GlobePolygonColorState = {
     selectedIso: null,
     feedbackCorrectIso: null,
@@ -380,18 +385,19 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     }
     const width = host.clientWidth || 360;
     const height = host.clientHeight || Math.max(280, Math.round(window.innerHeight * 0.4));
+    const globeCfg = this.visualQuality.profile().globe;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
     this.camera.position.z = 320;
 
     this.renderer = new THREE.WebGLRenderer({
-      antialias: false,
+      antialias: globeCfg.antialias,
       alpha: true,
       powerPreference: 'high-performance',
     });
     this.renderer.setSize(width, height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, GLOBE_MAX_PIXEL_RATIO));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, globeCfg.maxPixelRatio));
     host.appendChild(this.renderer.domElement);
 
     const globe = new ThreeGlobe({
@@ -399,15 +405,19 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       waitForGlobeReady: true,
     }) as unknown as ThreeGlobeApi;
 
-    globe
+    let globeLayer = globe
       .globeImageUrl(GLOBE_POLITICAL_TEXTURE)
-      .showAtmosphere(false)
+      .showAtmosphere(false);
+    if (globeCfg.useBumpMap) {
+      globeLayer = globeLayer.bumpImageUrl(GLOBE_BUMP_TEXTURE);
+    }
+    globeLayer
       .polygonsData(this.geoFeatures)
       .polygonCapColor(this.capColorFn)
       .polygonSideColor(() => 'rgba(30, 41, 59, 0.35)')
       .polygonStrokeColor(this.strokeColorFn)
       .polygonAltitude(() => POLYGON_ALTITUDE)
-      .polygonCapCurvatureResolution(GLOBE_POLITICAL_CURVATURE_DEG)
+      .polygonCapCurvatureResolution(globeCfg.polygonCurvatureDeg)
       .polygonsTransitionDuration(0)
       .onGlobeReady(() => this.renderLoop?.requestRender());
 
@@ -487,6 +497,32 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.polygonStyleState.feedbackCorrectIso = this.feedbackCorrectIso;
     this.polygonStyleState.feedbackWrongIso = this.feedbackWrongIso;
     this.polygonStyleState.phase = this.phase;
+
+    const dirtyIsos = new Set<string>();
+    if (this.lastColorSelectedIso) {
+      dirtyIsos.add(this.lastColorSelectedIso);
+    }
+    if (this.lastColorFeedbackCorrectIso) {
+      dirtyIsos.add(this.lastColorFeedbackCorrectIso);
+    }
+    if (this.lastColorFeedbackWrongIso) {
+      dirtyIsos.add(this.lastColorFeedbackWrongIso);
+    }
+    if (this.selectedIso) {
+      dirtyIsos.add(this.selectedIso);
+    }
+    if (this.feedbackCorrectIso) {
+      dirtyIsos.add(this.feedbackCorrectIso);
+    }
+    if (this.feedbackWrongIso) {
+      dirtyIsos.add(this.feedbackWrongIso);
+    }
+
+    this.lastColorSelectedIso = this.selectedIso;
+    this.lastColorFeedbackCorrectIso = this.feedbackCorrectIso;
+    this.lastColorFeedbackWrongIso = this.feedbackWrongIso;
+
+    this.polygonColorDirtyIsos = dirtyIsos.size > 0 ? dirtyIsos : null;
     this.polygonColorsDirty = true;
     this.renderLoop?.requestRender();
   }
@@ -496,7 +532,9 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       return;
     }
     this.polygonColorsDirty = false;
-    refreshGlobePolygonColors(this.globe, this.polygonStyleState);
+    const onlyIsos = this.polygonColorDirtyIsos ?? undefined;
+    refreshGlobePolygonColors(this.globe, this.polygonStyleState, onlyIsos ? { onlyIsos } : undefined);
+    this.polygonColorDirtyIsos = null;
   }
 
   private pickCountryAtPointer(clientX: number, clientY: number): void {

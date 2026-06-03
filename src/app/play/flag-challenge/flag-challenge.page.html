@@ -25,141 +25,147 @@
   </p>
 
   <ng-container *ngIf="!loading && target">
-    <div class="challenge-prompt">
-      <p class="challenge-prompt__text">{{ promptText }}</p>
-      <app-speak-button [text]="promptText"></app-speak-button>
-    </div>
+    <div class="challenge-layout">
+      <div class="challenge-stage">
+        <div class="challenge-prompt">
+          <p class="challenge-prompt__text">{{ promptText }}</p>
+          <app-speak-button [text]="promptText"></app-speak-button>
+        </div>
 
-    <div *ngIf="showFlag" class="challenge-flag">
-      <app-flag-display
-        [iso2]="target.iso2"
-        size="hero"
-        [enableCultureHold]="false"
-      ></app-flag-display>
-    </div>
+        <div *ngIf="showFlag" class="challenge-flag">
+          <app-flag-display
+            [iso2]="target.iso2"
+            size="hero"
+            [enableCultureHold]="false"
+          ></app-flag-display>
+        </div>
 
-    <div *ngIf="showCapitalPrompt" class="challenge-capital-prompt">
-      <h2 class="challenge-capital-prompt__value">
-        {{ catalog.localizedCapital(target, locale.language) }}
-      </h2>
-      <app-speak-button
-        [text]="catalog.localizedCapital(target, locale.language)"
-      ></app-speak-button>
-    </div>
-
-    <ng-container *ngIf="phase === 'pick' && passPlayBuzzer">
-      <div class="challenge-buzzer-grid">
-        <button
-          type="button"
-          *ngFor="let p of passPlayPlayerButtons"
-          class="challenge-buzzer-btn"
-          (click)="buzzIn(p.index)"
-        >
-          {{ p.name }}
-        </button>
-      </div>
-      <ion-button
-        expand="block"
-        fill="clear"
-        class="challenge-buzzer-skip"
-        (click)="skipBuzzRound()"
-      >
-        {{ 'passPlay.buzzerSkip' | i18n:null:lang}}
-      </ion-button>
-    </ng-container>
-
-    <ng-container *ngIf="phase === 'pick' && !passPlayBuzzer">
-      <div
-        *ngIf="mode === 'flag_pick_country' || mode === 'capital_pick_country'"
-        class="challenge-choices"
-      >
-        <button
-          type="button"
-          *ngFor="let c of choices"
-          class="challenge-choice"
-          [class.challenge-choice--correct]="choiceState(c.country.iso2) === 'correct'"
-          [class.challenge-choice--wrong]="choiceState(c.country.iso2) === 'wrong'"
-          (click)="pickCountry(c)"
-        >
-          <span>{{ c.label }}</span>
-          <app-speak-button [text]="c.label"></app-speak-button>
-        </button>
-      </div>
-
-      <div *ngIf="mode === 'country_pick_capital'" class="challenge-choices">
-        <button
-          type="button"
-          *ngFor="let cap of capitalChoices"
-          class="challenge-choice"
-          [class.challenge-choice--correct]="capitalChoiceState(cap) === 'correct'"
-          [class.challenge-choice--wrong]="capitalChoiceState(cap) === 'wrong'"
-          (click)="pickCapital(cap)"
-        >
-          <span>{{ cap }}</span>
-          <app-speak-button [text]="cap"></app-speak-button>
-        </button>
-      </div>
-
-      <div *ngIf="mode === 'flag_type_country'" class="challenge-type">
-        <ion-item>
-          <ion-input
-            [label]="'challenge.typeCountryLabel' | i18n:null:lang"
-            labelPlacement="stacked"
-            [(ngModel)]="typedName"
-            (keyup.enter)="verifyTyped()"
-          ></ion-input>
-        </ion-item>
-        <ion-button expand="block" (click)="verifyTyped()">
-          {{ 'globe.verify' | i18n:null:lang}}
-        </ion-button>
-      </div>
-    </ng-container>
-
-    <div *ngIf="phase === 'feedback'" class="challenge-feedback">
-      <ng-container *ngIf="passPlayBuzzer">
-        <p class="challenge-feedback__buzzer">
-          {{ 'passPlay.buzzerFirst' | i18n:{ name: buzzPlayerName }:lang}}
-        </p>
-        <p class="challenge-feedback__line">
-          {{ catalog.localizedName(target, locale.language) }}
-          ·
-          {{ catalog.localizedCapital(target, locale.language) }}
+        <div *ngIf="showCapitalPrompt" class="challenge-capital-prompt">
+          <h2 class="challenge-capital-prompt__value">
+            {{ catalog.localizedCapital(target, locale.language) }}
+          </h2>
           <app-speak-button
-            [text]="
-              catalog.localizedName(target, locale.language) +
-              ', ' +
-              catalog.localizedCapital(target, locale.language)
-            "
+            [text]="catalog.localizedCapital(target, locale.language)"
           ></app-speak-button>
-        </p>
-        <ion-button expand="block" color="success" (click)="confirmBuzzCorrect()">
-          {{ 'passPlay.buzzerCorrect' | i18n:null:lang}}
-        </ion-button>
-        <ion-button expand="block" fill="outline" color="medium" (click)="rejectBuzz()">
-          {{ 'passPlay.buzzerWrong' | i18n:null:lang}}
-        </ion-button>
-      </ng-container>
+        </div>
 
-      <ng-container *ngIf="!passPlayBuzzer">
-        <p [class.correct]="feedbackCorrect" [class.wrong]="!feedbackCorrect">
-          {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}
-        </p>
-        <p class="challenge-feedback__line">
-          {{ catalog.localizedName(target, locale.language) }}
-          ·
-          {{ catalog.localizedCapital(target, locale.language) }}
-          <app-speak-button
-            [text]="
-              catalog.localizedName(target, locale.language) +
-              ', ' +
-              catalog.localizedCapital(target, locale.language)
-            "
-          ></app-speak-button>
-        </p>
-        <ion-button expand="block" (click)="nextRound()">
-          {{ 'globe.next' | i18n:null:lang}}
-        </ion-button>
-      </ng-container>
+        <div *ngIf="phase === 'feedback'" class="challenge-feedback">
+          <ng-container *ngIf="passPlayBuzzer">
+            <p class="challenge-feedback__buzzer">
+              {{ 'passPlay.buzzerFirst' | i18n:{ name: buzzPlayerName }:lang}}
+            </p>
+            <p class="challenge-feedback__line">
+              {{ catalog.localizedName(target, locale.language) }}
+              ·
+              {{ catalog.localizedCapital(target, locale.language) }}
+              <app-speak-button
+                [text]="
+                  catalog.localizedName(target, locale.language) +
+                  ', ' +
+                  catalog.localizedCapital(target, locale.language)
+                "
+              ></app-speak-button>
+            </p>
+            <ion-button expand="block" color="success" (click)="confirmBuzzCorrect()">
+              {{ 'passPlay.buzzerCorrect' | i18n:null:lang}}
+            </ion-button>
+            <ion-button expand="block" fill="outline" color="medium" (click)="rejectBuzz()">
+              {{ 'passPlay.buzzerWrong' | i18n:null:lang}}
+            </ion-button>
+          </ng-container>
+
+          <ng-container *ngIf="!passPlayBuzzer">
+            <p [class.correct]="feedbackCorrect" [class.wrong]="!feedbackCorrect">
+              {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}
+            </p>
+            <p class="challenge-feedback__line">
+              {{ catalog.localizedName(target, locale.language) }}
+              ·
+              {{ catalog.localizedCapital(target, locale.language) }}
+              <app-speak-button
+                [text]="
+                  catalog.localizedName(target, locale.language) +
+                  ', ' +
+                  catalog.localizedCapital(target, locale.language)
+                "
+              ></app-speak-button>
+            </p>
+            <ion-button expand="block" (click)="nextRound()">
+              {{ 'globe.next' | i18n:null:lang}}
+            </ion-button>
+          </ng-container>
+        </div>
+      </div>
+
+      <div *ngIf="phase === 'pick'" class="challenge-answers">
+        <ng-container *ngIf="passPlayBuzzer">
+          <div class="challenge-buzzer-grid">
+            <button
+              type="button"
+              *ngFor="let p of passPlayPlayerButtons"
+              class="challenge-buzzer-btn"
+              (click)="buzzIn(p.index)"
+            >
+              {{ p.name }}
+            </button>
+          </div>
+          <ion-button
+            expand="block"
+            fill="clear"
+            class="challenge-buzzer-skip"
+            (click)="skipBuzzRound()"
+          >
+            {{ 'passPlay.buzzerSkip' | i18n:null:lang}}
+          </ion-button>
+        </ng-container>
+
+        <ng-container *ngIf="!passPlayBuzzer">
+          <div
+            *ngIf="mode === 'flag_pick_country' || mode === 'capital_pick_country'"
+            class="challenge-choices"
+          >
+            <button
+              type="button"
+              *ngFor="let c of choices"
+              class="challenge-choice"
+              [class.challenge-choice--correct]="choiceState(c.country.iso2) === 'correct'"
+              [class.challenge-choice--wrong]="choiceState(c.country.iso2) === 'wrong'"
+              (click)="pickCountry(c)"
+            >
+              <span>{{ c.label }}</span>
+              <app-speak-button [text]="c.label"></app-speak-button>
+            </button>
+          </div>
+
+          <div *ngIf="mode === 'country_pick_capital'" class="challenge-choices">
+            <button
+              type="button"
+              *ngFor="let cap of capitalChoices"
+              class="challenge-choice"
+              [class.challenge-choice--correct]="capitalChoiceState(cap) === 'correct'"
+              [class.challenge-choice--wrong]="capitalChoiceState(cap) === 'wrong'"
+              (click)="pickCapital(cap)"
+            >
+              <span>{{ cap }}</span>
+              <app-speak-button [text]="cap"></app-speak-button>
+            </button>
+          </div>
+
+          <div *ngIf="mode === 'flag_type_country'" class="challenge-type">
+            <ion-item>
+              <ion-input
+                [label]="'challenge.typeCountryLabel' | i18n:null:lang"
+                labelPlacement="stacked"
+                [(ngModel)]="typedName"
+                (keyup.enter)="verifyTyped()"
+              ></ion-input>
+            </ion-item>
+            <ion-button expand="block" (click)="verifyTyped()">
+              {{ 'globe.verify' | i18n:null:lang}}
+            </ion-button>
+          </div>
+        </ng-container>
+      </div>
     </div>
   </ng-container>
 </ion-content>

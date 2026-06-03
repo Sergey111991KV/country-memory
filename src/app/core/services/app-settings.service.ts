@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 
+import type { VisualQuality } from '../data/visual-quality';
+import { parseVisualQuality } from '../data/visual-quality';
 import { StorageService } from './storage.service';
 
 const KEY = 'app_settings_v2';
@@ -15,6 +17,8 @@ export interface AppSettings {
   heroTypography: HeroTypography;
   bodyTypography: BodyTypography;
   colorPalette: ColorPalette;
+  /** Globe polygon detail + flag animation intensity. */
+  visualQuality: VisualQuality;
 }
 
 const DEFAULT_PLAYER = 'Player';
@@ -56,6 +60,7 @@ export class AppSettingsService {
       heroTypography: 'comfortable',
       bodyTypography: 'default',
       colorPalette: 'ocean',
+      visualQuality: 'balanced',
     };
   }
 
@@ -94,6 +99,7 @@ export class AppSettingsService {
       heroTypography,
       bodyTypography,
       colorPalette,
+      visualQuality: parseVisualQuality(raw.visualQuality),
     };
     return this.cached;
   }

@@ -13,50 +13,56 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding knowledge-quiz-page">
+<ion-content class="ion-padding challenge-page knowledge-quiz-page">
   <p *ngIf="loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
   <p *ngIf="!loading && empty" class="knowledge-quiz-empty">
     {{ 'play.knowledgeEmpty' | i18n:null:lang}}
   </p>
 
   <ng-container *ngIf="!loading && !empty && target">
-    <div class="challenge-prompt">
-      <p>{{ promptText }}</p>
-      <app-speak-button [text]="promptText"></app-speak-button>
-    </div>
+    <div class="challenge-layout">
+      <div class="challenge-stage">
+        <div class="challenge-prompt">
+          <p class="challenge-prompt__text">{{ promptText }}</p>
+          <app-speak-button [text]="promptText"></app-speak-button>
+        </div>
 
-    <div *ngIf="kind === 'flag'" class="challenge-flag">
-      <app-flag-display [iso2]="target.iso2" size="hero" [enableCultureHold]="false"></app-flag-display>
-    </div>
+        <div *ngIf="kind === 'flag'" class="challenge-flag">
+          <app-flag-display [iso2]="target.iso2" size="hero" [enableCultureHold]="false"></app-flag-display>
+        </div>
 
-    <ng-container *ngIf="phase === 'pick'">
-      <div *ngIf="kind !== 'fact'" class="challenge-choices">
-        <button
-          type="button"
-          *ngFor="let c of choices"
-          class="challenge-choice"
-          (click)="pickCountry(c)"
-        >
-          <span>{{ c.label }}</span>
-          <app-speak-button [text]="c.label"></app-speak-button>
-        </button>
+        <div *ngIf="phase === 'feedback'" class="challenge-feedback">
+          <p [class.correct]="feedbackCorrect" [class.wrong]="!feedbackCorrect">
+            {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}
+          </p>
+          <ion-button expand="block" (click)="nextRound()">{{ 'globe.next' | i18n:null:lang}}</ion-button>
+        </div>
       </div>
-      <div *ngIf="kind === 'fact'" class="challenge-choices">
-        <button
-          type="button"
-          *ngFor="let t of factChoices"
-          class="challenge-choice"
-          (click)="pickFact(t)"
-        >
-          <span>{{ t }}</span>
-          <app-speak-button [text]="t"></app-speak-button>
-        </button>
-      </div>
-    </ng-container>
 
-    <div *ngIf="phase === 'feedback'">
-      <p>{{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}</p>
-      <ion-button expand="block" (click)="nextRound()">{{ 'globe.next' | i18n:null:lang}}</ion-button>
+      <div *ngIf="phase === 'pick'" class="challenge-answers">
+        <div *ngIf="kind !== 'fact'" class="challenge-choices">
+          <button
+            type="button"
+            *ngFor="let c of choices"
+            class="challenge-choice"
+            (click)="pickCountry(c)"
+          >
+            <span>{{ c.label }}</span>
+            <app-speak-button [text]="c.label"></app-speak-button>
+          </button>
+        </div>
+        <div *ngIf="kind === 'fact'" class="challenge-choices">
+          <button
+            type="button"
+            *ngFor="let t of factChoices"
+            class="challenge-choice"
+            (click)="pickFact(t)"
+          >
+            <span>{{ t }}</span>
+            <app-speak-button [text]="t"></app-speak-button>
+          </button>
+        </div>
+      </div>
     </div>
   </ng-container>
 </ion-content>

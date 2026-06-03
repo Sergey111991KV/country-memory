@@ -15,6 +15,7 @@ import { CountriesCatalogService } from '../../core/services/countries-catalog.s
 import { CountryCultureModalService } from '../../core/services/country-culture-modal.service';
 import { FlagAssetsService } from '../../core/services/flag-assets.service';
 import { LocaleService } from '../../core/services/locale.service';
+import { VisualQualityService } from '../../core/services/visual-quality.service';
 
 export type FlagDisplaySize = 'hero' | 'card';
 
@@ -36,6 +37,7 @@ export class FlagDisplayComponent implements AfterViewInit, OnChanges, OnDestroy
   private readonly catalog = inject(CountriesCatalogService);
   readonly locale = inject(LocaleService);
   private readonly cultureModal = inject(CountryCultureModalService);
+  private readonly visualQuality = inject(VisualQualityService);
 
   @Input({ required: true }) iso2 = '';
   @Input() size: FlagDisplaySize = 'hero';
@@ -79,6 +81,23 @@ export class FlagDisplayComponent implements AfterViewInit, OnChanges, OnDestroy
     if (changes['animate'] || changes['iso2']) {
       this.scheduleWindSync();
     }
+  }
+
+  /** Respects Settings → Globe & flag detail. */
+  get flagAnimActive(): boolean {
+    return this.animate && this.visualQuality.profile().flag.animate;
+  }
+
+  get flagWindDisplacement(): boolean {
+    return this.flagAnimActive && this.visualQuality.profile().flag.windDisplacement;
+  }
+
+  get flagSheen(): boolean {
+    return this.flagAnimActive && this.visualQuality.profile().flag.sheen;
+  }
+
+  get flagWindFilterStyle(): string | null {
+    return this.flagWindDisplacement ? this.windFilterStyle : null;
   }
 
   ngOnDestroy(): void {
@@ -141,14 +160,14 @@ export class FlagDisplayComponent implements AfterViewInit, OnChanges, OnDestroy
 
   private syncWindAnimations(): void {
     this.cancelWindAnimations();
-    if (!this.animate || this.imageError || !this.src) {
+    if (!this.flagAnimActive || this.imageError || !this.src) {
       return;
     }
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
     const svg = this.windSvg?.nativeElement;
-    if (!svg) {
+    if (!svg || !this.flagWindDisplacement) {
       return;
     }
     const timing: KeyframeAnimationOptions = {

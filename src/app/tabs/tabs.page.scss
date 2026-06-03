@@ -18,15 +18,16 @@ ion-tab-bar {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  min-height: calc(62px + env(safe-area-inset-bottom, 0px));
+  min-height: calc(72px + env(safe-area-inset-bottom, 0px));
   --border: 1px solid color-mix(in srgb, #ffffff 10%, transparent);
   --background: #16122b;
   background: #16122b;
   padding-top: 8px;
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 10px);
   padding-left: max(10px, env(safe-area-inset-left, 0px));
   padding-right: max(10px, env(safe-area-inset-right, 0px));
   box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+  overflow: visible;
 }
 
 ion-tab-button {
@@ -46,10 +47,14 @@ ion-tab-button ion-label {
   font-style: normal !important;
   letter-spacing: 0 !important;
   text-transform: none !important;
-  line-height: 1.15;
+  line-height: 1.25;
+  height: auto !important;
   display: block;
   max-width: 100%;
-  overflow: hidden;
+  min-height: 1.25em;
+  margin-bottom: 2px;
+  overflow-x: hidden;
+  overflow-y: visible;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -57,11 +62,12 @@ ion-tab-button ion-label {
 ion-tab-button::part(native) {
   border-radius: 14px;
   margin: 2px 1px;
-  padding-top: 8px;
-  padding-bottom: 6px;
+  padding-top: 6px;
+  padding-bottom: 8px;
   padding-inline: 2px;
   max-width: 100%;
   box-sizing: border-box;
+  overflow: visible;
 }
 
 ion-tab-button ion-icon {

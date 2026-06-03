@@ -79,6 +79,13 @@ export interface CountryKnowledgeEntry {
   currencyName: LocalizedString;
   population: number;
   areaKm2: number;
+  /** Nominal GDP in current US$ (World Bank). */
+  gdpUsd?: number;
+  /** Latest observation year per metric (may be 2024 when 2025 is not published yet). */
+  metricsYear?: number;
+  metricsPopulationYear?: number;
+  metricsAreaYear?: number;
+  metricsGdpYear?: number;
   subregion: LocalizedString;
   facts: CountryFact[];
 }
@@ -87,6 +94,10 @@ export interface CountryKnowledgeFile {
   version: number;
   generatedAt: string;
   factCountPerCountry: number;
+  /** Official reference edition year for bundled metrics. */
+  metricsReferenceYear?: number;
+  metricsSource?: string;
+  metricsUpdatedAt?: string;
   countries: Record<string, CountryKnowledgeEntry>;
 }
 

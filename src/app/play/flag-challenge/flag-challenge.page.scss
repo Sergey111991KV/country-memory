@@ -1,5 +1,37 @@
 .challenge-page {
   font-family: var(--app-font-ui);
+
+  &::part(scroll) {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+}
+
+.challenge-layout {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 100%;
+  width: 100%;
+}
+
+.challenge-stage {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--app-space-4);
+  width: 100%;
+  min-height: 0;
+}
+
+.challenge-answers {
+  flex: 0 0 auto;
+  width: 100%;
+  margin-top: auto;
+  padding-top: var(--app-space-4);
 }
 
 .challenge-pass-play-turn {
@@ -62,22 +94,27 @@
 
 .challenge-prompt {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: var(--app-space-2);
-  margin-bottom: var(--app-space-4);
+  width: 100%;
+  max-width: 28rem;
+  margin: 0;
+  text-align: center;
 
   &__text {
-    flex: 1;
     margin: 0;
     font-size: 1.05rem;
     font-weight: 500;
+    line-height: 1.45;
   }
 }
 
 .challenge-flag {
   display: flex;
   justify-content: center;
-  margin-bottom: var(--app-space-4);
+  margin: 0;
 }
 
 .challenge-capital-prompt {
@@ -85,7 +122,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--app-space-2);
-  margin-bottom: var(--app-space-4);
+  margin: 0;
+  text-align: center;
 
   &__value {
     margin: 0;
@@ -126,7 +164,7 @@
 }
 
 .challenge-type {
-  margin-top: var(--app-space-2);
+  margin-top: 0;
 }
 
 .challenge-feedback {

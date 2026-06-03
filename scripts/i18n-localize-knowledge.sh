@@ -15,13 +15,13 @@ echo "$$" >"$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 export SKIP_EXISTING=1
-export MT_LINGVA_ONLY=1
-export LINGVA_MIRRORS='https://lingva.ml'
-export DELAY_MS="${DELAY_MS:-1200}"
+unset MT_MYMEMORY_ONLY MT_GOOGLE_ONLY MT_LINGVA_ONLY
+export DELAY_MS="${DELAY_MS:-2000}"
 export SAVE_EVERY="${SAVE_EVERY:-15}"
-export RATE_LIMIT_WAIT_MS="${RATE_LIMIT_WAIT_MS:-90000}"
+export RATE_LIMIT_WAIT_MS="${RATE_LIMIT_WAIT_MS:-60000}"
 
-LANGS=(es de fr uk zh hi ar pt ja ko it tr vi id pl nl bn ur)
+# uk done offline; continue MT for remaining langs
+LANGS=(zh hi ar pt ja ko it tr vi id pl nl bn ur)
 for lang in "${LANGS[@]}"; do
   echo "========== $lang =========="
   node scripts/localize-country-knowledge.mjs "$lang" || true

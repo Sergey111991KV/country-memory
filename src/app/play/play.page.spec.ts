@@ -36,11 +36,17 @@ describe('PlayPage launchMode', () => {
 
     playPool = jasmine.createSpyObj('PlayPoolService', [
       'getFreePool',
+      'getFilteredFreePool',
       'getLearnedCountries',
+      'getFilteredLearnedCountries',
       'poolForTier',
     ]);
     playPool.getFreePool.and.returnValue(Promise.resolve(FIXTURE_COUNTRIES));
+    playPool.getFilteredFreePool.and.returnValue(Promise.resolve(FIXTURE_COUNTRIES));
     playPool.getLearnedCountries.and.returnValue(
+      Promise.resolve(FIXTURE_COUNTRIES),
+    );
+    playPool.getFilteredLearnedCountries.and.returnValue(
       Promise.resolve(FIXTURE_COUNTRIES),
     );
     playPool.poolForTier.and.returnValue(Promise.resolve(FIXTURE_COUNTRIES));
@@ -167,7 +173,7 @@ describe('PlayPage launchMode', () => {
     ).find((m) => m.id === 'flag_pick_country');
     playSession.clear();
     await component.launchMode(slide!);
-    expect(playPool.getFreePool).toHaveBeenCalled();
+    expect(playPool.getFilteredFreePool).toHaveBeenCalled();
   });
 
   it('sets learned pool for recall challenge', async () => {
@@ -176,6 +182,6 @@ describe('PlayPage launchMode', () => {
     ).find((m) => m.id === 'recall_flag_pick_country');
     playSession.clear();
     await component.launchMode(slide!);
-    expect(playPool.getLearnedCountries).toHaveBeenCalled();
+    expect(playPool.getFilteredLearnedCountries).toHaveBeenCalled();
   });
 });

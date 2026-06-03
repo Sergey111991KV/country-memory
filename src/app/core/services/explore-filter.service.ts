@@ -5,7 +5,6 @@ import { EXPLORE_TOP_N } from '../data/explore-filters';
 import type { Country } from '../data/country.types';
 import { CountriesCatalogService } from './countries-catalog.service';
 import { CountryKnowledgeService } from './country-knowledge.service';
-import { GeoJsonCacheService } from './geo-json-cache.service';
 import { PlayPoolService } from './play-pool.service';
 
 const SPANISH_LANG = /spanish|español|castellano/i;
@@ -15,7 +14,6 @@ export class ExploreFilterService {
   private readonly catalog = inject(CountriesCatalogService);
   private readonly knowledge = inject(CountryKnowledgeService);
   private readonly playPool = inject(PlayPoolService);
-  private readonly geoCache = inject(GeoJsonCacheService);
 
   async getMatchingCountries(filterId: ExploreFilterId): Promise<Country[]> {
     await this.catalog.ensureLoaded();
@@ -67,19 +65,15 @@ export class ExploreFilterService {
       .map((c) => c.iso2.toUpperCase());
   }
 
-  private async topByGdp(countries: Country[]): Promise<string[]> {
-    const gdp = await this.loadGdpByIso();
+  private topByGdp(countries: Country[]): string[] {
     return [...countries]
-      .filter((c) => (gdp.get(c.iso2.toUpperCase()) ?? 0) > 0)
+      .filter((c) => (this.knowledge.getEntry(c.iso2)?.gdpUsd ?? 0) > 0)
       .sort(
         (a, b) =>
-          (gdp.get(b.iso2.toUpperCase()) ?? 0) - (gdp.get(a.iso2.toUpperCase()) ?? 0),
+          (this.knowledge.getEntry(b.iso2)?.gdpUsd ?? 0) -
+          (this.knowledge.getEntry(a.iso2)?.gdpUsd ?? 0),
       )
       .slice(0, EXPLORE_TOP_N)
       .map((c) => c.iso2.toUpperCase());
-  }
-
-  private async loadGdpByIso(): Promise<Map<string, number>> {
-    return this.geoCache.getGdpByIso();
   }
 }

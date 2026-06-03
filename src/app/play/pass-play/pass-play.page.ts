@@ -140,7 +140,7 @@ export class PassPlayPage implements ViewWillEnter {
       const players = this.playerNames
         .map((n) => n.trim())
         .filter((n) => n.length > 0);
-      const pool = await this.playPool.getFreePool();
+      const pool = await this.playPool.getFilteredFreePool();
       this.playSession.clear();
       this.playSession.setPool(pool);
       const session = createPassPlaySession(

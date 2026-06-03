@@ -144,6 +144,82 @@
       </div>
     </ion-accordion>
 
+    <ion-accordion value="learning" class="settings-accordion mem-surface">
+      <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
+        <ion-label>
+          <h2>{{ 'settings.sectionLearning' | i18n:null:lang}}</h2>
+          <p>{{ 'settings.sectionLearningSub' | i18n:null:lang}}</p>
+        </ion-label>
+      </ion-item>
+      <div slot="content" class="settings-acc-panel">
+        <ion-text color="medium" class="ion-text-wrap settings-learning-intro">
+          <p>{{ 'settings.metricFilterIntro' | i18n:{ year: metricsReferenceYear }:lang}}</p>
+        </ion-text>
+
+        <ion-list [inset]="true" class="settings-list settings-list--in-card">
+          <ion-item>
+            <ion-select
+              [label]="'settings.metricFilterPopulation' | i18n:null:lang"
+              [value]="metricFilters.population"
+              (ionChange)="onMetricFilterChange('population', $event)"
+              interface="popover"
+            >
+              <ion-select-option
+                *ngFor="let tier of metricFilterTiers"
+                [value]="tier"
+              >
+                {{ metricFilterTierLabel('population', tier) }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-select
+              [label]="'settings.metricFilterArea' | i18n:null:lang"
+              [value]="metricFilters.area"
+              (ionChange)="onMetricFilterChange('area', $event)"
+              interface="popover"
+            >
+              <ion-select-option
+                *ngFor="let tier of metricFilterTiers"
+                [value]="tier"
+              >
+                {{ metricFilterTierLabel('area', tier) }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-select
+              [label]="'settings.metricFilterGdp' | i18n:null:lang"
+              [value]="metricFilters.gdp"
+              (ionChange)="onMetricFilterChange('gdp', $event)"
+              interface="popover"
+            >
+              <ion-select-option
+                *ngFor="let tier of metricFilterTiers"
+                [value]="tier"
+              >
+                {{ metricFilterTierLabel('gdp', tier) }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-list>
+
+        <p class="settings-metric-pool-line">
+          {{ 'settings.metricFilterPoolCount' | i18n:{ n: filteredPoolCount, total: tierPoolCount }:lang}}
+        </p>
+
+        <ion-button
+          expand="block"
+          fill="outline"
+          color="medium"
+          [disabled]="!metricFiltersActive"
+          (click)="resetMetricFilters()"
+        >
+          {{ 'settings.metricFilterReset' | i18n:null:lang}}
+        </ion-button>
+      </div>
+    </ion-accordion>
+
     <ion-accordion value="display" class="settings-accordion mem-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
@@ -157,6 +233,23 @@
             <ion-toggle [checked]="isDarkTheme" (ionChange)="onThemeToggle($event)">
               {{ 'settings.darkTheme' | i18n:null:lang}}
             </ion-toggle>
+          </ion-item>
+          <ion-item>
+            <ion-select
+              [label]="'settings.visualQuality' | i18n:null:lang"
+              [value]="visualQuality"
+              (ionChange)="onVisualQualityChange($event)"
+              interface="popover"
+            >
+              <ion-select-option value="performance">{{ 'settings.visualQualityPerformance' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="balanced">{{ 'settings.visualQualityBalanced' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="quality">{{ 'settings.visualQualityQuality' | i18n:null:lang}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-text color="medium" class="ion-text-wrap small-hint">
+              <p class="ion-no-margin">{{ 'settings.visualQualityHint' | i18n:null:lang}}</p>
+            </ion-text>
           </ion-item>
           <ion-item>
             <ion-select
@@ -245,24 +338,6 @@
       </div>
     </ion-accordion>
 
-    <ion-accordion value="how-it-works" class="settings-accordion mem-surface">
-      <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
-        <ion-label>
-          <h2>{{ 'settings.sectionHowItWorks' | i18n:null:lang}}</h2>
-          <p>{{ 'settings.sectionHowItWorksSub' | i18n:null:lang}}</p>
-        </ion-label>
-      </ion-item>
-      <div slot="content" class="settings-acc-panel">
-        <ion-text color="medium" class="ion-text-wrap settings-how-hint">
-          <p class="ion-no-margin">{{ 'settings.howItWorksHint' | i18n:null:lang}}</p>
-        </ion-text>
-        <ion-button expand="block" class="ion-margin-top" routerLink="/tabs/settings/about-product">
-          <ion-icon slot="start" name="play-circle-outline" aria-hidden="true"></ion-icon>
-          {{ 'settings.openHowItWorks' | i18n:null:lang}}
-        </ion-button>
-      </div>
-    </ion-accordion>
-
     <ion-accordion value="about" class="settings-accordion mem-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
@@ -292,6 +367,17 @@
             </ion-text>
           </p>
         </div>
+
+        <section class="settings-about-tour" aria-labelledby="settings-about-tour-heading">
+          <h3 id="settings-about-tour-heading" class="settings-about-tour__title">
+            {{ 'settings.sectionHowItWorks' | i18n:null:lang}}
+          </h3>
+          <p class="settings-about-tour__hint">{{ 'settings.howItWorksHint' | i18n:null:lang}}</p>
+          <ion-button expand="block" routerLink="/tabs/settings/about-product">
+            <ion-icon slot="start" name="play-circle-outline" aria-hidden="true"></ion-icon>
+            {{ 'settings.openHowItWorks' | i18n:null:lang}}
+          </ion-button>
+        </section>
       </div>
     </ion-accordion>
 

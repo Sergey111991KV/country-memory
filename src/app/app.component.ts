@@ -14,6 +14,7 @@ import { AppLogService } from './core/services/app-log.service';
 import { SubscriptionService } from './core/services/subscription.service';
 import { ThemeService } from './core/services/theme.service';
 import { UserLearningService } from './core/services/user-learning.service';
+import { VisualQualityService } from './core/services/visual-quality.service';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -32,6 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly displayText = inject(DisplayTextService);
   private readonly appSettings = inject(AppSettingsService);
   private readonly userLearning = inject(UserLearningService);
+  private readonly visualQuality = inject(VisualQualityService);
 
   async ngOnInit(): Promise<void> {
     await this.locale.hydrate();
@@ -40,6 +42,7 @@ export class AppComponent implements OnInit, OnDestroy {
     const settings = await this.appSettings.load();
     applyBodyTypographyClass(settings.bodyTypography);
     applyColorPaletteClass(settings.colorPalette);
+    await this.visualQuality.hydrate();
     await this.subscription.init();
     await this.appLog.log('app', 'Application started', {
       version: environment.appVersion,

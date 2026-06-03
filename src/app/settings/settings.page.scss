@@ -479,10 +479,25 @@ html.ion-palette-dark .premium-benefits {
   color: var(--ion-color-warning) !important;
 }
 
-.settings-how-hint {
-  display: block;
+.settings-about-tour {
+  margin-top: var(--app-space-3);
+  padding-top: var(--app-space-3);
+  border-top: 1px solid color-mix(in srgb, var(--ion-color-medium) 22%, transparent);
+}
+
+.settings-about-tour__title {
+  margin: 0 0 var(--app-space-2);
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.settings-about-tour__hint {
+  margin: 0 0 var(--app-space-3);
   font-size: 0.9rem;
   line-height: 1.45;
+  color: var(--ion-color-medium);
+  text-align: left;
 }
 
 .settings-about-product {

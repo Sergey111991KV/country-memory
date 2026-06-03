@@ -3,7 +3,7 @@
   class="flag-display"
   [class.flag-display--hero]="size === 'hero'"
   [class.flag-display--card]="size === 'card'"
-  [class.flag-display--animate]="animate"
+  [class.flag-display--animate]="flagAnimActive"
   [class.flag-display--holdable]="enableCultureHold"
   [attr.role]="countryLabel ? 'img' : null"
   [attr.aria-label]="countryLabel || holdAriaLabel || null"
@@ -20,7 +20,7 @@
   >
     <svg
       #windSvg
-      *ngIf="animate && !imageError && src"
+      *ngIf="flagWindDisplacement && !imageError && src"
       class="flag-wind-svg"
       aria-hidden="true"
       focusable="false"
@@ -45,11 +45,11 @@
         </filter>
       </defs>
     </svg>
-    <div *ngIf="animate && !imageError && src" class="flag-wind__motion">
+    <div *ngIf="flagAnimActive && !imageError && src" class="flag-wind__motion">
       <img
         class="flag-wind__img"
         [src]="src"
-        [style.filter]="windFilterStyle"
+        [style.filter]="flagWindFilterStyle"
         alt=""
         loading="lazy"
         decoding="async"
@@ -58,7 +58,7 @@
       />
     </div>
     <img
-      *ngIf="!animate && !imageError && src"
+      *ngIf="!flagAnimActive && !imageError && src"
       [src]="src"
       alt=""
       loading="lazy"
@@ -67,7 +67,7 @@
       (error)="onImageError()"
     />
     <span *ngIf="imageError" class="flag-display__fallback" aria-hidden="true">🏳️</span>
-    <span class="flag-display__sheen" aria-hidden="true"></span>
+    <span *ngIf="flagSheen" class="flag-display__sheen" aria-hidden="true"></span>
     <span *ngIf="enableCultureHold && holdHintVisible" class="flag-display__hold-ring" aria-hidden="true"></span>
   </div>
   <p *ngIf="enableCultureHold && size === 'hero'" class="flag-display__hold-hint">{{ 'flag.holdExplore' | i18n:null:lang}}</p>

@@ -337,6 +337,14 @@ ion-popover.knowledge-hints-popover {
   border-bottom: 1px solid color-mix(in srgb, var(--ion-color-medium) 24%, transparent);
 }
 
+ion-toolbar ion-buttons[slot='end']:has(ion-note) {
+  padding-inline-end: var(--app-space-3);
+}
+
+ion-toolbar ion-buttons[slot='end'] ion-note {
+  font-size: 0.8rem;
+}
+
 .app-page-toolbar__title {
   flex: 1;
   margin: 0;
@@ -388,8 +396,13 @@ ion-tab-bar ion-tab-button ion-label {
   font-style: normal !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
+  line-height: 1.25;
+  height: auto !important;
   max-width: 100%;
-  overflow: hidden;
+  min-height: 1.25em;
+  margin-bottom: 2px;
+  overflow-x: hidden;
+  overflow-y: visible;
   text-overflow: ellipsis;
 }
 

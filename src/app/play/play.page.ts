@@ -513,12 +513,16 @@ export class PlayPage implements OnInit, ViewWillEnter {
     }
 
     if (slide.action.type === 'free') {
-      const pool = await this.playPool.getFreePool();
+      const pool = await this.playPool.getFilteredFreePool();
+      if (pool.length < 2) {
+        await this.presentRecallEmptyAlert('settings.metricFilterEmptyPool');
+        return;
+      }
       this.playSession.clear();
       this.playSession.setPool(pool);
       this.playSession.setMeta({ kind: 'default' });
     } else if (slide.action.type === 'recall_challenge') {
-      const learned = await this.playPool.getLearnedCountries();
+      const learned = await this.playPool.getFilteredLearnedCountries();
       const min = slide.action.mode === 'flag_type_country' ? 1 : 4;
       playDebug('PlayHub', 'recall pool', { learned: learned.length, min });
       if (learned.length < min) {
@@ -544,10 +548,10 @@ export class PlayPage implements OnInit, ViewWillEnter {
       const levelId = slide.action.levelId;
       let pool = await this.playPool.poolForTier();
       if (levelId === 'facts-starter') {
-        pool = await this.playPool.getFreePool();
+        pool = await this.playPool.getFilteredFreePool();
       }
       if (pool.length < 2) {
-        await this.presentRecallEmptyAlert('course.emptyPool');
+        await this.presentRecallEmptyAlert('settings.metricFilterEmptyPool');
         return;
       }
       this.playSession.clear();

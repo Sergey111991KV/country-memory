@@ -4,6 +4,7 @@ import type { Country, CountryFact } from '../data/country.types';
 import { FREE_TIER_COUNTRY_ISOS } from '../data/play-tier.constants';
 import { CountriesCatalogService } from './countries-catalog.service';
 import { CountryKnowledgeService } from './country-knowledge.service';
+import { CountryMetricFilterService } from './country-metric-filter.service';
 import { SubscriptionService } from './subscription.service';
 import { UserLearnedService } from './user-learned.service';
 
@@ -13,6 +14,7 @@ export class PlayPoolService {
   private readonly knowledge = inject(CountryKnowledgeService);
   private readonly learned = inject(UserLearnedService);
   private readonly sub = inject(SubscriptionService);
+  private readonly metricFilter = inject(CountryMetricFilterService);
 
   private readonly freeIsoSet = new Set<string>(
     FREE_TIER_COUNTRY_ISOS.map((x) => x.toUpperCase()),
@@ -35,7 +37,18 @@ export class PlayPoolService {
   }
 
   async poolForTier(): Promise<Country[]> {
-    return this.isPremium() ? this.getFullPool() : this.getFreePool();
+    const base = this.isPremium() ? await this.getFullPool() : await this.getFreePool();
+    return this.metricFilter.apply(base);
+  }
+
+  /** Free tier pool with active metric filters applied (for launching games). */
+  async getFilteredFreePool(): Promise<Country[]> {
+    return this.metricFilter.apply(await this.getFreePool());
+  }
+
+  /** Learned countries with active metric filters applied (for recall modes). */
+  async getFilteredLearnedCountries(): Promise<Country[]> {
+    return this.metricFilter.apply(await this.getLearnedCountries());
   }
 
   async getLearnedCountries(): Promise<Country[]> {

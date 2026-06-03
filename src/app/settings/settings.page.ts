@@ -14,6 +14,8 @@ import {
   type ColorPalette,
   type HeroTypography,
 } from '../core/services/app-settings.service';
+import type { VisualQuality } from '../core/data/visual-quality';
+import { VisualQualityService } from '../core/services/visual-quality.service';
 import { DisplayTextService } from '../core/services/display-text.service';
 import { LegalLinksService } from '../core/services/legal-links.service';
 import { LocaleService } from '../core/services/locale.service';
@@ -21,6 +23,16 @@ import { SessionAccessService } from '../core/services/session-access.service';
 import { SubscriptionService } from '../core/services/subscription.service';
 import { LocalAuthService } from '../core/services/local-auth.service';
 import { ThemeService } from '../core/services/theme.service';
+import {
+  METRIC_FILTER_TIER_OPTIONS,
+  METRICS_REFERENCE_YEAR,
+  metricFilterTierKey,
+  type CountryMetricFilters,
+  type CountryMetricKind,
+  type MetricFilterTier,
+} from '../core/data/country-metric-filters';
+import { CountryMetricFilterService } from '../core/services/country-metric-filter.service';
+import { PlayPoolService } from '../core/services/play-pool.service';
 import { environment } from '../../environments/environment';
 
 export interface SettingsSupportBlock {
@@ -53,7 +65,13 @@ export class SettingsPage implements OnInit, ViewWillEnter {
   private readonly alertCtrl = inject(AlertController);
   readonly sub = inject(SubscriptionService);
   private readonly sessionAccess = inject(SessionAccessService);
+  private readonly metricFiltersService = inject(CountryMetricFilterService);
+  private readonly playPool = inject(PlayPoolService);
   readonly displayText = inject(DisplayTextService);
+  private readonly visualQualityService = inject(VisualQualityService);
+
+  readonly metricsReferenceYear = METRICS_REFERENCE_YEAR;
+  readonly metricFilterTiers = METRIC_FILTER_TIER_OPTIONS;
 
   readonly billingDebugEnabled = environment.billingDebugEnabled || environment.devMockBilling || !environment.production;
   readonly freeGamesLimit = environment.freeGamesLimit;
@@ -113,9 +131,18 @@ export class SettingsPage implements OnInit, ViewWillEnter {
   heroTypography: HeroTypography = 'comfortable';
   bodyTypography: BodyTypography = 'default';
   colorPalette: ColorPalette = 'ocean';
+  visualQuality: VisualQuality = 'balanced';
   heroTitleCustom = '';
   heroSubShortCustom = '';
   heroSubLongCustom = '';
+  metricFilters: CountryMetricFilters = {
+    population: 'any',
+    area: 'any',
+    gdp: 'any',
+  };
+  metricFiltersActive = false;
+  filteredPoolCount = 0;
+  tierPoolCount = 0;
 
   ngOnInit(): void {
     this.applyPanelFromRoute();
@@ -229,6 +256,16 @@ export class SettingsPage implements OnInit, ViewWillEnter {
     const prev = await this.appSettings.load();
     await this.appSettings.save({ ...prev, bodyTypography: v });
     applyBodyTypographyClass(v);
+    await this.toastSaved();
+  }
+
+  async onVisualQualityChange(ev: CustomEvent): Promise<void> {
+    const v = String(ev.detail.value) as VisualQuality;
+    if (v !== 'performance' && v !== 'balanced' && v !== 'quality') {
+      return;
+    }
+    this.visualQuality = v;
+    await this.visualQualityService.setLevel(v);
     await this.toastSaved();
   }
 
@@ -366,6 +403,40 @@ export class SettingsPage implements OnInit, ViewWillEnter {
     await this.theme.setTheme(checked ? 'dark' : 'light');
   }
 
+  async onMetricFilterChange(
+    kind: CountryMetricKind,
+    ev: CustomEvent,
+  ): Promise<void> {
+    const tier = String(ev.detail.value) as MetricFilterTier;
+    await this.metricFiltersService.setFilters({
+      ...this.metricFilters,
+      [kind]: tier,
+    });
+    await this.syncMetricFilters();
+    await this.toastSaved();
+  }
+
+  async resetMetricFilters(): Promise<void> {
+    await this.metricFiltersService.resetFilters();
+    await this.syncMetricFilters();
+    await this.toastSaved();
+  }
+
+  metricFilterTierLabel(kind: CountryMetricKind, tier: MetricFilterTier): string {
+    return this.i18n.translate(metricFilterTierKey(kind, tier));
+  }
+
+  private async syncMetricFilters(): Promise<void> {
+    this.metricFilters = this.metricFiltersService.getFilters();
+    this.metricFiltersActive = this.metricFiltersService.isActive();
+    const base = this.sub.isSubscribed()
+      ? await this.playPool.getFullPool()
+      : await this.playPool.getFreePool();
+    this.tierPoolCount = base.length;
+    this.filteredPoolCount = this.metricFiltersService.countMatching(base);
+    this.cdr.markForCheck();
+  }
+
   async load(): Promise<void> {
     await this.sub.init();
     await this.sessionAccess.hydrate();
@@ -383,8 +454,12 @@ export class SettingsPage implements OnInit, ViewWillEnter {
     this.heroTypography = settings.heroTypography;
     this.bodyTypography = settings.bodyTypography;
     this.colorPalette = settings.colorPalette;
+    this.visualQuality = settings.visualQuality;
+    await this.visualQualityService.hydrate();
     applyBodyTypographyClass(settings.bodyTypography);
     applyColorPaletteClass(settings.colorPalette);
+    await this.metricFiltersService.hydrate();
+    await this.syncMetricFilters();
     this.cdr.markForCheck();
   }
 
@@ -392,9 +467,7 @@ export class SettingsPage implements OnInit, ViewWillEnter {
     const panel = this.route.snapshot.queryParamMap.get('panel');
     if (panel === 'support') {
       this.accordionValue = 'support';
-    } else if (panel === 'how-it-works' || panel === 'tour') {
-      this.accordionValue = 'how-it-works';
-    } else if (panel === 'about') {
+    } else if (panel === 'how-it-works' || panel === 'tour' || panel === 'about') {
       this.accordionValue = 'about';
     }
   }
