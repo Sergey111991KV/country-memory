@@ -38,23 +38,31 @@ export class LoginPage implements OnInit {
     this.busy = true;
     try {
       await this.auth.setDisplayName(this.username);
-      const settings = await this.appSettings.load();
-      await this.appSettings.save({
-        ...settings,
-        primaryPlayerName: this.auth.displayName(),
-      });
-      await this.appLog.log('account', 'Profile name set', {
-        name: this.auth.displayName(),
-      });
-      void this.router.navigate(['/tabs/play']);
+      void this.router.navigate(['/tabs/play'], { replaceUrl: true });
+      void this.syncProfileSettings();
     } catch (e) {
       const code = e instanceof Error ? e.message : 'USERNAME_SHORT';
       this.errorKey =
         code === 'USERNAME_SHORT'
           ? 'auth.errorUsernameShort'
           : 'auth.errorInvalid';
-    } finally {
       this.busy = false;
+    }
+  }
+
+  /** Non-blocking: settings + log after navigation so the UI does not freeze. */
+  private async syncProfileSettings(): Promise<void> {
+    try {
+      const settings = await this.appSettings.load();
+      await this.appSettings.save({
+        ...settings,
+        primaryPlayerName: this.auth.displayName(),
+      });
+      void this.appLog.log('account', 'Profile name set', {
+        name: this.auth.displayName(),
+      });
+    } catch {
+      /* profile is already in memory; settings sync can retry from Settings */
     }
   }
 }

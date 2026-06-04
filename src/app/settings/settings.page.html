@@ -1,5 +1,8 @@
 @let lang = i18n.langSig();
-<ion-content class="ion-padding settings-page page-safe-top settings-page--rhythm">
+<ion-content
+  #settingsContent
+  class="ion-padding settings-page page-safe-top settings-page--rhythm"
+>
   <ion-accordion-group
     [multiple]="false"
     [value]="accordionValue"

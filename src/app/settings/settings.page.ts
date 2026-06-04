@@ -1,6 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController, ToastController, ViewWillEnter } from '@ionic/angular';
+import { AlertController, IonContent, ToastController, ViewWillEnter } from '@ionic/angular';
 
 import type { AppLang } from '../core/i18n/messages';
 import { MESSAGES } from '../core/i18n/messages';
@@ -51,6 +58,8 @@ export interface SettingsSupportBlock {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsPage implements OnInit, ViewWillEnter {
+  @ViewChild('settingsContent') private settingsContent?: IonContent;
+
   private readonly appSettings = inject(AppSettingsService);
   private readonly toastCtrl = inject(ToastController);
   protected readonly i18n = inject(LocaleService);
@@ -153,7 +162,12 @@ export class SettingsPage implements OnInit, ViewWillEnter {
 
   ionViewWillEnter(): void {
     this.applyPanelFromRoute();
+    void this.scrollToTop();
     void this.load();
+  }
+
+  private async scrollToTop(): Promise<void> {
+    await this.settingsContent?.scrollToTop(0);
   }
 
   isSupportBlockEnabled(block: SettingsSupportBlock): boolean {

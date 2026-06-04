@@ -23,6 +23,7 @@
     color-mix(in srgb, var(--ion-color-primary) 6%, var(--ion-background-color)) 0%,
     var(--ion-background-color) 38%
   );
+  --padding-bottom: calc(var(--app-tab-bar-height, 74px) + var(--app-space-4));
 }
 
 .settings-accordion-group {

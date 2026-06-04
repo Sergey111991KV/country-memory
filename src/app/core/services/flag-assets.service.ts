@@ -13,7 +13,7 @@ export class FlagAssetsService {
     return this.url(iso2, 320);
   }
 
-  private url(iso2: string, width: 320 | 640): string {
+  url(iso2: string, width: 160 | 320 | 640): string {
     const code = iso2.trim().toLowerCase();
     if (!/^[a-z]{2}$/.test(code)) {
       return '';

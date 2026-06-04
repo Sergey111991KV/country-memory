@@ -1,6 +1,6 @@
 @let lang = locale.langSig();
-<ion-content class="knowledge-page page-safe-top" [fullscreen]="true">
-  <div class="knowledge-shell" *ngIf="!loading; else loadingTpl">
+<ion-content #knowledgeContent class="knowledge-page page-safe-top" [fullscreen]="true">
+  <div class="knowledge-shell">
     <header class="knowledge-header">
       <div class="knowledge-header__text">
         <p class="knowledge-header__brand">Flagfield</p>
@@ -9,6 +9,9 @@
       </div>
     </header>
 
+    <p *ngIf="loading" class="knowledge-loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
+
+    <ng-container *ngIf="!loading">
     <section class="knowledge-block" aria-labelledby="knowledge-summary-heading">
       <h2 id="knowledge-summary-heading" class="knowledge-kicker">{{ 'knowledge.summaryLead' | i18n:null:lang}}</h2>
       <p class="knowledge-summary-line">
@@ -191,9 +194,6 @@
         </article>
       </div>
     </section>
+    </ng-container>
   </div>
-
-  <ng-template #loadingTpl>
-    <p class="knowledge-loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
-  </ng-template>
 </ion-content>

@@ -44,7 +44,7 @@ export class AppComponent implements OnInit, OnDestroy {
     applyColorPaletteClass(settings.colorPalette);
     await this.visualQuality.hydrate();
     await this.subscription.init();
-    await this.appLog.log('app', 'Application started', {
+    void this.appLog.log('app', 'Application started', {
       version: environment.appVersion,
       production: environment.production,
     });

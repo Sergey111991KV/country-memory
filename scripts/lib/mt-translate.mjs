@@ -150,7 +150,7 @@ export async function translateViaLingva(text, lang) {
   throw new Error(errors.join(' | '));
 }
 
-export async function translateViaGoogle(text, lang, depth = 0) {
+export async function translateViaGoogle(text, lang, depth = 0, emptyRetry = 0) {
   if (depth > 4) {
     throw new Error('Google rate limit retries exhausted');
   }
@@ -159,6 +159,10 @@ export async function translateViaGoogle(text, lang, depth = 0) {
     const result = await translateGoogleX(text, { from: 'en', to });
     const out = (result.text ?? result).trim();
     if (!out || isBadTranslation(out, text)) {
+      if (emptyRetry < 2) {
+        await sleep(800);
+        return translateViaGoogle(text, lang, depth, emptyRetry + 1);
+      }
       throw new Error('Empty or invalid Google translation');
     }
     return out;
@@ -237,6 +241,13 @@ function translationProviders(shielded, lang) {
   }
   if (process.env.MT_LINGVA_ONLY === '1') {
     return [() => translateViaLingva(shielded, lang)];
+  }
+  if (process.env.MT_SKIP_LINGVA === '1') {
+    return [
+      () => translateViaGoogle(shielded, lang),
+      () => translateViaGoogleVitalets(shielded, lang),
+      () => translateViaMyMemory(shielded, lang),
+    ];
   }
   return [
     () => translateViaGoogle(shielded, lang),

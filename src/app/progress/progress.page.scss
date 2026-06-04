@@ -11,6 +11,7 @@
   --background: var(--pr-bg);
   --color: #ffffff;
   font-family: var(--app-font-ui);
+  --padding-bottom: calc(var(--app-tab-bar-height, 74px) + var(--app-space-2));
 }
 
 .progress-shell {

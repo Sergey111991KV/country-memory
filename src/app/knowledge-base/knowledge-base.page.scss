@@ -23,8 +23,9 @@
 }
 
 .knowledge-loading {
+  margin: 0 0 var(--app-space-4);
   text-align: center;
-  padding: var(--app-space-6);
+  padding: var(--app-space-3);
   color: var(--kb-text-muted);
 }
 

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ViewChild,
+  inject,
+} from '@angular/core';
+import { IonContent, ViewWillEnter } from '@ionic/angular';
 
 import type { AppLang } from '../core/i18n/messages';
 import type { GameModeId } from '../core/data/country.types';
@@ -27,7 +34,8 @@ export interface PathChapterDot {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProgressPage {
+export class ProgressPage implements ViewWillEnter {
+  @ViewChild('progressContent') private progressContent?: IonContent;
   readonly catalog = inject(CountriesCatalogService);
   readonly locale = inject(LocaleService);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -54,7 +62,12 @@ export class ProgressPage {
   private lastRefreshKey: string | null = null;
 
   ionViewWillEnter(): void {
+    void this.scrollToTop();
     void this.refresh();
+  }
+
+  private async scrollToTop(): Promise<void> {
+    await this.progressContent?.scrollToTop(0);
   }
 
   async refresh(): Promise<void> {

@@ -5,6 +5,7 @@ import {
   Input,
   OnChanges,
   OnDestroy,
+  OnInit,
   SimpleChanges,
   ViewChild,
   inject,
@@ -32,7 +33,7 @@ let windFilterSeq = 0;
   styleUrls: ['./flag-display.component.scss'],
   standalone: false,
 })
-export class FlagDisplayComponent implements AfterViewInit, OnChanges, OnDestroy {
+export class FlagDisplayComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   private readonly flags = inject(FlagAssetsService);
   private readonly catalog = inject(CountriesCatalogService);
   readonly locale = inject(LocaleService);
@@ -50,16 +51,23 @@ export class FlagDisplayComponent implements AfterViewInit, OnChanges, OnDestroy
   @ViewChild('windSvg') private windSvg?: ElementRef<SVGSVGElement>;
 
   imageError = false;
+  displaySrc = '';
+  windFilterOff = false;
   holdHintVisible = false;
 
+  private loadRetryIndex = 0;
   private windAnimations: Animation[] = [];
   private pressTimer: ReturnType<typeof setTimeout> | null = null;
   private pressStartX = 0;
   private pressStartY = 0;
-  get src(): string {
-    return this.size === 'card'
-      ? this.flags.cardUrl(this.iso2)
-      : this.flags.heroUrl(this.iso2);
+  get imgCrossOrigin(): 'anonymous' | null {
+    return this.flagWindDisplacement && !this.windFilterOff && this.displaySrc
+      ? 'anonymous'
+      : null;
+  }
+
+  get imgLoading(): 'eager' | 'lazy' {
+    return this.size === 'hero' ? 'eager' : 'lazy';
   }
 
   get windFilterStyle(): string {
@@ -73,11 +81,20 @@ export class FlagDisplayComponent implements AfterViewInit, OnChanges, OnDestroy
     return this.locale.translate('flag.holdExplore');
   }
 
+  ngOnInit(): void {
+    if (!this.displaySrc) {
+      this.resetImageState();
+    }
+  }
+
   ngAfterViewInit(): void {
     this.scheduleWindSync();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['iso2'] || changes['size']) {
+      this.resetImageState();
+    }
     if (changes['animate'] || changes['iso2']) {
       this.scheduleWindSync();
     }
@@ -97,7 +114,7 @@ export class FlagDisplayComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   get flagWindFilterStyle(): string | null {
-    return this.flagWindDisplacement ? this.windFilterStyle : null;
+    return this.flagWindDisplacement && !this.windFilterOff ? this.windFilterStyle : null;
   }
 
   ngOnDestroy(): void {
@@ -106,8 +123,32 @@ export class FlagDisplayComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   onImageError(): void {
+    if (this.flagWindDisplacement && !this.windFilterOff) {
+      this.windFilterOff = true;
+      this.scheduleWindSync();
+      return;
+    }
+    if (this.loadRetryIndex < 1) {
+      this.loadRetryIndex += 1;
+      this.displaySrc = this.buildDisplaySrc();
+      return;
+    }
     this.imageError = true;
     this.cancelWindAnimations();
+  }
+
+  private resetImageState(): void {
+    this.imageError = false;
+    this.windFilterOff = false;
+    this.loadRetryIndex = 0;
+    this.displaySrc = this.buildDisplaySrc();
+  }
+
+  private buildDisplaySrc(): string {
+    const widths: readonly (160 | 320 | 640)[] =
+      this.size === 'card' ? [320, 160] : [640, 320];
+    const width = widths[Math.min(this.loadRetryIndex, widths.length - 1)];
+    return this.flags.url(this.iso2, width);
   }
 
   onPointerDown(ev: PointerEvent): void {
@@ -160,7 +201,7 @@ export class FlagDisplayComponent implements AfterViewInit, OnChanges, OnDestroy
 
   private syncWindAnimations(): void {
     this.cancelWindAnimations();
-    if (!this.flagAnimActive || this.imageError || !this.src) {
+    if (!this.flagAnimActive || this.imageError || !this.displaySrc) {
       return;
     }
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {

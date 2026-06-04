@@ -72,11 +72,10 @@
         {{ 'home.getPremiumCta' | i18n:null:lang}}
       </ion-button>
     </div>
-  </div>
 
-  <aside
-    class="play-mode-dock"
-    *ngIf="dockItemCount > 0"
+    <aside
+      class="play-mode-dock"
+      *ngIf="showModeDock && dockItemCount > 0"
     [class.play-mode-dock--modes]="dockLevel === 'modes'"
     [class.play-mode-dock--exit]="dockPhase === 'exit'"
     [class.play-mode-dock--enter]="dockPhase === 'enter'"
@@ -169,5 +168,6 @@
         <ion-icon name="chevron-forward" aria-hidden="true"></ion-icon>
       </button>
     </div>
-  </aside>
+    </aside>
+  </div>
 </ion-content>

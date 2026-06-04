@@ -229,12 +229,20 @@ html.ion-palette-dark .play-daily {
 }
 
 /* —— Bottom mode dock (circular wheel) —— */
+:host(.ion-page-hidden) .play-mode-dock,
+:host-context(.ion-page-hidden) .play-mode-dock {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 .play-mode-dock {
-  position: fixed;
+  position: sticky;
   left: 0;
   right: 0;
   bottom: var(--play-tab-bar-offset);
   z-index: 20;
+  margin-top: var(--app-space-2);
   padding: var(--app-space-3) 4px var(--app-space-2);
   pointer-events: none;
   background: transparent;

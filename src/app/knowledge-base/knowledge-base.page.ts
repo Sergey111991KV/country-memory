@@ -3,10 +3,11 @@ import {
   ChangeDetectorRef,
   Component,
   inject,
+  ViewChild,
 } from '@angular/core';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
-import { ViewWillEnter } from '@ionic/angular';
+import { IonContent, ViewWillEnter } from '@ionic/angular';
 
 import type { AppLang } from '../core/i18n/messages';
 import type { Country, CountryFact, CountryProfileField } from '../core/data/country.types';
@@ -45,6 +46,8 @@ export interface CollectionCardStats {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KnowledgeBasePage implements ViewWillEnter {
+  @ViewChild('knowledgeContent') private knowledgeContent?: IonContent;
+
   readonly catalog = inject(CountriesCatalogService);
   protected readonly locale = inject(LocaleService);
   readonly manifest = inject(KnowledgeManifestService);
@@ -74,6 +77,7 @@ export class KnowledgeBasePage implements ViewWillEnter {
   private lastBuiltLanguage: AppLang | null = null;
 
   ionViewWillEnter(): void {
+    void this.scrollToTop();
     void this.refresh();
   }
 
@@ -308,7 +312,12 @@ export class KnowledgeBasePage implements ViewWillEnter {
     } finally {
       this.loading = false;
       this.cdr.markForCheck();
+      void this.scrollToTop();
     }
+  }
+
+  private async scrollToTop(): Promise<void> {
+    await this.knowledgeContent?.scrollToTop(0);
   }
 
   private applyListFilter(): void {

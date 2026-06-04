@@ -15,13 +15,14 @@ echo "$$" >"$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 export SKIP_EXISTING=1
+export MT_SKIP_LINGVA=1
 unset MT_MYMEMORY_ONLY MT_GOOGLE_ONLY MT_LINGVA_ONLY
 export DELAY_MS="${DELAY_MS:-2000}"
 export SAVE_EVERY="${SAVE_EVERY:-15}"
 export RATE_LIMIT_WAIT_MS="${RATE_LIMIT_WAIT_MS:-60000}"
 
-# uk done offline; continue MT for remaining langs
-LANGS=(zh hi ar pt ja ko it tr vi id pl nl bn ur)
+# zh hi ar done; resume pt and remaining langs
+LANGS=(pt ja ko it tr vi id pl nl bn ur)
 for lang in "${LANGS[@]}"; do
   echo "========== $lang =========="
   node scripts/localize-country-knowledge.mjs "$lang" || true

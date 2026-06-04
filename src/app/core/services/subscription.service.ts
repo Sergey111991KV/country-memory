@@ -21,9 +21,13 @@ import {
   isNativeBillingPlatform,
   type BillingStorePlatform,
 } from '../utils/billing-platform';
+import { withTimeout } from '../utils/promise-timeout';
 import { LocaleService } from './locale.service';
 import { AppLogService } from './app-log.service';
 import { StorageService } from './storage.service';
+
+/** Native StoreKit / Play Billing calls must not block the UI indefinitely. */
+const NATIVE_BILLING_TIMEOUT_MS = 10_000;
 
 export type PremiumKind = 'none' | 'lifetime' | 'subscription' | 'trial' | 'intro' | 'unknown';
 
@@ -36,7 +40,7 @@ export class SubscriptionService {
   private readonly appLog = inject(AppLogService);
   private readonly storage = inject(StorageService);
 
-  private initialized = false;
+  private initPromise: Promise<void> | null = null;
   private transactionListenerRegistered = false;
 
   readonly billingPlatformSig = signal<BillingStorePlatform>(detectBillingStorePlatform());
@@ -74,20 +78,27 @@ export class SubscriptionService {
   );
 
   async init(): Promise<void> {
-    if (this.initialized) {
-      return;
+    if (!this.initPromise) {
+      this.initPromise = this.runInit();
     }
-    this.initialized = true;
+    return this.initPromise;
+  }
+
+  private async runInit(): Promise<void> {
     this.billingPlatformSig.set(detectBillingStorePlatform());
     await this.syncDebugPremiumFromStorage();
-    await this.logBilling('init_start', {
+    void this.logBilling('init_start', {
       platform: this.billingPlatformSig(),
       canPurchaseInApp: this.canPurchaseInAppSig(),
     });
 
     try {
       if (isNativeStoreBillingAvailable()) {
-        const supported = await checkNativeBillingSupported();
+        const supported = await withTimeout(
+          checkNativeBillingSupported(),
+          NATIVE_BILLING_TIMEOUT_MS,
+          () => false,
+        );
         this.storeConfiguredSig.set(supported);
         if (supported) {
           await this.registerTransactionListener();
@@ -102,10 +113,10 @@ export class SubscriptionService {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.initErrorMessageSig.set(msg);
-      await this.logBilling('init_error', { message: msg }, 'error');
+      void this.logBilling('init_error', { message: msg }, 'error');
     } finally {
       this.readySig.set(true);
-      await this.logBilling('init_complete', {
+      void this.logBilling('init_complete', {
         subscribed: this.isSubscribed(),
         debugPremium: this.debugPremiumSig(),
         hasEntitlement: this.hasEntitlementSig(),
@@ -233,9 +244,13 @@ export class SubscriptionService {
     }
     this.offeringsLoadingSig.set(true);
     try {
-      const { monthly, lifetime } = await loadStoreProducts(
-        this.billingPlatformSig(),
-        environment.androidMonthlyBasePlanId,
+      const { monthly, lifetime } = await withTimeout(
+        loadStoreProducts(
+          this.billingPlatformSig(),
+          environment.androidMonthlyBasePlanId,
+        ),
+        NATIVE_BILLING_TIMEOUT_MS,
+        () => ({ monthly: null, lifetime: null }),
       );
       this.monthlyProductSig.set(monthly);
       this.lifetimeProductSig.set(lifetime);
@@ -438,7 +453,11 @@ export class SubscriptionService {
   }
 
   private async syncEntitlementFromStore(): Promise<void> {
-    const purchases = await fetchActivePurchases();
+    const purchases = await withTimeout(
+      fetchActivePurchases(),
+      NATIVE_BILLING_TIMEOUT_MS,
+      () => [],
+    );
     this.applyPurchases(purchases);
   }
 

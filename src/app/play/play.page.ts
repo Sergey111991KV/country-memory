@@ -6,7 +6,7 @@ import {
   inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, ViewWillEnter } from '@ionic/angular';
+import { AlertController, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 
 import { CourseLaunchService } from '../core/services/course-launch.service';
 import {
@@ -74,7 +74,7 @@ interface PlayRefreshSnapshot {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PlayPage implements OnInit, ViewWillEnter {
+export class PlayPage implements OnInit, ViewWillEnter, ViewWillLeave {
   private readonly router = inject(Router);
   private readonly alertCtrl = inject(AlertController);
   protected readonly locale = inject(LocaleService);
@@ -105,6 +105,8 @@ export class PlayPage implements OnInit, ViewWillEnter {
 
   dockLevel: PlayDockLevel = 'categories';
   dockPhase: PlayDockPhase = 'idle';
+  /** False when leaving Play tab so the dock cannot cover other tabs. */
+  showModeDock = false;
   playCategories: PlayCategorySlide[] = [];
   recallCategory: PlayCategorySlide | null = null;
   categoryModes: PlayModeSlide[] = [];
@@ -131,7 +133,14 @@ export class PlayPage implements OnInit, ViewWillEnter {
   }
 
   ionViewWillEnter(): void {
+    this.showModeDock = true;
+    this.cdr.markForCheck();
     void this.refresh({ fromViewEnter: true });
+  }
+
+  ionViewWillLeave(): void {
+    this.showModeDock = false;
+    this.cdr.markForCheck();
   }
 
   get dockSliderAriaKey(): string {

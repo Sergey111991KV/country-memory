@@ -20,7 +20,7 @@
   >
     <svg
       #windSvg
-      *ngIf="flagWindDisplacement && !imageError && src"
+      *ngIf="flagWindDisplacement && !imageError && displaySrc"
       class="flag-wind-svg"
       aria-hidden="true"
       focusable="false"
@@ -45,23 +45,24 @@
         </filter>
       </defs>
     </svg>
-    <div *ngIf="flagAnimActive && !imageError && src" class="flag-wind__motion">
+    <div *ngIf="flagAnimActive && !imageError && displaySrc" class="flag-wind__motion">
       <img
         class="flag-wind__img"
-        [src]="src"
+        [src]="displaySrc"
         [style.filter]="flagWindFilterStyle"
+        [attr.crossorigin]="imgCrossOrigin"
         alt=""
-        loading="lazy"
+        [attr.loading]="imgLoading"
         decoding="async"
         draggable="false"
         (error)="onImageError()"
       />
     </div>
     <img
-      *ngIf="!flagAnimActive && !imageError && src"
-      [src]="src"
+      *ngIf="!flagAnimActive && !imageError && displaySrc"
+      [src]="displaySrc"
       alt=""
-      loading="lazy"
+      [attr.loading]="imgLoading"
       decoding="async"
       draggable="false"
       (error)="onImageError()"

@@ -159,9 +159,18 @@ ion-content::part(scroll)::-webkit-scrollbar {
  */
 .home-content,
 .knowledge-page,
+.progress-page,
 .settings-page,
 .home-about-content {
   font-family: var(--app-font-ui);
+}
+
+/* Play hub dock must never cover Knowledge / Progress / Settings tab stacks */
+.ion-page-hidden .play-mode-dock,
+app-play.ion-page-hidden .play-mode-dock {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .home-content h1,
