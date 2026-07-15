@@ -1,9 +1,6 @@
 .paywall-content {
-  --background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--ion-color-primary) 10%, var(--ion-background-color)) 0%,
-    var(--ion-background-color) 40%
-  );
+  --background: var(--app-mesh-bg);
+  font-family: var(--app-font-ui);
 }
 
 .paywall-loading {
@@ -43,6 +40,7 @@
 .paywall-hero {
   text-align: center;
   margin-bottom: 20px;
+  padding: var(--app-space-4) var(--app-space-3);
 }
 
 .paywall-hero__mark {
@@ -52,6 +50,8 @@
 .paywall-hero h1 {
   margin: 0 0 8px;
   font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .paywall-hero__lead {
@@ -88,6 +88,7 @@
   margin-top: 8px;
 }
 
-.mem-surface {
+.paywall-active-card,
+ion-card.glass-surface {
   margin-bottom: 16px;
 }

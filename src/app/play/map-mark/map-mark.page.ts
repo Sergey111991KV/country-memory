@@ -22,6 +22,7 @@ import { CountriesCatalogService } from '../../core/services/countries-catalog.s
 import { DailyGoalService } from '../../core/services/daily-goal.service';
 import { ExploreFilterService } from '../../core/services/explore-filter.service';
 import { GeoJsonCacheService } from '../../core/services/geo-json-cache.service';
+import { GlobeThemeService } from '../../core/services/globe-theme.service';
 import { LocaleService } from '../../core/services/locale.service';
 import { PlaySessionCompleteService } from '../../core/services/play-session-complete.service';
 import { SessionAccessService } from '../../core/services/session-access.service';
@@ -67,6 +68,7 @@ export class MapMarkPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private readonly alertCtrl = inject(AlertController);
   private readonly ngZone = inject(NgZone);
   private readonly geoCache = inject(GeoJsonCacheService);
+  private readonly globeTheme = inject(GlobeThemeService);
 
   filterId: ExploreFilterId = 'lang_spanish';
   loading = true;
@@ -90,6 +92,8 @@ export class MapMarkPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   ionViewDidEnter(): void {
     if (this.bootStarted) {
       this.ensureMapReady();
+      this.lastStyleKey = '';
+      this.refreshMapStyles();
       return;
     }
     void this.startSession();
@@ -343,6 +347,7 @@ export class MapMarkPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
   private styleForFeature(feature: GlobeCountryFeature): L.PathOptions {
     const state = this.polygonColorState();
+    const palette = this.globeTheme.palette();
     const iso = iso2FromNaturalEarth(feature.properties);
     const highlighted =
       Boolean(iso) &&
@@ -350,15 +355,15 @@ export class MapMarkPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
         (this.phase === 'feedback' &&
           (state.expectedIsos?.has(iso ?? '') || state.multiSelected?.has(iso ?? ''))));
     return {
-      fillColor: politicalCapColor(feature, state),
+      fillColor: politicalCapColor(feature, state, palette),
       fillOpacity: 1,
-      color: politicalStrokeColor(feature, state),
+      color: politicalStrokeColor(feature, state, palette),
       weight: highlighted ? 2 : 1,
     };
   }
 
   private refreshMapStyles(): void {
-    const styleKey = `${this.phase}|${[...this.selectedIsos].join(',')}|${this.correctHits}`;
+    const styleKey = `${this.globeTheme.theme()}|${this.phase}|${[...this.selectedIsos].join(',')}|${this.correctHits}`;
     if (styleKey === this.lastStyleKey) {
       return;
     }

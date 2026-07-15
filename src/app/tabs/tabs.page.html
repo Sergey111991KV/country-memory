@@ -1,6 +1,10 @@
 @let lang = locale.langSig();
-<ion-tabs>
+<ion-tabs (ionTabsDidChange)="onTabsChanged($event)">
   <ion-tab-bar slot="bottom">
+    <ion-tab-button tab="home" href="/tabs/home">
+      <ion-icon name="sparkles-outline" aria-hidden="true"></ion-icon>
+      <ion-label>{{ 'tabs.home' | i18n:null:lang}}</ion-label>
+    </ion-tab-button>
     <ion-tab-button tab="play" href="/tabs/play">
       <ion-icon name="earth-outline" aria-hidden="true"></ion-icon>
       <ion-label>{{ 'tabs.play' | i18n:null:lang}}</ion-label>

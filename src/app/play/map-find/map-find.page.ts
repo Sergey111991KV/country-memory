@@ -33,6 +33,7 @@ import { PlaySessionCompleteService } from '../../core/services/play-session-com
 import { PlaySessionService } from '../../core/services/play-session.service';
 import { SessionAccessService } from '../../core/services/session-access.service';
 import { GeoJsonCacheService } from '../../core/services/geo-json-cache.service';
+import { GlobeThemeService } from '../../core/services/globe-theme.service';
 import { PerfLogService } from '../../core/services/perf-log.service';
 import { ensurePlaySessionAccess } from '../../core/utils/play-access';
 import { buildSoloSessionResult } from '../../core/utils/play-session-result-builders';
@@ -69,6 +70,7 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private readonly ngZone = inject(NgZone);
   private readonly perf = inject(PerfLogService);
   private readonly geoCache = inject(GeoJsonCacheService);
+  private readonly globeTheme = inject(GlobeThemeService);
 
   loading = true;
   loadError = false;
@@ -95,6 +97,8 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   ionViewDidEnter(): void {
     if (this.bootStarted) {
       this.ensureMapReady();
+      this.lastStyleKey = '';
+      this.refreshMapStyles();
       return;
     }
     void this.startSession();
@@ -367,6 +371,7 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
   private styleForFeature(feature: GlobeCountryFeature): L.PathOptions {
     const state = this.polygonColorState();
+    const palette = this.globeTheme.palette();
     const iso = iso2FromNaturalEarth(feature.properties);
     const highlighted =
       Boolean(iso) &&
@@ -374,15 +379,15 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
         iso === state.feedbackCorrectIso ||
         iso === state.feedbackWrongIso);
     return {
-      fillColor: politicalCapColor(feature, state),
+      fillColor: politicalCapColor(feature, state, palette),
       fillOpacity: 1,
-      color: politicalStrokeColor(feature, state),
+      color: politicalStrokeColor(feature, state, palette),
       weight: highlighted ? 2 : 1,
     };
   }
 
   private refreshMapStyles(): void {
-    const styleKey = `${this.phase}|${this.selectedIso}|${this.feedbackCorrectIso}|${this.feedbackWrongIso}`;
+    const styleKey = `${this.globeTheme.theme()}|${this.phase}|${this.selectedIso}|${this.feedbackCorrectIso}|${this.feedbackWrongIso}`;
     if (styleKey === this.lastStyleKey) {
       return;
     }

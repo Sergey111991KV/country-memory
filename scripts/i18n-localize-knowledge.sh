@@ -21,11 +21,7 @@ export DELAY_MS="${DELAY_MS:-2000}"
 export SAVE_EVERY="${SAVE_EVERY:-15}"
 export RATE_LIMIT_WAIT_MS="${RATE_LIMIT_WAIT_MS:-60000}"
 
-# zh hi ar done; resume pt and remaining langs
-LANGS=(pt ja ko it tr vi id pl nl bn ur)
-for lang in "${LANGS[@]}"; do
-  echo "========== $lang =========="
-  node scripts/localize-country-knowledge.mjs "$lang" || true
-done
+# resume vi and remaining langs (single node process — survives better than bash loop)
+node scripts/localize-country-knowledge.mjs vi id pl nl bn ur || true
 
 echo "Knowledge localization done."

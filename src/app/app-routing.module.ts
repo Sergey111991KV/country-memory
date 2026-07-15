@@ -14,7 +14,7 @@ const routes: Routes = [
     loadChildren: () =>
       import('./tabs/tabs.module').then((m) => m.TabsPageModule),
   },
-  { path: 'home', redirectTo: 'tabs/play', pathMatch: 'full' },
+  { path: 'home', redirectTo: 'tabs/home', pathMatch: 'full' },
   { path: 'settings', redirectTo: 'tabs/settings', pathMatch: 'full' },
   {
     path: 'paywall',

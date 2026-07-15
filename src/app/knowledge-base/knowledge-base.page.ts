@@ -66,11 +66,6 @@ export class KnowledgeBasePage implements ViewWillEnter {
   searchQuery = '';
   continentFilter: string | null = null;
   learnedSet = new Set<string>();
-  summaryCollectionCount = 0;
-  summaryEngagedCount = 0;
-  summaryPartialCount = 0;
-  summaryMarksKnown = 0;
-  summaryMarksTotal = 0;
 
   private rowsCacheReady = false;
   private lastMarksRevision = -1;
@@ -249,7 +244,6 @@ export class KnowledgeBasePage implements ViewWillEnter {
       this.learnedSet,
     );
     this.lastMarksRevision = this.userLearned.getMarksRevision();
-    this.updateSummary();
     this.rebuildCollectionStats();
     this.applyListFilter();
     this.cdr.markForCheck();
@@ -301,7 +295,6 @@ export class KnowledgeBasePage implements ViewWillEnter {
       this.lastMarksRevision = marksRevision;
       this.lastBuiltLanguage = language;
       this.rowsCacheReady = true;
-      this.updateSummary();
       this.rebuildCollectionStats();
       this.applyListFilter();
       totalSpan.end({
@@ -366,32 +359,6 @@ export class KnowledgeBasePage implements ViewWillEnter {
     }
   }
 
-  private updateSummary(): void {
-    let collection = 0;
-    let engaged = 0;
-    let partial = 0;
-    let marksKnown = 0;
-    let marksTotal = 0;
-    for (const row of this.countryRows) {
-      if (row.status.id === 'collection') {
-        collection += 1;
-      }
-      if (row.status.inQuizPool || row.status.id === 'collection') {
-        engaged += 1;
-      }
-      if (row.status.id === 'partial') {
-        partial += 1;
-      }
-      marksKnown += row.status.marksKnown;
-      marksTotal += row.status.marksTotal;
-    }
-    this.summaryCollectionCount = collection;
-    this.summaryEngagedCount = engaged;
-    this.summaryPartialCount = partial;
-    this.summaryMarksKnown = marksKnown;
-    this.summaryMarksTotal = marksTotal;
-  }
-
   private buildCountryRow(country: Country, language: AppLang): CountryMarkRow {
     const status = this.learnStatus.getCountryStatusSync(
       country.iso2,
@@ -430,7 +397,6 @@ export class KnowledgeBasePage implements ViewWillEnter {
       this.learnedSet,
     );
     this.lastMarksRevision = this.userLearned.getMarksRevision();
-    this.updateSummary();
     this.rebuildCollectionStats();
     this.applyListFilter();
     this.cdr.markForCheck();

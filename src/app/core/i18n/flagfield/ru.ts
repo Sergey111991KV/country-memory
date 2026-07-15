@@ -45,6 +45,13 @@ export const FLAGFIELD_RU: Record<string, string> = {
     'Premium по желанию: безлимит сессий и режимы глобус/карта. Восстановление покупок — в настройках.',
   'home.aboutGameLegacyLabel': 'Краткая справка',
   'home.playCta': 'Играть',
+  'home.feed.heroTitle': 'Открой мир',
+  'home.feed.flagTitle': 'Страна',
+  'home.feed.factTitle': 'Знаешь ли ты?',
+  'home.feed.capitalTitle': 'Столица',
+  'home.feed.playCta': 'Играть эту страну',
+  'home.feed.learnCta': 'Открыть в Базе знаний',
+  'home.feed.rotateHint': 'Новая страна каждые несколько секунд',
   'home.dailyGoalTitle': 'Цель дня',
   'home.dailyGoalProgress': '{{done}} / {{target}} верных ответов сегодня',
   'home.dailyGoalHint':
@@ -233,6 +240,9 @@ export const FLAGFIELD_RU: Record<string, string> = {
   'challenge.mode.capital_pick_country': 'Столица → выбор страны',
   'challenge.mode.country_pick_capital': 'Страна → выбор столицы',
   'play.title': 'Игра',
+  'play.hubTitle': 'Выбери режим',
+  'play.hubSub': 'Свайпай колесо или выбери категорию',
+  'play.viewProgress': 'Прогресс и цель дня',
   'play.subtitle': 'Выберите режим',
   'play.globeFindTitle': 'Квест глобуса',
   'play.globeFindSub': 'Найди страну на вращающемся глобусе',
@@ -388,6 +398,12 @@ export const FLAGFIELD_RU: Record<string, string> = {
   'settings.visualQualityQuality': 'Качество',
   'settings.visualQualityHint':
     'Влияет на детализацию полигонов на глобусе и анимацию флагов. Для глобуса откройте Globe Quest заново.',
+  'settings.globeTheme': 'Цвета глобуса',
+  'settings.globeThemeClassic': 'Классика по континентам',
+  'settings.globeThemeFlagfield': 'Flagfield фиолетовый',
+  'settings.globeThemeMinimal': 'Минимализм',
+  'settings.globeThemeHint':
+    'Заливка стран в «Квесте глобуса» и на карте. Если квест уже открыт — вернитесь на экран, чтобы применить.',
   'settings.paletteOcean': 'Океан',
   'settings.paletteForest': 'Лес',
   'settings.paletteSunset': 'Закат',
@@ -446,7 +462,8 @@ export const FLAGFIELD_RU: Record<string, string> = {
   'paywall.webOnly': 'Покупки доступны только в приложениях для iOS и Android.',
   'paywall.testModeHint':
     'Тестовый режим: нажмите «Подписка», чтобы активировать Premium без реальной оплаты.',
-  'paywall.subscribeTest': 'Подписка на месяц (тест)',
+  'paywall.storeProductPending':
+    'Продукт в App Store ещё не подключён. Включите тестовый режим (devMockBilling) или завершите настройку App Store Connect.',
   'paywall.storeBadge': 'Оплата через {{store}}',
   'paywall.heroTitle': 'Исследуй без ограничений',
   'paywall.heroLead':

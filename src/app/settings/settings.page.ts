@@ -7,7 +7,7 @@ import {
   inject,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController, IonContent, ToastController, ViewWillEnter } from '@ionic/angular';
+import { AlertController, IonContent, ToastController, ViewDidEnter, ViewWillEnter } from '@ionic/angular';
 
 import type { AppLang } from '../core/i18n/messages';
 import { MESSAGES } from '../core/i18n/messages';
@@ -22,7 +22,9 @@ import {
   type HeroTypography,
 } from '../core/services/app-settings.service';
 import type { VisualQuality } from '../core/data/visual-quality';
+import type { GlobeThemeId } from '../core/data/globe-theme';
 import { VisualQualityService } from '../core/services/visual-quality.service';
+import { GlobeThemeService } from '../core/services/globe-theme.service';
 import { DisplayTextService } from '../core/services/display-text.service';
 import { LegalLinksService } from '../core/services/legal-links.service';
 import { LocaleService } from '../core/services/locale.service';
@@ -57,7 +59,7 @@ export interface SettingsSupportBlock {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsPage implements OnInit, ViewWillEnter {
+export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   @ViewChild('settingsContent') private settingsContent?: IonContent;
 
   private readonly appSettings = inject(AppSettingsService);
@@ -78,6 +80,7 @@ export class SettingsPage implements OnInit, ViewWillEnter {
   private readonly playPool = inject(PlayPoolService);
   readonly displayText = inject(DisplayTextService);
   private readonly visualQualityService = inject(VisualQualityService);
+  private readonly globeThemeService = inject(GlobeThemeService);
 
   readonly metricsReferenceYear = METRICS_REFERENCE_YEAR;
   readonly metricFilterTiers = METRIC_FILTER_TIER_OPTIONS;
@@ -141,6 +144,7 @@ export class SettingsPage implements OnInit, ViewWillEnter {
   bodyTypography: BodyTypography = 'default';
   colorPalette: ColorPalette = 'ocean';
   visualQuality: VisualQuality = 'balanced';
+  globeTheme: GlobeThemeId = 'classic';
   heroTitleCustom = '';
   heroSubShortCustom = '';
   heroSubLongCustom = '';
@@ -162,12 +166,12 @@ export class SettingsPage implements OnInit, ViewWillEnter {
 
   ionViewWillEnter(): void {
     this.applyPanelFromRoute();
-    void this.scrollToTop();
+    this.cdr.markForCheck();
     void this.load();
   }
 
-  private async scrollToTop(): Promise<void> {
-    await this.settingsContent?.scrollToTop(0);
+  ionViewDidEnter(): void {
+    void this.settingsContent?.scrollToTop(0);
   }
 
   isSupportBlockEnabled(block: SettingsSupportBlock): boolean {
@@ -280,6 +284,16 @@ export class SettingsPage implements OnInit, ViewWillEnter {
     }
     this.visualQuality = v;
     await this.visualQualityService.setLevel(v);
+    await this.toastSaved();
+  }
+
+  async onGlobeThemeChange(ev: CustomEvent): Promise<void> {
+    const v = String(ev.detail.value) as GlobeThemeId;
+    if (v !== 'classic' && v !== 'flagfield' && v !== 'minimal') {
+      return;
+    }
+    this.globeTheme = v;
+    await this.globeThemeService.setTheme(v);
     await this.toastSaved();
   }
 
@@ -469,7 +483,9 @@ export class SettingsPage implements OnInit, ViewWillEnter {
     this.bodyTypography = settings.bodyTypography;
     this.colorPalette = settings.colorPalette;
     this.visualQuality = settings.visualQuality;
+    this.globeTheme = settings.globeTheme;
     await this.visualQualityService.hydrate();
+    await this.globeThemeService.hydrate();
     applyBodyTypographyClass(settings.bodyTypography);
     applyColorPaletteClass(settings.colorPalette);
     await this.metricFiltersService.hydrate();

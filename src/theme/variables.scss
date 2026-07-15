@@ -1,8 +1,8 @@
 /* Ionic app theme — loaded with global styles */
 
 :root {
-  --ion-font-family: 'Bangers', 'Segoe UI', system-ui, sans-serif;
-  --app-font-display: 'Bangers', 'Segoe UI', system-ui, sans-serif;
+  --ion-font-family: var(--app-font-ui);
+  --app-font-display: var(--app-font-ui);
   --app-font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
   --app-font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;

@@ -5,7 +5,8 @@ import {
   ViewChild,
   inject,
 } from '@angular/core';
-import { IonContent, ViewWillEnter } from '@ionic/angular';
+import { IonContent, ViewDidEnter, ViewWillEnter } from '@ionic/angular';
+import { Router } from '@angular/router';
 
 import type { AppLang } from '../core/i18n/messages';
 import type { GameModeId } from '../core/data/country.types';
@@ -19,6 +20,9 @@ import { UserKnowledgeService } from '../core/services/user-knowledge.service';
 import { UserLearnedService } from '../core/services/user-learned.service';
 import { UserLearningService } from '../core/services/user-learning.service';
 import { PerfLogService } from '../core/services/perf-log.service';
+import { SessionAccessService } from '../core/services/session-access.service';
+import { SubscriptionService } from '../core/services/subscription.service';
+import { environment } from '../../environments/environment';
 
 export interface PathChapterDot {
   id: string;
@@ -34,10 +38,11 @@ export interface PathChapterDot {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProgressPage implements ViewWillEnter {
+export class ProgressPage implements ViewWillEnter, ViewDidEnter {
   @ViewChild('progressContent') private progressContent?: IonContent;
   readonly catalog = inject(CountriesCatalogService);
   readonly locale = inject(LocaleService);
+  readonly sub = inject(SubscriptionService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly learning = inject(UserLearningService);
   private readonly learned = inject(UserLearnedService);
@@ -46,11 +51,18 @@ export class ProgressPage implements ViewWillEnter {
   private readonly userKnowledge = inject(UserKnowledgeService);
   private readonly learningPath = inject(LearningPathService);
   private readonly perf = inject(PerfLogService);
+  private readonly sessionAccess = inject(SessionAccessService);
+  private readonly router = inject(Router);
+
+  readonly freeGamesLimit = environment.freeGamesLimit;
 
   practicedCount = 0;
   correctToday = 0;
   dailyDone = 0;
   dailyTarget = 5;
+  dailyComplete = false;
+  dailyProgressPercent = 0;
+  freeGamesLeft = environment.freeGamesLimit;
   streakDays = 0;
   bestDayRecord = 0;
   factsLearnedTotal = 0;
@@ -62,16 +74,17 @@ export class ProgressPage implements ViewWillEnter {
   private lastRefreshKey: string | null = null;
 
   ionViewWillEnter(): void {
-    void this.scrollToTop();
     void this.refresh();
   }
 
-  private async scrollToTop(): Promise<void> {
-    await this.progressContent?.scrollToTop(0);
+  ionViewDidEnter(): void {
+    void this.progressContent?.scrollToTop(0);
   }
 
   async refresh(): Promise<void> {
     const span = this.perf.span('Progress', 'refresh');
+    await this.sub.init();
+    await this.sessionAccess.hydrate();
     await this.manifest.ensureLoaded();
     await this.catalog.ensureLoaded();
     await this.learning.hydrate();
@@ -87,6 +100,12 @@ export class ProgressPage implements ViewWillEnter {
     this.lastRefreshKey = refreshKey;
     this.dailyDone = goal.progress;
     this.dailyTarget = goal.target;
+    this.dailyComplete = goal.progress >= goal.target;
+    this.dailyProgressPercent =
+      this.dailyTarget > 0
+        ? Math.min(100, Math.round((this.dailyDone / this.dailyTarget) * 100))
+        : 0;
+    this.freeGamesLeft = this.sessionAccess.remainingFreeGames(this.sub.isSubscribed());
     this.correctToday = this.learning.countCorrectToday();
     this.streakDays = this.learning.getActivityStreak();
     this.bestDayRecord = this.learning.getBestDayCorrect();
@@ -135,6 +154,10 @@ export class ProgressPage implements ViewWillEnter {
         completed: p.completed,
       };
     });
+  }
+
+  openPaywall(): void {
+    void this.router.navigate(['/paywall']);
   }
 
   private modeLabel(mode: GameModeId): string {

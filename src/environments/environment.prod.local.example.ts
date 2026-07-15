@@ -6,7 +6,7 @@
  * 1. PUBLIC_SITE — your HTTPS domain (no trailing slash)
  * 2. Product IDs in App Store Connect / Play Console (see billing.constants.ts)
  * 3. `androidMonthlyBasePlanId` — Google Play base plan id for monthly sub
- * 4. devMockBilling: false
+ * 4. devMockBilling: true for TestFlight QA (tap = mock Premium); false before store submit
  *
  * Build: npm run build:release | npm run cap:sync:release
  */
@@ -18,8 +18,8 @@ export const environment = {
   production: true,
   freeGamesLimit: 10,
   androidMonthlyBasePlanId: 'monthly',
+  /** false before App Store submit; never true in production builds. */
   devMockBilling: false,
-  /** Set true only for App Review / sandbox QA builds. */
   billingDebugEnabled: false,
   debugVerbose: false,
 

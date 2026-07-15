@@ -9,7 +9,7 @@
     (ionChange)="onAccordionChange($event)"
     class="settings-accordion-group"
   >
-    <ion-accordion value="premium" class="settings-accordion mem-surface">
+    <ion-accordion value="premium" class="settings-accordion glass-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
           <h2>{{ 'settings.sectionPremium' | i18n:null:lang}}</h2>
@@ -79,7 +79,7 @@
       </div>
     </ion-accordion>
 
-    <ion-accordion value="language" class="settings-accordion mem-surface">
+    <ion-accordion value="language" class="settings-accordion glass-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
           <h2>{{ 'settings.sectionLanguage' | i18n:null:lang}}</h2>
@@ -147,7 +147,7 @@
       </div>
     </ion-accordion>
 
-    <ion-accordion value="learning" class="settings-accordion mem-surface">
+    <ion-accordion value="learning" class="settings-accordion glass-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
           <h2>{{ 'settings.sectionLearning' | i18n:null:lang}}</h2>
@@ -223,7 +223,7 @@
       </div>
     </ion-accordion>
 
-    <ion-accordion value="display" class="settings-accordion mem-surface">
+    <ion-accordion value="display" class="settings-accordion glass-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
           <h2>{{ 'settings.sectionDisplay' | i18n:null:lang}}</h2>
@@ -252,6 +252,23 @@
           <ion-item lines="none">
             <ion-text color="medium" class="ion-text-wrap small-hint">
               <p class="ion-no-margin">{{ 'settings.visualQualityHint' | i18n:null:lang}}</p>
+            </ion-text>
+          </ion-item>
+          <ion-item>
+            <ion-select
+              [label]="'settings.globeTheme' | i18n:null:lang"
+              [value]="globeTheme"
+              (ionChange)="onGlobeThemeChange($event)"
+              interface="popover"
+            >
+              <ion-select-option value="classic">{{ 'settings.globeThemeClassic' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="flagfield">{{ 'settings.globeThemeFlagfield' | i18n:null:lang}}</ion-select-option>
+              <ion-select-option value="minimal">{{ 'settings.globeThemeMinimal' | i18n:null:lang}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-text color="medium" class="ion-text-wrap small-hint">
+              <p class="ion-no-margin">{{ 'settings.globeThemeHint' | i18n:null:lang}}</p>
             </ion-text>
           </ion-item>
           <ion-item>
@@ -341,7 +358,7 @@
       </div>
     </ion-accordion>
 
-    <ion-accordion value="about" class="settings-accordion mem-surface">
+    <ion-accordion value="about" class="settings-accordion glass-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
           <h2>{{ 'settings.sectionAbout' | i18n:null:lang}}</h2>
@@ -384,7 +401,7 @@
       </div>
     </ion-accordion>
 
-    <ion-accordion value="support" class="settings-accordion mem-surface">
+    <ion-accordion value="support" class="settings-accordion glass-surface">
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
           <h2>{{ 'settings.sectionSupport' | i18n:null:lang}}</h2>

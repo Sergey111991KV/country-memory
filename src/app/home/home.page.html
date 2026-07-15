@@ -1,83 +1,42 @@
 @let lang = locale.langSig();
-<ion-content class="home-content page-safe-top ion-padding">
-  <div class="home-shell" [ngClass]="'typography-' + heroTypography">
+<ion-content class="home-content page-safe-top" [fullscreen]="true">
+  <div class="home-shell">
     <header class="home-header">
       <img
         class="home-mark"
         src="assets/brand/flagfield-mark.svg"
-        width="64"
-        height="64"
+        width="56"
+        height="56"
         alt=""
       />
       <p class="home-brand-name">Flagfield</p>
-      <h1 class="home-hero-title">{{ heroTitleDisplay }}</h1>
-      <p class="home-hero-sub">{{ heroSubShortDisplay }}</p>
+      <h1 class="home-hero-title">{{ 'home.feed.heroTitle' | i18n:null:lang}}</h1>
     </header>
 
-    <section class="home-daily" aria-labelledby="home-daily-heading">
-      <div class="home-daily__head">
-        <h2 id="home-daily-heading" class="home-daily__title">
-          {{ 'home.dailyGoalTitle' | i18n:null:lang}}
-        </h2>
-        <span *ngIf="dailyComplete" class="home-daily__badge">{{ 'home.dailyGoalDoneShort' | i18n:null:lang}}</span>
-      </div>
-      <p class="home-daily__progress stat-emphasis">
-        <ng-container *ngIf="!dailyComplete">
-          {{ 'home.dailyGoalProgress' | i18n:{ done: dailyDone, target: dailyTarget }:lang}}
-        </ng-container>
-        <ng-container *ngIf="dailyComplete">{{ 'home.dailyGoalDone' | i18n:null:lang}}</ng-container>
-      </p>
-      <div
-        class="home-daily__bar"
-        role="progressbar"
-        [attr.aria-valuenow]="dailyDone"
-        [attr.aria-valuemin]="0"
-        [attr.aria-valuemax]="dailyTarget"
-        [attr.aria-label]="'home.dailyGoalTitle' | i18n:null:lang"
-      >
-        <span class="home-daily__bar-fill" [style.width.%]="dailyProgressPercent"></span>
-      </div>
-      <p class="home-daily__meta">
-        <span *ngIf="!sub.isSubscribed()" class="home-daily__free">
-          {{ 'home.freeTierCountries' | i18n:{ n: freeCountryCount }:lang}}
-        </span>
-        <span *ngIf="sub.isSubscribed()" class="home-daily__premium">{{ 'home.premiumActive' | i18n:null:lang}}</span>
-      </p>
-    </section>
-
-    <section class="home-modes" aria-labelledby="home-modes-heading">
-      <h2 id="home-modes-heading" class="home-modes__title">{{ 'home.modesTitle' | i18n:null:lang}}</h2>
-      <div class="home-modes__grid">
-        <button type="button" class="home-mode" (click)="play()">
-          <app-icon class="home-mode__icon" icon="mode-flag-pick" size="lg"></app-icon>
-          <span class="home-mode__label">{{ 'play.freeSection' | i18n:null:lang}}</span>
-        </button>
-        <button type="button" class="home-mode" (click)="play()">
-          <app-icon class="home-mode__icon" icon="mode-knowledge-quiz" size="lg"></app-icon>
-          <span class="home-mode__label">{{ 'tabs.knowledge' | i18n:null:lang}}</span>
-        </button>
-        <button type="button" class="home-mode" (click)="play()">
-          <app-icon class="home-mode__icon" icon="mode-learning-path" size="lg"></app-icon>
-          <span class="home-mode__label">{{ 'play.learningTitle' | i18n:null:lang}}</span>
-        </button>
+    <section
+      *ngIf="card as c"
+      class="home-feed-card glass-surface"
+      [class.home-feed-card--fade]="cardPhase === 'fade'"
+      aria-live="polite"
+    >
+      <img class="home-feed-card__flag" [src]="c.flagUrl" [alt]="c.countryName" width="200" height="133" />
+      <p class="home-feed-card__kicker">{{ c.titleKey | i18n:null:lang}}</p>
+      <h2 class="home-feed-card__country">{{ c.countryName }}</h2>
+      <p class="home-feed-card__body">{{ c.body }}</p>
+      <div class="home-feed-card__actions">
+        <ion-button expand="block" color="primary" (click)="playCountry()">
+          {{ 'home.feed.playCta' | i18n:null:lang}}
+        </ion-button>
+        <ion-button expand="block" fill="clear" (click)="openKnowledge()">
+          {{ 'home.feed.learnCta' | i18n:null:lang}}
+        </ion-button>
       </div>
     </section>
 
-    <div class="home-actions">
-      <ion-button expand="block" size="large" color="primary" class="home-play-cta" (click)="play()">
-        {{ 'home.playCta' | i18n:null:lang}}
-      </ion-button>
-      <ion-button
-        *ngIf="!sub.isSubscribed()"
-        expand="block"
-        fill="clear"
-        color="warning"
-        class="home-premium-cta"
-        (click)="openPaywall()"
-      >
-        <app-icon slot="start" icon="ui-premium" size="sm"></app-icon>
-        {{ 'home.getPremiumCta' | i18n:null:lang}}
-      </ion-button>
-    </div>
+    <p class="home-feed-hint">{{ 'home.feed.rotateHint' | i18n:null:lang}}</p>
+
+    <ion-button expand="block" fill="outline" class="home-play-all" (click)="openPlay()">
+      {{ 'home.playCta' | i18n:null:lang}}
+    </ion-button>
   </div>
 </ion-content>

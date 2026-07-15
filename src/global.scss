@@ -10,7 +10,7 @@
  */
 
 html.ion-palette-dark body {
-  background: #16122b;
+  background: var(--premium-card, #16122b);
 }
 
 .page-safe-top {
@@ -22,7 +22,7 @@ app-root {
   height: 100%;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bangers&family=IBM+Plex+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
@@ -49,15 +49,22 @@ app-root {
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 @import "@ionic/angular/css/palettes/dark.class.css";
+
+@import "theme/design-system.scss";
 /* dark.system.css follows OS only — manual theme toggle needs dark.class.css */
 /* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+ion-content {
+  --background: var(--app-mesh-bg);
+}
 
 ion-title,
 h1,
 h2,
 h3 {
-  font-family: var(--app-font-display);
-  letter-spacing: 0.02em;
+  font-family: var(--app-font-ui);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 code,
@@ -98,24 +105,33 @@ html.palette-classic {
 }
 
 ion-card {
-  border: 2px solid color-mix(in srgb, var(--ion-color-primary) 32%, #ffffff);
-  border-radius: 20px;
-  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 html.ion-palette-dark ion-card {
-  border-color: color-mix(
-    in srgb,
-    var(--ion-color-primary) 45%,
-    var(--ion-background-color)
-  );
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  background: var(--glass-bg);
+  box-shadow: var(--glass-shadow);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  ion-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--app-surface-solid);
+  }
 }
 
 ion-button {
   --border-radius: 14px;
-  font-family: var(--app-font-display);
-  letter-spacing: 0.04em;
+  font-family: var(--app-font-ui);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 ion-button.button-disabled {
@@ -155,19 +171,17 @@ ion-content::part(scroll)::-webkit-scrollbar {
 }
 
 /**
- * Long-form and hub copy: use neutral UI face (display font reads “italic” at small sizes).
+ * Long-form and hub copy: neutral UI face.
+ * Surface + typography tokens live in theme/design-system.scss.
  */
-.home-content,
-.knowledge-page,
-.progress-page,
-.settings-page,
-.home-about-content {
-  font-family: var(--app-font-ui);
-}
 
 /* Play hub dock must never cover Knowledge / Progress / Settings tab stacks */
 .ion-page-hidden .play-mode-dock,
-app-play.ion-page-hidden .play-mode-dock {
+app-play.ion-page-hidden .play-mode-dock,
+html:not(.flagfield-active-tab-play) .play-mode-dock,
+.ion-page-hidden .play-tablet-grid,
+app-play.ion-page-hidden .play-tablet-grid,
+html:not(.flagfield-active-tab-play) .play-tablet-grid {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -179,12 +193,6 @@ app-play.ion-page-hidden .play-mode-dock {
 .home-content p,
 .home-content ion-button {
   font-family: var(--app-font-ui);
-}
-
-.home-content h1,
-.home-content h2 {
-  font-style: normal;
-  text-transform: none;
 }
 
 .home-about-content h2,
@@ -332,9 +340,9 @@ html.ion-palette-dark .app-hint-banner {
 }
 
 ion-popover.knowledge-hints-popover {
-  --background: #16122b;
-  --box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-  --border: 1px solid color-mix(in srgb, #ffffff 12%, transparent);
+  --background: var(--app-surface-solid);
+  --box-shadow: var(--glass-shadow);
+  --border: 1px solid var(--glass-border);
 }
 
 .app-page-toolbar {

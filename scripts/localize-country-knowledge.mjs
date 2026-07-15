@@ -124,6 +124,8 @@ async function fillCache(lang, enStrings, cacheStore) {
       const out = await translateEnTo(lang, en);
       if (out && !isBadTranslation(out, en)) {
         cacheStore.map[en] = out;
+      } else if (out === en) {
+        cacheStore.map[en] = en;
       }
     } catch (err) {
       console.warn(`  skip string (${i}/${todo.length}): ${err.message}`);

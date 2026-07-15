@@ -1,5 +1,6 @@
 import type { LineBasicMaterial, Mesh, MeshBasicMaterial, Object3D } from 'three';
 
+import type { GlobeThemePalette } from '../data/globe-theme';
 import {
   type GlobeCountryFeature,
   type GlobePolygonColorState,
@@ -58,9 +59,10 @@ export interface RefreshGlobePolygonColorsOptions {
 export function refreshGlobePolygonColors(
   globeRoot: Object3D,
   state: GlobePolygonColorState,
-  options?: RefreshGlobePolygonColorsOptions,
+  options?: RefreshGlobePolygonColorsOptions & { palette?: GlobeThemePalette },
 ): void {
   const onlyIsos = options?.onlyIsos;
+  const palette = options?.palette;
   globeRoot.traverse((obj) => {
     const node = obj as GlobePolygonObject;
     if (node.__globeObjType !== 'polygon') {
@@ -77,8 +79,8 @@ export function refreshGlobePolygonColors(
       }
     }
 
-    const capColor = politicalCapColor(feature, state);
-    const strokeColor = politicalStrokeColor(feature, state);
+    const capColor = politicalCapColor(feature, state, palette);
+    const strokeColor = politicalStrokeColor(feature, state, palette);
     const conic = node.children[0] as Mesh | undefined;
     const stroke = node.children[1] as Mesh | undefined;
 

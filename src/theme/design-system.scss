@@ -1,0 +1,320 @@
+/**
+ * Flagfield design system — Liquid Glass (CSS approximation).
+ * Single source: tokens, surfaces, hub layout, Ionic primitives, a11y fallbacks.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Glass + mesh tokens                                                        */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.14);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.22);
+  --glass-border: rgba(255, 255, 255, 0.28);
+  --glass-blur: 22px;
+  --glass-radius: 20px;
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --app-mesh-bg:
+    radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      color-mix(in srgb, var(--ion-color-primary) 18%, transparent),
+      transparent 55%
+    ),
+    var(--ion-background-color);
+  --app-surface-solid: color-mix(
+    in srgb,
+    var(--ion-background-color) 88%,
+    var(--ion-color-primary) 12%
+  );
+  --app-surface-muted: color-mix(
+    in srgb,
+    var(--ion-background-color) 94%,
+    var(--ion-text-color) 6%
+  );
+  --app-text-muted: var(--ion-color-medium-shade, var(--ion-color-medium));
+  --app-border-subtle: color-mix(in srgb, var(--ion-text-color) 10%, transparent);
+  --app-accent-gradient: linear-gradient(
+    135deg,
+    var(--ion-color-secondary) 0%,
+    #ec4899 100%
+  );
+  --app-accent-cyan: #0284c7;
+  --app-tab-color: var(--ion-color-medium);
+  --app-tab-color-selected: var(--ion-color-secondary);
+  --app-shell-max: 48rem;
+  --app-overlay-scrim: color-mix(in srgb, var(--ion-background-color) 55%, transparent);
+}
+
+html.ion-palette-dark {
+  --glass-bg: rgba(22, 18, 43, 0.55);
+  --glass-bg-elevated: rgba(30, 24, 53, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --app-surface-solid: color-mix(
+    in srgb,
+    var(--premium-card, #16122b) 92%,
+    var(--ion-color-primary) 8%
+  );
+  --app-surface-muted: color-mix(
+    in srgb,
+    var(--premium-card, #16122b) 96%,
+    #ffffff 4%
+  );
+  --app-text-muted: #a1a1aa;
+  --app-border-subtle: color-mix(in srgb, #ffffff 12%, transparent);
+  --app-accent-cyan: #22d3ee;
+  --app-tab-color: #71717a;
+  --app-tab-color-selected: #e9d5ff;
+  --app-overlay-scrim: color-mix(in srgb, var(--ion-background-color) 72%, transparent);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Surfaces                                                                   */
+/* -------------------------------------------------------------------------- */
+
+.glass-surface {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-surface--elevated {
+  background: var(--glass-bg-elevated);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+}
+
+/**
+ * Solid surfaces for canvas/game overlays (no backdrop-filter).
+ * Same radius, border, shadow as glass.
+ */
+.mem-surface,
+.glass-surface--solid {
+  background: var(--app-surface-solid);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+}
+
+.mem-surface--solid {
+  background: var(--app-surface-muted);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-surface,
+  .glass-surface--elevated,
+  .app-metric-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--app-surface-solid);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-surface,
+  .glass-surface--elevated,
+  .app-metric-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--app-surface-solid);
+  }
+
+  ion-tab-bar {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    --background: var(--ion-background-color);
+  }
+
+  ion-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--app-surface-solid);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-surface,
+  .glass-surface--elevated,
+  ion-tab-bar {
+    transition: none;
+  }
+}
+
+ion-card.glass-surface,
+ion-card.mem-surface {
+  margin-inline: 0;
+}
+
+ion-card.glass-surface {
+  --background: transparent;
+  background: var(--glass-bg);
+}
+
+html.ion-palette-dark ion-card.glass-surface {
+  background: var(--glass-bg);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Hub pages — mesh background + UI typography                                */
+/* -------------------------------------------------------------------------- */
+
+.app-hub-page,
+.home-content,
+.knowledge-page,
+.progress-page,
+.settings-page,
+.paywall-content,
+.login-page,
+.home-about-content,
+.product-info-content,
+.play-hub,
+.session-result-content,
+.learning-path-page {
+  --background: var(--app-mesh-bg);
+  font-family: var(--app-font-ui);
+  color: var(--ion-text-color);
+}
+
+.app-hub-page h1,
+.app-hub-page h2,
+.app-hub-page h3,
+.home-content h1,
+.home-content h2,
+.knowledge-page h1,
+.knowledge-page h2,
+.progress-page h1,
+.progress-page h2,
+.settings-page h1,
+.settings-page h2,
+.paywall-content h1,
+.login-page h1,
+.home-about-content h1,
+.home-about-content h2,
+.session-result-content h1,
+.session-result-content h2 {
+  font-family: var(--app-font-ui);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ion-text-color);
+}
+
+.app-page-shell {
+  width: 100%;
+  max-width: min(100%, var(--app-shell-max));
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.app-kicker {
+  margin: 0 0 var(--app-space-3);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.app-accent-text {
+  background: var(--app-accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.app-metric-card {
+  padding: var(--app-space-3);
+  border-radius: var(--glass-radius);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-shadow);
+  text-align: center;
+
+  ion-icon {
+    font-size: 1.2rem;
+    margin-bottom: 4px;
+  }
+
+  &__value {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--ion-text-color);
+  }
+
+  &__label {
+    margin: 6px 0 0;
+    font-size: 0.72rem;
+    color: var(--app-text-muted);
+  }
+
+  &--streak ion-icon {
+    color: #fb923c;
+  }
+
+  &--record ion-icon {
+    color: #facc15;
+  }
+}
+
+/* Game / canvas shells — solid bg, glass only on overlays */
+.app-game-shell {
+  --background: var(--ion-background-color);
+  font-family: var(--app-font-ui);
+  color: var(--ion-text-color);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Ionic primitives                                                           */
+/* -------------------------------------------------------------------------- */
+
+ion-tab-bar {
+  --background: transparent;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--glass-border);
+}
+
+ion-searchbar.app-glass-search,
+ion-searchbar.knowledge-search {
+  --background: var(--glass-bg);
+  --border-radius: var(--glass-radius);
+  --box-shadow: var(--glass-shadow);
+  --color: var(--ion-text-color);
+  --placeholder-color: var(--app-text-muted);
+  --icon-color: var(--app-text-muted);
+  padding: 0;
+}
+
+ion-accordion.glass-surface,
+ion-accordion.settings-accordion {
+  border-radius: var(--glass-radius);
+  overflow: hidden;
+}
+
+ion-popover.app-glass-popover,
+ion-popover.knowledge-hints-popover {
+  --background: var(--app-surface-solid);
+  --box-shadow: var(--glass-shadow);
+  --border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+ion-item.app-glass-item {
+  --background: transparent;
+  --border-color: var(--app-border-subtle);
+}
+
+ion-list.app-glass-list {
+  background: transparent;
+  border-radius: var(--glass-radius);
+}

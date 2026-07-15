@@ -45,6 +45,13 @@ export const FLAGFIELD_EN: Record<string, string> = {
     'Premium is optional: unlimited sessions plus globe and map quests. Restore purchases from Settings if you reinstall.',
   'home.aboutGameLegacyLabel': 'Quick reference',
   'home.playCta': 'Play',
+  'home.feed.heroTitle': 'Discover the world',
+  'home.feed.flagTitle': 'Country',
+  'home.feed.factTitle': 'Did you know?',
+  'home.feed.capitalTitle': 'Capital',
+  'home.feed.playCta': 'Play this country',
+  'home.feed.learnCta': 'Open in Knowledge',
+  'home.feed.rotateHint': 'New country every few seconds',
   'home.dailyGoalTitle': 'Daily goal',
   'home.dailyGoalProgress': '{{done}} / {{target}} correct answers today',
   'home.dailyGoalHint':
@@ -233,6 +240,9 @@ export const FLAGFIELD_EN: Record<string, string> = {
   'challenge.mode.capital_pick_country': 'Capital → pick country',
   'challenge.mode.country_pick_capital': 'Country → pick capital',
   'play.title': 'Play',
+  'play.hubTitle': 'Choose a mode',
+  'play.hubSub': 'Swipe the wheel or tap a category',
+  'play.viewProgress': 'Progress & daily goal',
   'play.subtitle': 'Pick a mode',
   'play.globeFindTitle': 'Globe Quest',
   'play.globeFindSub': 'Find the country on the spinning globe',
@@ -388,6 +398,12 @@ export const FLAGFIELD_EN: Record<string, string> = {
   'settings.visualQualityQuality': 'Quality',
   'settings.visualQualityHint':
     'Controls 3D globe polygon detail and flag animation. Reopen Globe Quest for globe changes to apply.',
+  'settings.globeTheme': 'Globe colors',
+  'settings.globeThemeClassic': 'Classic continents',
+  'settings.globeThemeFlagfield': 'Flagfield violet',
+  'settings.globeThemeMinimal': 'Minimal slate',
+  'settings.globeThemeHint':
+    'Country fill colors on Globe Quest and Map Quest. Reopen the quest to apply if it is already open.',
   'settings.paletteOcean': 'Ocean',
   'settings.paletteForest': 'Forest',
   'settings.paletteSunset': 'Sunset',
@@ -446,7 +462,8 @@ export const FLAGFIELD_EN: Record<string, string> = {
   'paywall.webOnly': 'Purchases are available in the iOS and Android apps only.',
   'paywall.testModeHint':
     'Test mode: tap Subscribe to activate Premium without a real purchase.',
-  'paywall.subscribeTest': 'Subscribe monthly (test)',
+  'paywall.storeProductPending':
+    'Store product is not loaded yet. Enable test mode (devMockBilling) or finish App Store Connect setup.',
   'paywall.storeBadge': 'Payments via {{store}}',
   'paywall.heroTitle': 'Explore without limits',
   'paywall.heroLead':

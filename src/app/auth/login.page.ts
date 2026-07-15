@@ -38,7 +38,7 @@ export class LoginPage implements OnInit {
     this.busy = true;
     try {
       await this.auth.setDisplayName(this.username);
-      void this.router.navigate(['/tabs/play'], { replaceUrl: true });
+      void this.router.navigate(['/tabs/home'], { replaceUrl: true });
       void this.syncProfileSettings();
     } catch (e) {
       const code = e instanceof Error ? e.message : 'USERNAME_SHORT';

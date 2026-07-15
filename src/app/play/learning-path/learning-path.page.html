@@ -14,7 +14,7 @@
   <p *ngIf="loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
   <p class="learning-path-lead">{{ 'play.learningLead' | i18n:null:lang}}</p>
 
-  <ion-list *ngIf="!loading" lines="none">
+  <ion-list *ngIf="!loading" lines="none" class="learning-path-list glass-surface">
     <ion-item
       *ngFor="let row of rows"
       button

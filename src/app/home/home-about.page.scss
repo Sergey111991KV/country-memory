@@ -1,9 +1,5 @@
 .home-about-content {
-  --background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--ion-color-primary) 5%, var(--ion-background-color)) 0%,
-    var(--ion-background-color) 40%
-  );
+  font-family: var(--app-font-ui);
 }
 
 .about-shell {
@@ -27,9 +23,6 @@
 }
 
 .about-card {
-  border-radius: 20px !important;
-  overflow: hidden;
-  box-shadow: 0 12px 32px color-mix(in srgb, var(--ion-text-color) 8%, transparent);
   margin: 0;
 }
 

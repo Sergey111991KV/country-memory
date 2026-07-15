@@ -4,6 +4,7 @@ import {
   NgZone,
   OnDestroy,
   ViewChild,
+  effect,
   inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
@@ -24,7 +25,6 @@ import { UserLearningService } from '../../core/services/user-learning.service';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import {
   GLOBE_BUMP_TEXTURE,
-  GLOBE_POLITICAL_TEXTURE,
   type GlobeCountryFeature,
   type GlobePolygonColorState,
   iso2FromNaturalEarth,
@@ -49,6 +49,8 @@ import { buildSoloSessionResult } from '../../core/utils/play-session-result-bui
 import { GlobeRenderLoop } from '../../core/utils/globe-render-loop';
 import { refreshGlobePolygonColors } from '../../core/utils/globe-polygon-colors';
 import { VisualQualityService } from '../../core/services/visual-quality.service';
+import { GlobeThemeService } from '../../core/services/globe-theme.service';
+import type { GlobeThemeId, GlobeThemePalette } from '../../core/data/globe-theme';
 
 type ThreeNamespace = typeof import('three');
 type ThreeGlobeApi = Object3D & {
@@ -104,6 +106,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private readonly geoCache = inject(GeoJsonCacheService);
   private readonly knowledge = inject(CountryKnowledgeService);
   private readonly visualQuality = inject(VisualQualityService);
+  private readonly globeTheme = inject(GlobeThemeService);
 
   loading = true;
   loadError = false;
@@ -137,10 +140,12 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     feedbackWrongIso: null,
     phase: 'pick',
   };
+  private themePalette: GlobeThemePalette = this.globeTheme.palette();
+  private appliedGlobeTheme: GlobeThemeId | null = null;
   private readonly capColorFn = (f: GlobeCountryFeature): string =>
-    politicalCapColor(f, this.polygonStyleState);
+    politicalCapColor(f, this.polygonStyleState, this.themePalette);
   private readonly strokeColorFn = (f: GlobeCountryFeature): string =>
-    politicalStrokeColor(f, this.polygonStyleState);
+    politicalStrokeColor(f, this.polygonStyleState, this.themePalette);
   private readonly onVisibilityChange = (): void => {
     const hidden = document.hidden;
     this.renderLoop?.setPaused(hidden);
@@ -165,8 +170,18 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   };
   readonly roundsTotal = ROUNDS_PER_SESSION;
 
+  constructor() {
+    effect(() => {
+      const themeId = this.globeTheme.theme();
+      if (this.globe && themeId !== this.appliedGlobeTheme) {
+        this.applyGlobeTheme(themeId);
+      }
+    });
+  }
+
   ionViewDidEnter(): void {
     if (this.bootStarted) {
+      this.syncGlobeTheme();
       this.renderLoop?.setPaused(false);
       this.renderLoop?.requestRender();
       return;
@@ -406,7 +421,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     }) as unknown as ThreeGlobeApi;
 
     let globeLayer = globe
-      .globeImageUrl(GLOBE_POLITICAL_TEXTURE)
+      .globeImageUrl(this.themePalette.globeTexture)
       .showAtmosphere(false);
     if (globeCfg.useBumpMap) {
       globeLayer = globeLayer.bumpImageUrl(GLOBE_BUMP_TEXTURE);
@@ -414,7 +429,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     globeLayer
       .polygonsData(this.geoFeatures)
       .polygonCapColor(this.capColorFn)
-      .polygonSideColor(() => 'rgba(30, 41, 59, 0.35)')
+      .polygonSideColor(() => this.themePalette.polygonSideColor)
       .polygonStrokeColor(this.strokeColorFn)
       .polygonAltitude(() => POLYGON_ALTITUDE)
       .polygonCapCurvatureResolution(globeCfg.polygonCurvatureDeg)
@@ -423,6 +438,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
     this.scene.add(globe);
     this.globe = globe;
+    this.applyGlobeTheme(this.globeTheme.theme());
 
     const light = new THREE.AmbientLight(0xffffff, 1.15);
     this.scene.add(light);
@@ -488,7 +504,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   }
 
   private refreshPolygonColors(): void {
-    const styleKey = `${this.phase}|${this.selectedIso}|${this.feedbackCorrectIso}|${this.feedbackWrongIso}`;
+    const styleKey = `${this.appliedGlobeTheme}|${this.phase}|${this.selectedIso}|${this.feedbackCorrectIso}|${this.feedbackWrongIso}`;
     if (styleKey === this.lastPolygonStyleKey) {
       return;
     }
@@ -533,7 +549,10 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     }
     this.polygonColorsDirty = false;
     const onlyIsos = this.polygonColorDirtyIsos ?? undefined;
-    refreshGlobePolygonColors(this.globe, this.polygonStyleState, onlyIsos ? { onlyIsos } : undefined);
+    refreshGlobePolygonColors(this.globe, this.polygonStyleState, {
+      onlyIsos,
+      palette: this.themePalette,
+    });
     this.polygonColorDirtyIsos = null;
   }
 
@@ -643,6 +662,26 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       }
     };
     this.flyRafId = this.renderLoop!.scheduleFrame(tick);
+  }
+
+  private syncGlobeTheme(): void {
+    const themeId = this.globeTheme.theme();
+    if (themeId !== this.appliedGlobeTheme) {
+      this.applyGlobeTheme(themeId);
+    }
+  }
+
+  private applyGlobeTheme(themeId: GlobeThemeId): void {
+    this.themePalette = this.globeTheme.palette();
+    this.appliedGlobeTheme = themeId;
+    const g = this.globe as ThreeGlobeApi | null;
+    if (g) {
+      g.globeImageUrl(this.themePalette.globeTexture);
+    }
+    this.lastPolygonStyleKey = '';
+    this.polygonColorDirtyIsos = null;
+    this.polygonColorsDirty = true;
+    this.renderLoop?.requestRender();
   }
 
   private featureForCountry(country: Country): GlobeCountryFeature | undefined {

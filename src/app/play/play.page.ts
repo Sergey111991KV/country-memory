@@ -2,10 +2,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   OnInit,
   inject,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 import { AlertController, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 
 import { CourseLaunchService } from '../core/services/course-launch.service';
@@ -28,11 +31,7 @@ export type {
   PlayModeSlide,
 } from './play-mode.types';
 import { LearningPathService } from '../core/services/learning-path.service';
-import type { HeroTypography } from '../core/services/app-settings.service';
-import { AppSettingsService } from '../core/services/app-settings.service';
-import { DailyGoalService } from '../core/services/daily-goal.service';
 import { LocaleService } from '../core/services/locale.service';
-import { DisplayTextService } from '../core/services/display-text.service';
 import { PlayPoolService } from '../core/services/play-pool.service';
 import { PlaySessionService } from '../core/services/play-session.service';
 import { SessionAccessService } from '../core/services/session-access.service';
@@ -48,7 +47,6 @@ import {
   snapPlayDockSlotIndex,
   type PlayDockWheelSlot,
 } from '../core/utils/play-dock-arc';
-import { environment } from '../../environments/environment';
 
 export type PlayDockLevel = 'categories' | 'modes';
 
@@ -58,9 +56,6 @@ const DOCK_TRANSITION_MS = 280;
 
 interface PlayRefreshSnapshot {
   subscribed: boolean;
-  dailyDone: number;
-  dailyTarget: number;
-  freeGamesLeft: number;
   atGameLimit: boolean;
   dockLevel: PlayDockLevel;
   selectedCategoryId: PlayCategoryId | null;
@@ -75,32 +70,19 @@ interface PlayRefreshSnapshot {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlayPage implements OnInit, ViewWillEnter, ViewWillLeave {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly alertCtrl = inject(AlertController);
   protected readonly locale = inject(LocaleService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly courseLaunch = inject(CourseLaunchService);
   private readonly learningPath = inject(LearningPathService);
-  private readonly displayText = inject(DisplayTextService);
-  private readonly appSettings = inject(AppSettingsService);
-  private readonly dailyGoal = inject(DailyGoalService);
   private readonly playPool = inject(PlayPoolService);
   private readonly playSession = inject(PlaySessionService);
   readonly sub = inject(SubscriptionService);
   readonly sessionAccess = inject(SessionAccessService);
   private readonly perf = inject(PerfLogService);
 
-  readonly freeGamesLimit = environment.freeGamesLimit;
-
-  heroTitleDisplay = '';
-  heroSubShortDisplay = '';
-  heroTypography: HeroTypography = 'comfortable';
-  dailyDone = 0;
-  dailyTarget = 5;
-  dailyComplete = false;
-  dailyProgressPercent = 0;
-  freeCountryCount = 30;
-  freeGamesLeft = environment.freeGamesLimit;
   atGameLimit = false;
 
   dockLevel: PlayDockLevel = 'categories';
@@ -129,17 +111,34 @@ export class PlayPage implements OnInit, ViewWillEnter, ViewWillLeave {
   ngOnInit(): void {
     this.rebuildPlayDockWheel();
     this.snapPlayDockToLogical(0, false);
+    this.syncModeDockFromRoute();
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.syncModeDockFromRoute());
     void this.refresh();
   }
 
   ionViewWillEnter(): void {
-    this.showModeDock = true;
-    this.cdr.markForCheck();
+    this.syncModeDockFromRoute();
     void this.refresh({ fromViewEnter: true });
   }
 
   ionViewWillLeave(): void {
     this.showModeDock = false;
+    this.cdr.markForCheck();
+  }
+
+  /** Tab switches may skip ionViewWillLeave; also hide dock off /tabs/play. */
+  private syncModeDockFromRoute(): void {
+    const path = this.router.url.split('?')[0].split('#')[0];
+    const onPlayHub = /^\/tabs\/play\/?$/.test(path);
+    if (this.showModeDock === onPlayHub) {
+      return;
+    }
+    this.showModeDock = onPlayHub;
     this.cdr.markForCheck();
   }
 
@@ -174,6 +173,23 @@ export class PlayPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
   trackPlayDockSlot(_index: number, slot: PlayDockWheelSlot): number {
     return slot.slotIndex;
+  }
+
+  trackPlayCategory(_index: number, category: PlayCategorySlide): string {
+    return category.id;
+  }
+
+  trackPlayMode(_index: number, mode: PlayModeSlide): string {
+    return mode.id;
+  }
+
+  isModeLocked(mode: PlayModeSlide): boolean {
+    return (
+      (mode.action.type === 'globe' ||
+        mode.action.type === 'map' ||
+        mode.action.type === 'explore_mark') &&
+      !this.sub.isSubscribed()
+    );
   }
 
   playDockSpokeTransform(slotIndex: number): string {
@@ -378,31 +394,12 @@ export class PlayPage implements OnInit, ViewWillEnter, ViewWillLeave {
     const span = this.perf.span('PlayHub', 'refresh');
     await this.sub.init();
     await this.sessionAccess.hydrate();
-    await this.displayText.ensureLoaded();
-    this.heroTitleDisplay = this.displayText.effective('home.heroTitle');
-    this.heroSubShortDisplay = this.displayText.effective('home.heroSubShort');
-    const settings = await this.appSettings.load();
-    this.heroTypography = settings.heroTypography;
-    const goal = await this.dailyGoal.syncFromLearning();
-    this.dailyDone = goal.progress;
-    this.dailyTarget = goal.target;
-    this.dailyComplete = goal.progress >= goal.target;
-    this.dailyProgressPercent =
-      this.dailyTarget > 0
-        ? Math.min(100, Math.round((this.dailyDone / this.dailyTarget) * 100))
-        : 0;
-    const free = await this.playPool.getFreePool();
-    this.freeCountryCount = free.length;
-    this.freeGamesLeft = this.sessionAccess.remainingFreeGames(this.sub.isSubscribed());
     this.atGameLimit =
       !this.sub.isSubscribed() && !this.sessionAccess.canStartGame(false);
 
     const subscribed = this.sub.isSubscribed();
     const snapshot: PlayRefreshSnapshot = {
       subscribed,
-      dailyDone: this.dailyDone,
-      dailyTarget: this.dailyTarget,
-      freeGamesLeft: this.freeGamesLeft,
       atGameLimit: this.atGameLimit,
       dockLevel: this.dockLevel,
       selectedCategoryId: this.selectedCategory?.id ?? null,
@@ -460,9 +457,6 @@ export class PlayPage implements OnInit, ViewWillEnter, ViewWillLeave {
   ): boolean {
     return (
       a.subscribed === b.subscribed &&
-      a.dailyDone === b.dailyDone &&
-      a.dailyTarget === b.dailyTarget &&
-      a.freeGamesLeft === b.freeGamesLeft &&
       a.atGameLimit === b.atGameLimit &&
       a.dockLevel === b.dockLevel &&
       a.selectedCategoryId === b.selectedCategoryId &&

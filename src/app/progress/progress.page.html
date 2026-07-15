@@ -6,26 +6,64 @@
       <p>{{ 'progress.subtitle' | i18n:null:lang}}</p>
     </header>
 
-    <section class="progress-block" aria-labelledby="progress-activity-heading">
+    <section class="progress-block progress-daily glass-surface" aria-labelledby="progress-daily-heading">
+      <div class="progress-daily__head">
+        <h2 id="progress-daily-heading" class="progress-kicker">{{ 'home.dailyGoalTitle' | i18n:null:lang}}</h2>
+        <span *ngIf="dailyComplete" class="progress-daily__badge">{{ 'home.dailyGoalDoneShort' | i18n:null:lang}}</span>
+      </div>
+      <p class="progress-daily__progress">
+        <ng-container *ngIf="!dailyComplete">
+          {{ 'home.dailyGoalProgress' | i18n:{ done: dailyDone, target: dailyTarget }:lang}}
+        </ng-container>
+        <ng-container *ngIf="dailyComplete">{{ 'home.dailyGoalDone' | i18n:null:lang}}</ng-container>
+      </p>
+      <div
+        class="progress-daily__bar"
+        role="progressbar"
+        [attr.aria-valuenow]="dailyDone"
+        [attr.aria-valuemin]="0"
+        [attr.aria-valuemax]="dailyTarget"
+      >
+        <span class="progress-daily__bar-fill" [style.width.%]="dailyProgressPercent"></span>
+      </div>
+      <p *ngIf="!sub.isSubscribedSig()" class="progress-daily__meta">
+        {{ 'paywall.freeGamesLine' | i18n:{ n: freeGamesLeft, limit: freeGamesLimit }:lang}}
+      </p>
+      <p *ngIf="sub.isSubscribedSig()" class="progress-daily__meta progress-daily__meta--premium">
+        {{ 'home.premiumActive' | i18n:null:lang}}
+      </p>
+      <ion-button
+        *ngIf="!sub.isSubscribedSig()"
+        expand="block"
+        fill="clear"
+        color="warning"
+        class="progress-premium-cta"
+        (click)="openPaywall()"
+      >
+        {{ 'home.getPremiumCta' | i18n:null:lang}}
+      </ion-button>
+    </section>
+
+    <section class="progress-block glass-surface" aria-labelledby="progress-activity-heading">
       <h2 id="progress-activity-heading" class="progress-kicker">{{ 'progress.activitySection' | i18n:null:lang}}</h2>
       <div class="progress-metric-cards">
-        <article class="progress-metric-card">
-          <p class="progress-metric-card__value">{{ dailyDone }}/{{ dailyTarget }}</p>
-          <p class="progress-metric-card__label">{{ 'home.dailyGoalTitle' | i18n:null:lang}}</p>
+        <article class="app-metric-card">
+          <p class="app-metric-card__value">{{ dailyDone }}/{{ dailyTarget }}</p>
+          <p class="app-metric-card__label">{{ 'home.dailyGoalTitle' | i18n:null:lang}}</p>
         </article>
-        <article class="progress-metric-card">
-          <p class="progress-metric-card__value">{{ correctToday }}</p>
-          <p class="progress-metric-card__label">{{ 'progress.correctToday' | i18n:null:lang}}</p>
+        <article class="app-metric-card">
+          <p class="app-metric-card__value">{{ correctToday }}</p>
+          <p class="app-metric-card__label">{{ 'progress.correctToday' | i18n:null:lang}}</p>
         </article>
-        <article class="progress-metric-card progress-metric-card--streak">
+        <article class="app-metric-card app-metric-card--streak">
           <ion-icon name="flame" aria-hidden="true"></ion-icon>
-          <p class="progress-metric-card__value">{{ streakDays }}</p>
-          <p class="progress-metric-card__label">{{ 'knowledge.streakLabel' | i18n:null:lang}}</p>
+          <p class="app-metric-card__value">{{ streakDays }}</p>
+          <p class="app-metric-card__label">{{ 'knowledge.streakLabel' | i18n:null:lang}}</p>
         </article>
-        <article class="progress-metric-card progress-metric-card--record">
+        <article class="app-metric-card app-metric-card--record">
           <ion-icon name="flash" aria-hidden="true"></ion-icon>
-          <p class="progress-metric-card__value">{{ bestDayRecord }}</p>
-          <p class="progress-metric-card__label">{{ 'knowledge.recordLabel' | i18n:null:lang}}</p>
+          <p class="app-metric-card__value">{{ bestDayRecord }}</p>
+          <p class="app-metric-card__label">{{ 'knowledge.recordLabel' | i18n:null:lang}}</p>
         </article>
       </div>
       <p class="progress-hint">{{ 'home.dailyGoalHint' | i18n:null:lang}}</p>
@@ -34,9 +72,9 @@
       </p>
     </section>
 
-    <section class="progress-block" aria-labelledby="progress-knowledge-heading">
+    <section class="progress-block glass-surface" aria-labelledby="progress-knowledge-heading">
       <h2 id="progress-knowledge-heading" class="progress-kicker">{{ 'progress.knowledgeSection' | i18n:null:lang}}</h2>
-      <p class="progress-summary">
+      <p class="progress-summary app-accent-text">
         {{ 'knowledge.factsKnown' | i18n:{ learned: factsLearnedTotal, total: factsTotal }:lang}}
       </p>
       <div class="progress-stats-track">
@@ -54,7 +92,7 @@
       </div>
     </section>
 
-    <section class="progress-block" aria-labelledby="progress-path-heading">
+    <section class="progress-block glass-surface" aria-labelledby="progress-path-heading">
       <h2 id="progress-path-heading" class="progress-kicker">{{ 'knowledge.pathSection' | i18n:null:lang}}</h2>
       <p class="progress-hint">{{ 'progress.pathHint' | i18n:null:lang}}</p>
       <div class="progress-chapter-track" role="list">
@@ -73,7 +111,7 @@
       </div>
     </section>
 
-    <section class="progress-block" aria-labelledby="progress-recent-heading">
+    <section class="progress-block glass-surface" aria-labelledby="progress-recent-heading">
       <h2 id="progress-recent-heading" class="progress-kicker">{{ 'progress.recent' | i18n:null:lang}}</h2>
       <p *ngIf="recent.length === 0" class="progress-empty">{{ 'progress.empty' | i18n:null:lang}}</p>
       <ion-list *ngIf="recent.length" class="progress-recent-list" lines="none">

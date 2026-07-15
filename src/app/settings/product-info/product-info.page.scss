@@ -1,10 +1,5 @@
 .product-info-content {
-  --background: linear-gradient(
-    185deg,
-    color-mix(in srgb, var(--ion-color-tertiary) 12%, var(--ion-background-color)) 0%,
-    var(--ion-background-color) 32%,
-    var(--ion-background-color) 100%
-  );
+  font-family: var(--app-font-ui);
 }
 
 .product-kicker {
@@ -14,7 +9,6 @@
 
 .about-onboarding {
   padding: var(--app-space-4) var(--app-space-3) var(--app-space-3);
-  border-radius: 20px;
   margin-bottom: var(--app-space-4);
 }
 

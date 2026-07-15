@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 
 import type { VisualQuality } from '../data/visual-quality';
 import { parseVisualQuality } from '../data/visual-quality';
+import type { GlobeThemeId } from '../data/globe-theme';
+import { parseGlobeTheme } from '../data/globe-theme';
 import { StorageService } from './storage.service';
 
 const KEY = 'app_settings_v2';
@@ -19,6 +21,8 @@ export interface AppSettings {
   colorPalette: ColorPalette;
   /** Globe polygon detail + flag animation intensity. */
   visualQuality: VisualQuality;
+  /** Country fill colors on globe and map quests. */
+  globeTheme: GlobeThemeId;
 }
 
 const DEFAULT_PLAYER = 'Player';
@@ -61,6 +65,7 @@ export class AppSettingsService {
       bodyTypography: 'default',
       colorPalette: 'ocean',
       visualQuality: 'balanced',
+      globeTheme: 'classic',
     };
   }
 
@@ -100,6 +105,7 @@ export class AppSettingsService {
       bodyTypography,
       colorPalette,
       visualQuality: parseVisualQuality(raw.visualQuality),
+      globeTheme: parseGlobeTheme(raw.globeTheme),
     };
     return this.cached;
   }

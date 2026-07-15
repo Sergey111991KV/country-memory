@@ -55,6 +55,23 @@ describe('SubscriptionService', () => {
     expect(service.premiumExpiresIsoSig()).toBeTruthy();
   });
 
+  it('should simulate before native store when devMockBilling is on', async () => {
+    await service.init();
+    service.storeConfiguredSig.set(true);
+    service.billingPlatformSig.set('ios');
+    service.monthlyProductSig.set({
+      productId: 'flagfield_premium_monthly',
+      title: 'Premium Monthly',
+      kind: 'monthly',
+      priceString: '$2.99',
+    });
+    expect(service.canPurchaseInApp()).toBeTrue();
+    expect(service.canSimulateBilling()).toBeTrue();
+    const result = await service.purchaseMonthly();
+    expect(result).toBe('success');
+    expect(service.debugPremiumActive()).toBeTrue();
+  });
+
   it('should resolve manage subscription url by platform signal', () => {
     service.billingPlatformSig.set('ios');
     expect(service.manageSubscriptionsUrl()).toContain('apple.com');

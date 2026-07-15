@@ -14,7 +14,7 @@
   <p class="icon-gallery__badge">{{ 'icons.devOnlyBadge' | i18n:null:lang}}</p>
   <p class="icon-gallery__lead">{{ 'icons.galleryLead' | i18n:null:lang}}</p>
 
-  <section class="icon-gallery__section mem-surface">
+  <section class="icon-gallery__section glass-surface">
     <h2 class="icon-gallery__heading">{{ 'icons.playDockPreviewTitle' | i18n:null:lang}}</h2>
     <p class="icon-gallery__sub">{{ 'icons.playDockPreviewLead' | i18n:null:lang}}</p>
 
@@ -22,7 +22,7 @@
     <ul class="icon-gallery__dock-row">
       <li
         *ngFor="let category of playCategories; trackBy: trackCategory"
-        class="icon-gallery__dock-card mem-surface"
+        class="icon-gallery__dock-card glass-surface"
       >
         <span class="icon-gallery__dock-shell" aria-hidden="true">
           <app-icon [icon]="category.icon" size="dock-lg"></app-icon>
@@ -40,7 +40,7 @@
       <ul class="icon-gallery__dock-row icon-gallery__dock-row--wrap">
         <li
           *ngFor="let mode of section.items; trackBy: trackMode"
-          class="icon-gallery__dock-card mem-surface"
+          class="icon-gallery__dock-card glass-surface"
         >
           <span class="icon-gallery__dock-shell" aria-hidden="true">
             <app-icon [icon]="mode.icon" size="dock-lg"></app-icon>
@@ -52,7 +52,7 @@
     </section>
   </section>
 
-  <section *ngFor="let group of groups" class="icon-gallery__section mem-surface">
+  <section *ngFor="let group of groups" class="icon-gallery__section glass-surface">
     <h2 class="icon-gallery__heading">{{ groupTitleKey(group) | i18n:null:lang}}</h2>
     <ul class="icon-gallery__grid">
       <li

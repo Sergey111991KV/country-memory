@@ -159,12 +159,32 @@ export class SubscriptionService {
     );
   }
 
-  /** Test / dev: simulate monthly Premium when the store is unavailable or devMockBilling is on. */
+  /**
+   * Test / dev: one-tap mock Premium without App Store / Play sheet.
+   * When true, `purchaseMonthly()` always simulates (even on native with StoreKit).
+   */
   canSimulateBilling(): boolean {
-    if (!this.canUseBillingDebug()) {
+    if (environment.production) {
       return false;
     }
-    return environment.devMockBilling || !this.canPurchaseInApp();
+    if (environment.devMockBilling) {
+      return true;
+    }
+    if (environment.billingDebugEnabled && this.canUseBillingDebug()) {
+      return true;
+    }
+    if (!this.canPurchaseInApp()) {
+      return this.canUseBillingDebug();
+    }
+    // Store wired in app but monthly SKU not returned yet (pre–App Store Connect QA).
+    if (
+      this.readySig() &&
+      !this.offeringsLoadingSig() &&
+      !this.monthlyProductSig()
+    ) {
+      return this.canUseBillingDebug() || !environment.production;
+    }
+    return false;
   }
 
   canSubscribeMonthly(): boolean {
@@ -272,15 +292,16 @@ export class SubscriptionService {
   }
 
   async purchaseMonthly(): Promise<'success' | 'cancelled' | 'error'> {
+    if (this.canSimulateBilling()) {
+      return this.simulateMonthlyPurchase();
+    }
     if (this.canPurchaseInApp()) {
       const product = this.monthlyProductSig();
       if (!product) {
+        await this.logBilling('purchase_no_monthly_product');
         return 'error';
       }
       return this.purchaseProduct(product);
-    }
-    if (this.canSimulateBilling()) {
-      return this.simulateMonthlyPurchase();
     }
     await this.logBilling('purchase_unavailable');
     return 'error';

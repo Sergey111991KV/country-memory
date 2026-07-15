@@ -24,6 +24,7 @@ export class PaywallPage implements OnInit, ViewWillEnter {
   protected readonly locale = inject(LocaleService);
 
   readonly billingDebugEnabled = this.sub.canUseBillingDebug();
+  readonly isProduction = environment.production;
   readonly isNative = Capacitor.isNativePlatform();
   readonly freeGamesLimit = environment.freeGamesLimit;
 
@@ -49,7 +50,7 @@ export class PaywallPage implements OnInit, ViewWillEnter {
   }
 
   goBack(): void {
-    void this.router.navigate(['/tabs/play']);
+    void this.router.navigate(['/tabs/home']);
   }
 
   async subscribeMonthly(): Promise<void> {

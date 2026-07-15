@@ -12,22 +12,6 @@
     <p *ngIf="loading" class="knowledge-loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
 
     <ng-container *ngIf="!loading">
-    <section class="knowledge-block" aria-labelledby="knowledge-summary-heading">
-      <h2 id="knowledge-summary-heading" class="knowledge-kicker">{{ 'knowledge.summaryLead' | i18n:null:lang}}</h2>
-      <p class="knowledge-summary-line">
-        {{ 'knowledge.summaryCountries' | i18n:{ n: summaryCollectionCount }:lang}}
-      </p>
-      <p class="knowledge-summary-line">
-        {{ 'knowledge.summaryEngaged' | i18n:{ n: summaryEngagedCount }:lang}}
-      </p>
-      <p class="knowledge-summary-line">
-        {{ 'knowledge.summaryMarks' | i18n:{ known: summaryMarksKnown, total: summaryMarksTotal }:lang}}
-      </p>
-      <p *ngIf="summaryPartialCount > 0" class="knowledge-summary-hint">
-        {{ 'knowledge.summaryPartial' | i18n:{ n: summaryPartialCount }:lang}}
-      </p>
-    </section>
-
     <section class="knowledge-block" aria-labelledby="knowledge-collections-heading">
       <div class="knowledge-block__head">
         <h2 id="knowledge-collections-heading" class="knowledge-kicker knowledge-block__kicker">{{ 'knowledge.collectionsSection' | i18n:null:lang}}</h2>
@@ -94,7 +78,7 @@
       <div class="knowledge-country-list">
         <article
           *ngFor="let row of displayCountryRows; trackBy: trackCountryRow"
-          class="knowledge-country-card"
+          class="knowledge-country-card glass-surface"
           [class.knowledge-country-card--expanded]="row.expanded"
         >
           <button

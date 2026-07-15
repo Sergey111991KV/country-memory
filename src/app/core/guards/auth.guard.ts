@@ -20,5 +20,5 @@ export const guestGuard: CanActivateFn = async () => {
   if (!auth.isLoggedIn()) {
     return true;
   }
-  return router.createUrlTree(['/tabs/play']);
+  return router.createUrlTree(['/tabs/home']);
 };

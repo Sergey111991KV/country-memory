@@ -8,7 +8,8 @@
   --play-dock-nav-height: 40px;
   --play-dock-height: calc(var(--play-arc-window) + 4px);
   --play-dock-height-modes: calc(var(--play-dock-height) + var(--play-dock-nav-height));
-  --background: var(--ion-background-color);
+  --play-dock-shift-down: 32px;
+  --background: var(--app-mesh-bg);
   font-family: var(--app-font-ui);
 }
 
@@ -27,54 +28,113 @@
 .play-hero {
   text-align: center;
   padding-top: var(--app-space-2);
-  margin-bottom: var(--app-space-3);
-}
-
-.play-hero__mark {
-  display: block;
-  margin: 0 auto var(--app-space-3);
-  filter: drop-shadow(0 8px 16px color-mix(in srgb, var(--ion-color-primary) 28%, transparent));
-}
-
-.play-hero__brand {
-  margin: 0 0 var(--app-space-2);
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ion-color-primary);
+  margin-bottom: var(--app-space-2);
 }
 
 .play-hero__title {
-  margin: 0 0 var(--app-space-3);
-  font-size: clamp(1.5rem, 2.5vw, 1.85rem);
-  font-weight: 500;
+  margin: 0 0 var(--app-space-2);
+  font-size: 1.35rem;
+  font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  color: var(--game-ink, var(--ion-text-color));
 }
 
 .play-hero__sub {
-  margin: 0 auto;
-  max-width: 36rem;
-  font-size: clamp(0.9rem, 1.5vw, 0.95rem);
-  line-height: 1.55;
+  margin: 0 auto var(--app-space-2);
+  max-width: 22rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
   color: var(--ion-color-medium);
 }
 
-.play-hero__about {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  margin-top: var(--app-space-3);
-  font-size: 0.9rem;
+.play-progress-link {
+  margin: 0;
+  text-transform: none;
   font-weight: 500;
-  color: var(--ion-color-primary);
-  text-decoration: none;
+  font-size: 0.85rem;
 }
 
-.play-hero__about ion-icon {
-  font-size: 1rem;
+.play-tablet-grid {
+  display: none;
+}
+
+.play-tablet-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--app-space-2);
+  min-height: 7.5rem;
+  padding: var(--app-space-4) var(--app-space-3);
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.play-tablet-card--locked {
+  opacity: 0.72;
+}
+
+.play-tablet-card__lock {
+  position: absolute;
+  top: var(--app-space-2);
+  right: var(--app-space-2);
+}
+
+.play-tablet-card__title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.play-tablet-grid__nav {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  margin-bottom: var(--app-space-1);
+}
+
+.play-tablet-grid__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ion-color-primary) 10%, transparent);
+  color: var(--ion-color-primary);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.play-tablet-grid__nav-title {
+  flex: 1;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .play-tablet-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--app-space-3);
+    margin-top: var(--app-space-3);
+  }
+
+  .play-mode-dock {
+    display: none !important;
+  }
+
+  .play-hub::part(scroll) {
+    padding-bottom: calc(var(--play-tab-bar-offset) + var(--app-space-4));
+  }
 }
 
 .play-daily {
@@ -216,10 +276,6 @@ html.ion-palette-dark .play-daily {
   }
 }
 
-.mem-surface {
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--ion-text-color) 8%, transparent);
-}
-
 .typography-compact .play-hero__title {
   font-size: 1.5rem;
 }
@@ -237,13 +293,12 @@ html.ion-palette-dark .play-daily {
 }
 
 .play-mode-dock {
-  position: sticky;
+  position: absolute;
   left: 0;
   right: 0;
-  bottom: var(--play-tab-bar-offset);
+  bottom: calc(var(--play-tab-bar-offset) - var(--play-dock-shift-down));
   z-index: 20;
-  margin-top: var(--app-space-2);
-  padding: var(--app-space-3) 4px var(--app-space-2);
+  padding: var(--app-space-2) 4px 0;
   pointer-events: none;
   background: transparent;
   isolation: isolate;

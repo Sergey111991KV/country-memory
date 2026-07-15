@@ -1,16 +1,23 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ViewWillEnter } from '@ionic/angular';
 
-import type { HeroTypography } from '../core/services/app-settings.service';
-import { AppSettingsService } from '../core/services/app-settings.service';
-import { DisplayTextService } from '../core/services/display-text.service';
-import { DailyGoalService } from '../core/services/daily-goal.service';
+import type { HomeFeedCard } from '../core/services/home-feed.service';
+import { HomeFeedService } from '../core/services/home-feed.service';
 import { LocaleService } from '../core/services/locale.service';
 import { PlayPoolService } from '../core/services/play-pool.service';
 import { PlaySessionService } from '../core/services/play-session.service';
-import { SubscriptionService } from '../core/services/subscription.service';
 import { PerfLogService } from '../core/services/perf-log.service';
+
+const ROTATE_MS = 10_000;
 
 @Component({
   selector: 'app-home',
@@ -20,28 +27,27 @@ import { PerfLogService } from '../core/services/perf-log.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage implements OnInit, ViewWillEnter {
-  private readonly displayText = inject(DisplayTextService);
-  private readonly appSettings = inject(AppSettingsService);
-  private readonly dailyGoal = inject(DailyGoalService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly feed = inject(HomeFeedService);
   private readonly playPool = inject(PlayPoolService);
   private readonly playSession = inject(PlaySessionService);
-  readonly sub = inject(SubscriptionService);
-  readonly locale = inject(LocaleService);
   private readonly router = inject(Router);
   private readonly perf = inject(PerfLogService);
   private readonly cdr = inject(ChangeDetectorRef);
+  readonly locale = inject(LocaleService);
 
-  heroTitleDisplay = '';
-  heroSubShortDisplay = '';
-  heroTypography: HeroTypography = 'comfortable';
-  dailyDone = 0;
-  dailyTarget = 5;
-  dailyComplete = false;
-  dailyProgressPercent = 0;
-  freeCountryCount = 30;
+  card: HomeFeedCard | null = null;
+  cardPhase: 'idle' | 'fade' = 'idle';
+  private rotateTimer: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void {
     void this.refresh();
+    this.rotateTimer = setInterval(() => this.rotateCard(), ROTATE_MS);
+    this.destroyRef.onDestroy(() => {
+      if (this.rotateTimer !== null) {
+        clearInterval(this.rotateTimer);
+      }
+    });
   }
 
   ionViewWillEnter(): void {
@@ -50,34 +56,51 @@ export class HomePage implements OnInit, ViewWillEnter {
 
   async refresh(): Promise<void> {
     const span = this.perf.span('Home', 'refresh');
-    await this.sub.init();
-    await this.displayText.ensureLoaded();
-    this.heroTitleDisplay = this.displayText.effective('home.heroTitle');
-    this.heroSubShortDisplay = this.displayText.effective('home.heroSubShort');
-    const settings = await this.appSettings.load();
-    this.heroTypography = settings.heroTypography;
-    const goal = await this.dailyGoal.syncFromLearning();
-    this.dailyDone = goal.progress;
-    this.dailyTarget = goal.target;
-    this.dailyComplete = goal.progress >= goal.target;
-    this.dailyProgressPercent =
-      this.dailyTarget > 0
-        ? Math.min(100, Math.round((this.dailyDone / this.dailyTarget) * 100))
-        : 0;
-    const free = await this.playPool.getFreePool();
-    this.freeCountryCount = free.length;
+    await this.feed.ensureDeck();
+    this.card = this.feed.currentCard();
     this.cdr.markForCheck();
-    span.end({ dailyDone: this.dailyDone, freeCountries: this.freeCountryCount });
+    span.end({ card: this.card?.id ?? null });
   }
 
-  async play(): Promise<void> {
-    const pool = await this.playPool.getFreePool();
+  rotateCard(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.card = this.feed.advance();
+      this.cdr.markForCheck();
+      return;
+    }
+    this.cardPhase = 'fade';
+    this.cdr.markForCheck();
+    window.setTimeout(() => {
+      this.card = this.feed.advance();
+      this.cardPhase = 'idle';
+      this.cdr.markForCheck();
+    }, 220);
+  }
+
+  async playCountry(): Promise<void> {
+    if (!this.card) {
+      void this.router.navigate(['/tabs/play']);
+      return;
+    }
+    const pool = await this.playPool.getFilteredFreePool();
+    const iso = this.card.iso;
+    const match = pool.find((c) => c.iso2.toUpperCase() === iso);
+    const sessionPool = match ? [match, ...pool.filter((c) => c.iso2.toUpperCase() !== iso).slice(0, 3)] : pool.slice(0, 4);
+    if (sessionPool.length < 2) {
+      void this.router.navigate(['/tabs/play']);
+      return;
+    }
     this.playSession.clear();
-    this.playSession.setPool(pool);
-    void this.router.navigate(['/tabs/play']);
+    this.playSession.setPool(sessionPool);
+    this.playSession.setMeta({ kind: 'default' });
+    void this.router.navigate(['/tabs/play/challenge', 'flag_pick_country']);
   }
 
-  openPaywall(): void {
-    void this.router.navigate(['/paywall']);
+  openKnowledge(): void {
+    void this.router.navigate(['/tabs/knowledge']);
+  }
+
+  openPlay(): void {
+    void this.router.navigate(['/tabs/play']);
   }
 }

@@ -1,3 +1,8 @@
+import {
+  globeThemePalette,
+  type GlobeThemePalette,
+} from '../data/globe-theme';
+
 /** Natural Earth admin-0 country feature (50m political boundaries). */
 export type NaturalEarthCountryProps = {
   name?: string;
@@ -19,21 +24,6 @@ export interface GlobeCountryFeature {
 /** Globe base texture (bundled locally for offline play). */
 export const GLOBE_POLITICAL_TEXTURE = 'assets/globe/earth-dark.jpg';
 export const GLOBE_BUMP_TEXTURE = 'assets/globe/earth-topology.png';
-
-const CONTINENT_FILL: Record<string, string> = {
-  Africa: 'rgba(210, 180, 120, 0.92)',
-  Asia: 'rgba(120, 168, 130, 0.92)',
-  Europe: 'rgba(130, 170, 210, 0.92)',
-  'North America': 'rgba(190, 150, 110, 0.92)',
-  'South America': 'rgba(140, 190, 130, 0.92)',
-  Oceania: 'rgba(170, 150, 200, 0.92)',
-  Antarctica: 'rgba(220, 230, 240, 0.75)',
-  'Seven seas (open ocean)': 'rgba(100, 140, 180, 0.5)',
-};
-
-const DEFAULT_FILL = 'rgba(148, 163, 184, 0.88)';
-const STROKE_DEFAULT = 'rgba(15, 23, 42, 0.55)';
-const STROKE_SELECTED = 'rgba(255, 255, 255, 0.85)';
 
 export interface GlobePolygonColorState {
   selectedIso: string | null;
@@ -65,42 +55,44 @@ export function iso2FromNaturalEarth(props: NaturalEarthCountryProps | undefined
 export function politicalCapColor(
   feature: GlobeCountryFeature,
   state: GlobePolygonColorState,
+  palette: GlobeThemePalette = globeThemePalette('classic'),
 ): string {
   const iso = iso2FromNaturalEarth(feature.properties);
   if (state.phase === 'feedback' && iso && state.expectedIsos) {
     const picked = state.multiSelected?.has(iso) ?? false;
     const expected = state.expectedIsos.has(iso);
     if (picked && expected) {
-      return 'rgba(34, 197, 94, 0.95)';
+      return palette.correctFill;
     }
     if (picked && !expected) {
-      return 'rgba(239, 68, 68, 0.95)';
+      return palette.wrongFill;
     }
     if (!picked && expected) {
-      return 'rgba(250, 204, 21, 0.88)';
+      return palette.missedFill;
     }
   }
   if (state.phase === 'feedback') {
     if (iso && iso === state.feedbackCorrectIso) {
-      return 'rgba(34, 197, 94, 0.95)';
+      return palette.correctFill;
     }
     if (iso && iso === state.feedbackWrongIso) {
-      return 'rgba(239, 68, 68, 0.95)';
+      return palette.wrongFill;
     }
   }
   if (iso && state.multiSelected?.has(iso)) {
-    return 'rgba(59, 130, 246, 0.92)';
+    return palette.selectedFill;
   }
   if (iso && iso === state.selectedIso) {
-    return 'rgba(59, 130, 246, 0.92)';
+    return palette.selectedFill;
   }
   const continent = feature.properties?.CONTINENT ?? '';
-  return CONTINENT_FILL[continent] ?? DEFAULT_FILL;
+  return palette.continentFill[continent] ?? palette.defaultFill;
 }
 
 export function politicalStrokeColor(
   feature: GlobeCountryFeature,
   state: GlobePolygonColorState,
+  palette: GlobeThemePalette = globeThemePalette('classic'),
 ): string {
   const iso = iso2FromNaturalEarth(feature.properties);
   if (
@@ -109,12 +101,12 @@ export function politicalStrokeColor(
       iso === state.feedbackCorrectIso ||
       state.multiSelected?.has(iso))
   ) {
-    return STROKE_SELECTED;
+    return palette.strokeSelected;
   }
   if (state.phase === 'feedback' && iso && state.expectedIsos?.has(iso)) {
-    return STROKE_SELECTED;
+    return palette.strokeSelected;
   }
-  return STROKE_DEFAULT;
+  return palette.strokeDefault;
 }
 
 /** Drop Antarctica and nameless polygons; keep political countries only. */

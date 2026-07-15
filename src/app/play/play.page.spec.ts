@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { AlertController, IonicModule } from '@ionic/angular';
+import { EMPTY } from 'rxjs';
 
 import { I18nModule } from '../core/i18n/i18n.module';
 import { AppSettingsService } from '../core/services/app-settings.service';
@@ -33,6 +34,8 @@ describe('PlayPage launchMode', () => {
   beforeEach(async () => {
     router = jasmine.createSpyObj('Router', ['navigate']);
     router.navigate.and.returnValue(Promise.resolve(true));
+    Object.defineProperty(router, 'events', { value: EMPTY });
+    Object.defineProperty(router, 'url', { value: '/tabs/play' });
 
     playPool = jasmine.createSpyObj('PlayPoolService', [
       'getFreePool',

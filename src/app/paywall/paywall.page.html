@@ -18,11 +18,19 @@
 
   <ng-container *ngIf="sub.readySig()">
     <ion-text
-      *ngIf="isNative && !sub.storeConfiguredSig()"
+      *ngIf="isNative && !sub.storeConfiguredSig() && !sub.canSimulateBillingSig()"
       color="warning"
       class="paywall-warn ion-text-wrap"
     >
       <p>{{ sub.billingBannerText() }}</p>
+    </ion-text>
+
+    <ion-text
+      *ngIf="!sub.isSubscribed() && !sub.canSimulateBillingSig() && sub.canPurchaseInApp() && !sub.monthlyPriceSig() && !sub.offeringsLoadingSig()"
+      color="warning"
+      class="paywall-warn ion-text-wrap"
+    >
+      <p>{{ 'paywall.storeProductPending' | i18n:null:lang}}</p>
     </ion-text>
 
     <ion-text
@@ -34,7 +42,7 @@
     </ion-text>
 
     <ion-text
-      *ngIf="sub.canSimulateBillingSig() && !sub.isSubscribed()"
+      *ngIf="!isProduction && sub.canSimulateBillingSig() && !sub.isSubscribed()"
       color="medium"
       class="paywall-warn ion-text-wrap"
     >
@@ -48,7 +56,7 @@
       {{ 'paywall.storeBadge' | i18n:{ store: sub.storeLabel() }:lang}}
     </p>
 
-    <section class="paywall-hero">
+    <section class="paywall-hero glass-surface">
       <img
         class="paywall-hero__mark"
         src="assets/brand/flagfield-mark.svg"
@@ -63,7 +71,7 @@
       </p>
     </section>
 
-    <ion-card *ngIf="sub.isSubscribed()" class="paywall-active-card mem-surface">
+    <ion-card *ngIf="sub.isSubscribed()" class="paywall-active-card glass-surface">
       <ion-card-content>
         <ion-chip color="warning">
           <app-icon icon="ui-premium" size="sm"></app-icon>
@@ -82,7 +90,7 @@
       </ion-card-content>
     </ion-card>
 
-    <ion-card *ngIf="!sub.isSubscribed()" class="mem-surface">
+    <ion-card *ngIf="!sub.isSubscribed()" class="glass-surface">
       <ion-card-header>
         <ion-card-title>{{ 'paywall.featuresCardTitle' | i18n:null:lang}}</ion-card-title>
       </ion-card-header>
@@ -104,7 +112,7 @@
         [disabled]="busy || !sub.canSubscribeMonthlySig()"
         (click)="subscribeMonthly()"
       >
-        <span *ngIf="sub.canSimulateBillingSig()">{{ 'paywall.subscribeTest' | i18n:null:lang}}</span>
+        <span *ngIf="sub.canSimulateBillingSig()">{{ 'paywall.subscribe' | i18n:null:lang}}</span>
         <span *ngIf="!sub.canSimulateBillingSig() && sub.monthlyPriceSig() as price">{{ 'paywall.subscribe' | i18n:null:lang}} — {{ price }}</span>
         <span *ngIf="!sub.canSimulateBillingSig() && !sub.monthlyPriceSig()">{{ 'paywall.subscribe' | i18n:null:lang}}</span>
       </ion-button>
