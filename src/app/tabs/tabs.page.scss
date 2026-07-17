@@ -22,75 +22,94 @@ ion-tabs .tabs-inner > .ion-page.ion-page-hidden {
   pointer-events: none;
 }
 
+/*
+ * Compact tab bar (Apple HIG ~49pt content + home indicator).
+ * Selected state = color + soft chip, not a tall vertical pill.
+ */
 ion-tab-bar {
   position: relative;
   flex-shrink: 0;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  min-height: calc(72px + env(safe-area-inset-bottom, 0px));
-  --border: 1px solid var(--glass-border);
-  --background: transparent;
-  background: transparent;
-  padding-top: 8px;
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 10px);
-  padding-left: max(10px, env(safe-area-inset-left, 0px));
-  padding-right: max(10px, env(safe-area-inset-right, 0px));
-  box-shadow: 0 -8px 32px color-mix(in srgb, var(--ion-text-color) 8%, transparent);
+  height: auto;
+  min-height: 0;
+  --border: none;
+  --background: color-mix(in srgb, var(--glass-bg) 72%, transparent);
+  background: color-mix(in srgb, var(--glass-bg) 72%, transparent);
+  backdrop-filter: blur(var(--glass-blur, 44px)) saturate(var(--glass-saturate, 1.55));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 44px)) saturate(var(--glass-saturate, 1.55));
+  border-top: 1px solid var(--glass-border);
+  box-shadow:
+    0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.7)) inset,
+    0 -8px 28px color-mix(in srgb, var(--ion-color-primary) 8%, transparent);
+  padding-top: 4px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: max(8px, env(safe-area-inset-left, 0px));
+  padding-right: max(8px, env(safe-area-inset-right, 0px));
   overflow: visible;
 }
 
 ion-tab-button {
   --color: var(--app-tab-color);
   --color-selected: var(--app-tab-color-selected);
-  --ripple-color: color-mix(in srgb, var(--ion-color-secondary) 55%, transparent);
+  --ripple-color: color-mix(in srgb, var(--ion-color-primary) 40%, transparent);
   flex: 1 1 0;
   min-width: 0;
-  max-width: 25%;
+  max-width: none;
+  min-height: 44px;
   font-family: var(--app-font-ui);
+  transition: color var(--app-duration-fast, 0.18s) ease;
 }
 
 ion-tab-button ion-label {
   font-family: var(--app-font-ui) !important;
-  font-size: clamp(0.5rem, 2.6vw, 0.625rem);
-  font-weight: 500;
+  font-size: 0.625rem;
+  font-weight: 600;
   font-style: normal !important;
   letter-spacing: 0 !important;
   text-transform: none !important;
-  line-height: 1.25;
+  line-height: 1.2;
   height: auto !important;
   display: block;
   max-width: 100%;
-  min-height: 1.25em;
-  margin-bottom: 2px;
-  overflow-x: hidden;
-  overflow-y: visible;
+  min-height: 0;
+  margin-top: 1px;
+  margin-bottom: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 ion-tab-button::part(native) {
-  border-radius: 14px;
-  margin: 2px 1px;
-  padding-top: 6px;
-  padding-bottom: 8px;
-  padding-inline: 2px;
+  border-radius: 12px;
+  margin: 0 4px;
+  padding: 4px 6px 6px;
   max-width: 100%;
+  min-height: 44px;
   box-sizing: border-box;
   overflow: visible;
+  transition:
+    background var(--app-duration-fast, 0.18s) ease,
+    box-shadow var(--app-duration-base, 0.28s) ease;
 }
 
 ion-tab-button ion-icon {
-  font-size: 1.5rem;
-  margin-bottom: 2px;
+  font-size: 1.375rem;
+  margin-bottom: 0;
   height: auto;
-  min-height: 1.5rem;
+  min-height: 1.375rem;
   overflow: visible;
 }
 
 ion-tab-button.tab-selected::part(native) {
-  background: color-mix(in srgb, var(--ion-color-secondary) 14%, transparent);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--ion-color-secondary) 14%, transparent);
+  background: color-mix(in srgb, var(--ion-color-primary) 16%, var(--glass-bg-tint));
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #ffffff 55%, transparent) inset,
+    0 0 0 0.5px color-mix(in srgb, var(--ion-color-primary) 22%, transparent),
+    0 6px 18px color-mix(in srgb, var(--ion-color-primary) 18%, transparent);
 }
 
 ion-tab-button:first-child::part(native) {
@@ -102,7 +121,17 @@ ion-tab-button:last-child::part(native) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  ion-tab-button {
+  ion-tab-button,
+  ion-tab-button::part(native) {
     transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  ion-tab-bar {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    --background: var(--ion-background-color);
+    background: var(--ion-background-color);
   }
 }

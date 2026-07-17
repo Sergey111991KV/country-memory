@@ -30,10 +30,10 @@
 .paywall-store-badge {
   margin: 0 0 12px;
   font-size: 0.72rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #22d3ee;
+  color: var(--app-accent-cyan, var(--ion-color-primary));
   text-align: center;
 }
 

@@ -1,17 +1,18 @@
-/* Ionic app theme — loaded with global styles */
+/* Ionic app theme — Flagfield Liquid Glass */
 
 :root {
   --ion-font-family: var(--app-font-ui);
   --app-font-display: var(--app-font-ui);
-  --app-font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
-  --app-font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
+  --app-font-mono: 'SF Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --app-font-ui: 'DM Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI',
+    system-ui, sans-serif;
 
-  --premium-bg: #0b0814;
-  --premium-card: #16122b;
-  --premium-muted: #a1a1aa;
-  --premium-gradient: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
-  --premium-cyan: #22d3ee;
+  /* Premium / marketing surfaces (token aliases) */
+  --premium-bg: #e8f3fb;
+  --premium-card: color-mix(in srgb, #ffffff 78%, #e0f2fe 22%);
+  --premium-muted: #64748b;
+  --premium-gradient: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 55%, #0284c7 100%);
+  --premium-cyan: #0284c7;
 
   --app-space-1: 4px;
   --app-space-2: 8px;
@@ -20,47 +21,89 @@
   --app-space-5: 24px;
   --app-space-6: 32px;
 
-  /* Tab bar: min-height + vertical padding (see tabs.page.scss) */
-  --app-tab-bar-height: calc(74px + env(safe-area-inset-bottom, 0px));
+  /* Tab bar: ~49pt content + home indicator (see tabs.page.scss) */
+  --app-tab-bar-height: calc(52px + env(safe-area-inset-bottom, 0px));
 
-  --ion-color-primary: #3b82f6;
-  --ion-color-primary-rgb: 59, 130, 246;
+  /* Motion */
+  --app-ease-spring: cubic-bezier(0.34, 1.08, 0.44, 1);
+  --app-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --app-duration-fast: 0.18s;
+  --app-duration-base: 0.28s;
+  --app-duration-slow: 0.45s;
+
+  /* Light — soft sky glass */
+  --ion-color-primary: #0284c7;
+  --ion-color-primary-rgb: 2, 132, 199;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #3472d8;
-  --ion-color-primary-tint: #4f8ff7;
+  --ion-color-primary-shade: #0274af;
+  --ion-color-primary-tint: #1b90cd;
 
-  --ion-color-secondary: #8b5cf6;
-  --ion-color-secondary-rgb: 139, 92, 246;
+  --ion-color-secondary: #0ea5e9;
+  --ion-color-secondary-rgb: 14, 165, 233;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #7a51d8;
-  --ion-color-secondary-tint: #976df7;
+  --ion-color-secondary-shade: #0c91cd;
+  --ion-color-secondary-tint: #26aeeb;
 
-  --ion-color-tertiary: #16a34a;
-  --ion-color-tertiary-rgb: 22, 163, 74;
+  --ion-color-tertiary: #14b8a6;
+  --ion-color-tertiary-rgb: 20, 184, 166;
   --ion-color-tertiary-contrast: #ffffff;
   --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #138f41;
-  --ion-color-tertiary-tint: #2dae5c;
+  --ion-color-tertiary-shade: #12a292;
+  --ion-color-tertiary-tint: #2cbfaf;
 
+  --ion-color-success: #16a34a;
+  --ion-color-success-rgb: 22, 163, 74;
   --ion-color-warning: #d97706;
   --ion-color-warning-rgb: 217, 119, 6;
   --ion-color-danger: #dc2626;
   --ion-color-danger-rgb: 220, 38, 38;
-  --ion-background-color: #ffffff;
-  --ion-text-color: #111827;
+
+  --ion-background-color: #e8f3fb;
+  --ion-background-color-rgb: 232, 243, 251;
+  --ion-text-color: #0f172a;
+  --ion-text-color-rgb: 15, 23, 42;
+  --ion-color-medium: #64748b;
+  --ion-color-medium-rgb: 100, 116, 139;
+  --ion-color-medium-shade: #475569;
+  --ion-color-light: #f8fafc;
+  --ion-color-dark: #0f172a;
 }
 
 html.ion-palette-dark:root {
-  --ion-background-color: #0b0814;
-  --ion-text-color: #ffffff;
-  --ion-color-primary: #a78bfa;
-  --ion-color-primary-rgb: 167, 139, 250;
-  --ion-color-primary-contrast: #0b0814;
-  --ion-color-primary-contrast-rgb: 11, 8, 20;
-  --ion-color-primary-shade: #937adc;
-  --ion-color-primary-tint: #b097fb;
-  --ion-color-secondary: #22d3ee;
-  --ion-color-secondary-rgb: 34, 211, 238;
+  --premium-bg: #070b14;
+  --premium-card: #121a28;
+  --premium-muted: #94a3b8;
+  --premium-gradient: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 50%, #0ea5e9 100%);
+  --premium-cyan: #7dd3fc;
+
+  --ion-background-color: #070b14;
+  --ion-background-color-rgb: 7, 11, 20;
+  --ion-text-color: #f1f5f9;
+  --ion-text-color-rgb: 241, 245, 249;
+
+  --ion-color-primary: #38bdf8;
+  --ion-color-primary-rgb: 56, 189, 248;
+  --ion-color-primary-contrast: #070b14;
+  --ion-color-primary-contrast-rgb: 7, 11, 20;
+  --ion-color-primary-shade: #31a6da;
+  --ion-color-primary-tint: #4cc4f9;
+
+  --ion-color-secondary: #67e8f9;
+  --ion-color-secondary-rgb: 103, 232, 249;
+  --ion-color-secondary-contrast: #070b14;
+  --ion-color-secondary-contrast-rgb: 7, 11, 20;
+  --ion-color-secondary-shade: #5bcbdb;
+  --ion-color-secondary-tint: #76eafa;
+
+  --ion-color-tertiary: #2dd4bf;
+  --ion-color-tertiary-rgb: 45, 212, 191;
+  --ion-color-tertiary-contrast: #070b14;
+
+  --ion-color-success: #4ade80;
+  --ion-color-warning: #fbbf24;
+  --ion-color-danger: #f87171;
+  --ion-color-medium: #94a3b8;
+  --ion-color-medium-shade: #cbd5e1;
 }

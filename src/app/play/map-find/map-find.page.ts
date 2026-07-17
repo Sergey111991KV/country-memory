@@ -35,7 +35,7 @@ import { SessionAccessService } from '../../core/services/session-access.service
 import { GeoJsonCacheService } from '../../core/services/geo-json-cache.service';
 import { GlobeThemeService } from '../../core/services/globe-theme.service';
 import { PerfLogService } from '../../core/services/perf-log.service';
-import { ensurePlaySessionAccess } from '../../core/utils/play-access';
+import { ensurePlaySessionAccess, ensurePremiumPlayAccess } from '../../core/utils/play-access';
 import { buildSoloSessionResult } from '../../core/utils/play-session-result-builders';
 
 type PickPhase = 'pick' | 'feedback';
@@ -105,9 +105,7 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   }
 
   private async startSession(): Promise<void> {
-    await this.subscription.init();
-    if (!this.subscription.isSubscribed()) {
-      void this.router.navigate(['/paywall']);
+    if (!(await ensurePremiumPlayAccess(this.subscription, this.router))) {
       this.loading = false;
       return;
     }

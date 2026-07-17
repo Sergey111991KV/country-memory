@@ -18,7 +18,7 @@ export class HomeAboutPage implements OnInit {
   private readonly dailyGoal = inject(DailyGoalService);
   readonly locale = inject(LocaleService);
 
-  readonly freeGamesLimit = environment.freeGamesLimit;
+  readonly freeGamesLimit = environment.donatePromptAfterGames;
   freeCountryCount = 30;
   dailyTarget = 5;
 

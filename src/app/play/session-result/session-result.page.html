@@ -60,8 +60,15 @@
     <p *ngIf="extraStatsText()" class="session-result-solo__extra">{{ extraStatsText() }}</p>
   </section>
 
-  <section *ngIf="atLimit" class="session-result-limit mem-surface">
-    <p>{{ 'play.limitReachedMessage' | i18n:null:lang}}</p>
+  <section *ngIf="showDonatePrompt" class="session-result-limit mem-surface">
+    <h2>{{ 'donatePrompt.title' | i18n:null:lang}}</h2>
+    <p>{{ 'donatePrompt.heroLead' | i18n:null:lang}}</p>
+    <ion-button expand="block" color="primary" (click)="openDonate()">
+      {{ 'donatePrompt.openLink' | i18n:null:lang}}
+    </ion-button>
+    <ion-button expand="block" fill="clear" (click)="openDonatePage()">
+      {{ 'donatePrompt.learnMore' | i18n:null:lang}}
+    </ion-button>
   </section>
 
   <div class="session-result-actions">
@@ -74,25 +81,16 @@
     >
       {{ 'sessionResult.playAgain' | i18n:null:lang}}
     </ion-button>
-    <ion-button
-      *ngIf="atLimit"
-      expand="block"
-      color="primary"
-      size="large"
-      (click)="openPaywall()"
-    >
-      {{ 'home.getPremiumCta' | i18n:null:lang}}
-    </ion-button>
     <ion-button expand="block" fill="outline" size="large" (click)="backToPlay()">
       {{ 'sessionResult.backToPlay' | i18n:null:lang}}
     </ion-button>
     <ion-button
-      *ngIf="atLimit"
+      *ngIf="showDonatePrompt"
       expand="block"
       fill="clear"
       (click)="backToPlay()"
     >
-      {{ 'play.limitLater' | i18n:null:lang}}
+      {{ 'donatePrompt.later' | i18n:null:lang}}
     </ion-button>
   </div>
 </ion-content>

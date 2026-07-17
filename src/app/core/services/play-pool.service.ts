@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import type { Country, CountryFact } from '../data/country.types';
 import { FREE_TIER_COUNTRY_ISOS } from '../data/play-tier.constants';
+import { isBillingEnabled } from '../utils/billing-mode';
 import { CountriesCatalogService } from './countries-catalog.service';
 import { CountryKnowledgeService } from './country-knowledge.service';
 import { CountryMetricFilterService } from './country-metric-filter.service';
@@ -21,6 +22,9 @@ export class PlayPoolService {
   );
 
   isPremium(): boolean {
+    if (!isBillingEnabled()) {
+      return true;
+    }
     return this.sub.isSubscribed();
   }
 
@@ -41,8 +45,11 @@ export class PlayPoolService {
     return this.metricFilter.apply(base);
   }
 
-  /** Free tier pool with active metric filters applied (for launching games). */
+  /** Launch pool for recognition / free drills (respects tier when billing is on). */
   async getFilteredFreePool(): Promise<Country[]> {
+    if (!isBillingEnabled()) {
+      return this.metricFilter.apply(await this.getFullPool());
+    }
     return this.metricFilter.apply(await this.getFreePool());
   }
 

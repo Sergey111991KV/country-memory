@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import type { Country } from '../data/country.types';
 import type { FreeChallengeMode } from '../data/play-tier.constants';
+import type { FactsDrillRoundKind } from '../utils/facts-drill-options';
 import { playDebug } from '../utils/play-debug';
 import type {
   PassPlayScoringStyle,
@@ -19,6 +20,8 @@ export interface PlaySessionMeta {
   kind?: PlaySessionKind;
   levelId?: string | null;
   mixFlags?: boolean;
+  /** When set, facts-drill uses this round kind for the first round (hub feed). */
+  factsDrillKind?: FactsDrillRoundKind | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -34,6 +37,7 @@ export class PlaySessionService {
   levelId: string | null = null;
   /** When true (facts_mixed), ~35% of facts-drill rounds show a flag quiz instead. */
   mixFlags = false;
+  factsDrillKind: FactsDrillRoundKind | null = null;
   /** Solo session score (reset in clear). */
   sessionCorrect = 0;
   sessionAnswered = 0;
@@ -53,10 +57,14 @@ export class PlaySessionService {
     if (meta.mixFlags !== undefined) {
       this.mixFlags = meta.mixFlags;
     }
+    if (meta.factsDrillKind !== undefined) {
+      this.factsDrillKind = meta.factsDrillKind;
+    }
     playDebug('PlaySession', 'setMeta', {
       kind: this.sessionKind,
       levelId: this.levelId,
       mixFlags: this.mixFlags,
+      factsDrillKind: this.factsDrillKind,
     });
   }
 
@@ -81,6 +89,7 @@ export class PlaySessionService {
     this.sessionKind = 'default';
     this.levelId = null;
     this.mixFlags = false;
+    this.factsDrillKind = null;
     this.sessionCorrect = 0;
     this.sessionAnswered = 0;
   }

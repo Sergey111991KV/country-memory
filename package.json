@@ -1,6 +1,6 @@
 {
   "name": "flagfield",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Sergey Kosilov",
   "homepage": "https://github.com/sergejkosilov/countries",
   "scripts": {
@@ -19,6 +19,7 @@
     "cap:open:android": "npx cap open android",
     "build:ios:archive": "bash scripts/build-ios-appstore.sh",
     "assets:generate": "npx --yes @capacitor/assets generate --assetPath resources --iconBackgroundColor '#f0f9ff' --iconBackgroundColorDark '#1e3a8a' --splashBackgroundColor '#f0f9ff' --splashBackgroundColorDark '#0f172a'",
+    "assets:icon": "node scripts/build-app-icon.mjs",
     "assets:play-icons": "node scripts/generate-play-icons.mjs",
     "legal:build": "node scripts/build-legal-site.mjs",
     "env:init": "cp src/environments/environment.prod.local.example.ts src/environments/environment.prod.local.ts",

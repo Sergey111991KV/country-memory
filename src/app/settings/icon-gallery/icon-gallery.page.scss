@@ -83,9 +83,9 @@
   justify-content: center;
   gap: 4px;
   padding: 8px 6px;
-  border: 2px solid color-mix(in srgb, #a78bfa 28%, transparent);
+  border: 2px solid color-mix(in srgb, var(--ion-color-primary) 28%, transparent);
   border-radius: 18px;
-  background: color-mix(in srgb, #1e1835 92%, #000000);
+  background: color-mix(in srgb, var(--premium-card) 92%, #000000);
   text-align: center;
   box-sizing: border-box;
 }
@@ -100,7 +100,7 @@
   background: radial-gradient(
     circle at 35% 30%,
     color-mix(in srgb, #ffffff 14%, transparent),
-    color-mix(in srgb, #a78bfa 10%, transparent) 55%,
+    color-mix(in srgb, var(--ion-color-primary) 10%, transparent) 55%,
     transparent 72%
   );
 }

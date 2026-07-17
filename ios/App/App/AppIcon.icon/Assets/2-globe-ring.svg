@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-label="Flagfield globe ring">
+  <!-- Mid layer: sparse globe silhouette for Liquid Glass / Clear / Tinted -->
+  <circle cx="512" cy="512" r="300" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round"/>
+  <ellipse cx="512" cy="512" rx="120" ry="300" stroke="#FFFFFF" stroke-width="16" stroke-opacity="0.9"/>
+  <path d="M212 512H812" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" stroke-opacity="0.9"/>
+</svg>

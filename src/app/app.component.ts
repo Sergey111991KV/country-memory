@@ -16,6 +16,7 @@ import { ThemeService } from './core/services/theme.service';
 import { UserLearningService } from './core/services/user-learning.service';
 import { VisualQualityService } from './core/services/visual-quality.service';
 import { GlobeThemeService } from './core/services/globe-theme.service';
+import { isBillingEnabled } from './core/utils/billing-mode';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -46,12 +47,15 @@ export class AppComponent implements OnInit, OnDestroy {
     applyColorPaletteClass(settings.colorPalette);
     await this.visualQuality.hydrate();
     await this.globeTheme.hydrate();
-    await this.subscription.init();
+    if (isBillingEnabled()) {
+      await this.subscription.init();
+      await this.registerBillingResumeListener();
+    }
     void this.appLog.log('app', 'Application started', {
       version: environment.appVersion,
       production: environment.production,
+      billingEnabled: isBillingEnabled(),
     });
-    await this.registerBillingResumeListener();
     await this.registerPersistFlushListener();
   }
 
@@ -61,6 +65,9 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   showBillingBanner(): boolean {
+    if (!isBillingEnabled()) {
+      return false;
+    }
     return (
       Capacitor.isNativePlatform() &&
       this.subscription.readySig() &&

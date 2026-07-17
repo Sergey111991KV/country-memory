@@ -1,5 +1,5 @@
 /**
- * Flagfield design system — Liquid Glass (CSS approximation).
+ * Flagfield design system — Apple Liquid Glass (CSS approximation).
  * Single source: tokens, surfaces, hub layout, Ionic primitives, a11y fallbacks.
  */
 
@@ -8,86 +8,196 @@
 /* -------------------------------------------------------------------------- */
 
 :root {
-  --glass-bg: rgba(255, 255, 255, 0.14);
-  --glass-bg-elevated: rgba(255, 255, 255, 0.22);
-  --glass-border: rgba(255, 255, 255, 0.28);
-  --glass-blur: 22px;
-  --glass-radius: 20px;
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  /* Light Liquid Glass — translucent sky tint, not opaque white cards */
+  --glass-bg: color-mix(in srgb, #ffffff 52%, rgba(186, 230, 253, 0.38));
+  --glass-bg-elevated: color-mix(in srgb, #ffffff 68%, rgba(224, 242, 254, 0.45));
+  --glass-bg-tint: color-mix(in srgb, #7dd3fc 18%, rgba(255, 255, 255, 0.28));
+  --glass-border: color-mix(in srgb, #ffffff 72%, rgba(14, 165, 233, 0.22));
+  --glass-highlight: rgba(255, 255, 255, 0.92);
+  --glass-blur: 44px;
+  --glass-saturate: 1.55;
+  --glass-radius: 24px;
+  --glass-radius-sm: 16px;
+  --glass-radius-pill: 999px;
+  --glass-shadow:
+    0 1px 0 var(--glass-highlight) inset,
+    0 0 0 0.5px color-mix(in srgb, #0284c7 12%, transparent),
+    0 10px 36px rgba(14, 116, 144, 0.1),
+    0 2px 8px rgba(15, 23, 42, 0.04);
+  --glass-shadow-elevated:
+    0 1px 0 var(--glass-highlight) inset,
+    0 0 0 0.5px color-mix(in srgb, #0284c7 16%, transparent),
+    0 18px 48px rgba(14, 116, 144, 0.14),
+    0 4px 14px rgba(15, 23, 42, 0.06);
+
   --app-mesh-bg:
     radial-gradient(
-      ellipse 120% 80% at 50% -20%,
-      color-mix(in srgb, var(--ion-color-primary) 18%, transparent),
-      transparent 55%
+      ellipse 110% 80% at 8% -12%,
+      color-mix(in srgb, #38bdf8 34%, transparent),
+      transparent 58%
     ),
-    var(--ion-background-color);
-  --app-surface-solid: color-mix(
-    in srgb,
-    var(--ion-background-color) 88%,
-    var(--ion-color-primary) 12%
-  );
-  --app-surface-muted: color-mix(
-    in srgb,
-    var(--ion-background-color) 94%,
-    var(--ion-text-color) 6%
-  );
-  --app-text-muted: var(--ion-color-medium-shade, var(--ion-color-medium));
-  --app-border-subtle: color-mix(in srgb, var(--ion-text-color) 10%, transparent);
-  --app-accent-gradient: linear-gradient(
-    135deg,
-    var(--ion-color-secondary) 0%,
-    #ec4899 100%
-  );
+    radial-gradient(
+      ellipse 95% 70% at 96% 4%,
+      color-mix(in srgb, #67e8f9 26%, transparent),
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 80% 55% at 48% 108%,
+      color-mix(in srgb, #2dd4bf 18%, transparent),
+      transparent 56%
+    ),
+    radial-gradient(
+      ellipse 55% 40% at 72% 42%,
+      color-mix(in srgb, #0ea5e9 10%, transparent),
+      transparent 65%
+    ),
+    #e8f3fb;
+
+  --app-surface-solid: color-mix(in srgb, #ffffff 88%, #bae6fd 12%);
+  --app-surface-muted: color-mix(in srgb, #f1f5f9 86%, #e0f2fe 14%);
+  --app-text-muted: #64748b;
+  --app-border-subtle: color-mix(in srgb, #0284c7 10%, transparent);
+  --app-accent-gradient: var(--premium-gradient);
   --app-accent-cyan: #0284c7;
   --app-tab-color: var(--ion-color-medium);
-  --app-tab-color-selected: var(--ion-color-secondary);
+  --app-tab-color-selected: var(--ion-color-primary);
   --app-shell-max: 48rem;
-  --app-overlay-scrim: color-mix(in srgb, var(--ion-background-color) 55%, transparent);
+  --app-overlay-scrim: color-mix(in srgb, var(--ion-background-color) 48%, transparent);
 }
 
 html.ion-palette-dark {
-  --glass-bg: rgba(22, 18, 43, 0.55);
-  --glass-bg-elevated: rgba(30, 24, 53, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --glass-bg: rgba(22, 32, 48, 0.42);
+  --glass-bg-elevated: rgba(30, 44, 64, 0.55);
+  --glass-bg-tint: rgba(56, 189, 248, 0.12);
+  --glass-border: rgba(186, 230, 253, 0.22);
+  --glass-highlight: rgba(255, 255, 255, 0.18);
+  --glass-saturate: 1.6;
+  --glass-shadow:
+    0 1px 0 var(--glass-highlight) inset,
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.22);
+  --glass-shadow-elevated:
+    0 1px 0 var(--glass-highlight) inset,
+    0 20px 56px rgba(0, 0, 0, 0.5),
+    0 4px 16px rgba(0, 0, 0, 0.28);
+
+  --app-mesh-bg:
+    radial-gradient(
+      ellipse 110% 80% at 10% -15%,
+      color-mix(in srgb, #38bdf8 42%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 95% 70% at 95% 5%,
+      color-mix(in srgb, #67e8f9 28%, transparent),
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 80% 55% at 55% 105%,
+      color-mix(in srgb, #2dd4bf 22%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 70% 45%,
+      color-mix(in srgb, #0ea5e9 12%, transparent),
+      transparent 65%
+    ),
+    var(--ion-background-color);
+
   --app-surface-solid: color-mix(
     in srgb,
-    var(--premium-card, #16122b) 92%,
-    var(--ion-color-primary) 8%
+    var(--premium-card, #121a28) 86%,
+    var(--ion-color-primary) 14%
   );
   --app-surface-muted: color-mix(
     in srgb,
-    var(--premium-card, #16122b) 96%,
-    #ffffff 4%
+    var(--premium-card, #121a28) 92%,
+    #ffffff 8%
   );
-  --app-text-muted: #a1a1aa;
-  --app-border-subtle: color-mix(in srgb, #ffffff 12%, transparent);
-  --app-accent-cyan: #22d3ee;
-  --app-tab-color: #71717a;
-  --app-tab-color-selected: #e9d5ff;
-  --app-overlay-scrim: color-mix(in srgb, var(--ion-background-color) 72%, transparent);
+  --app-text-muted: #94a3b8;
+  --app-border-subtle: color-mix(in srgb, #ffffff 14%, transparent);
+  --app-accent-cyan: #7dd3fc;
+  --app-tab-color: #64748b;
+  --app-tab-color-selected: #e0f2fe;
+  --app-overlay-scrim: color-mix(in srgb, var(--ion-background-color) 68%, transparent);
 }
 
 /* -------------------------------------------------------------------------- */
 /* Surfaces                                                                   */
 /* -------------------------------------------------------------------------- */
 
-.glass-surface {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+@mixin glass-material($elevated: false) {
+  background: if($elevated, var(--glass-bg-elevated), var(--glass-bg));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border: 1px solid var(--glass-border);
   border-radius: var(--glass-radius);
-  box-shadow: var(--glass-shadow);
+  box-shadow: if($elevated, var(--glass-shadow-elevated), var(--glass-shadow));
+}
+
+.glass-surface {
+  @include glass-material(false);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform var(--app-duration-fast) var(--app-ease-out),
+    box-shadow var(--app-duration-base) var(--app-ease-out),
+    border-color var(--app-duration-fast) ease,
+    background var(--app-duration-base) var(--app-ease-out);
 }
 
 .glass-surface--elevated {
-  background: var(--glass-bg-elevated);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  border-radius: var(--glass-radius);
-  box-shadow: var(--glass-shadow);
+  @include glass-material(true);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Specular top edge + soft lens wash — Liquid Glass highlight */
+.glass-surface::before,
+.glass-surface--elevated::before,
+.app-metric-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 42%;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--glass-highlight) 55%, transparent) 0%,
+      transparent 72%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 4%,
+      var(--glass-highlight) 35%,
+      var(--glass-highlight) 65%,
+      transparent 96%
+    );
+  background-size: 100% 100%, 100% 1px;
+  background-repeat: no-repeat;
+  background-position: top, top;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-surface::after,
+.glass-surface--elevated::after {
+  content: '';
+  position: absolute;
+  inset: auto 8% -18% 8%;
+  height: 42%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--ion-color-secondary) 16%, transparent),
+    transparent 72%
+  );
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(12px);
+  opacity: 0.7;
 }
 
 /**
@@ -109,7 +219,9 @@ html.ion-palette-dark {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-surface,
   .glass-surface--elevated,
-  .app-metric-card {
+  .app-metric-card,
+  ion-tab-bar,
+  ion-card {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: var(--app-surface-solid);
@@ -123,6 +235,11 @@ html.ion-palette-dark {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: var(--app-surface-solid);
+  }
+
+  .glass-surface::after,
+  .glass-surface--elevated::after {
+    display: none;
   }
 
   ion-tab-bar {
@@ -141,7 +258,9 @@ html.ion-palette-dark {
 @media (prefers-reduced-motion: reduce) {
   .glass-surface,
   .glass-surface--elevated,
-  ion-tab-bar {
+  ion-tab-bar,
+  ion-tab-button,
+  .app-metric-card {
     transition: none;
   }
 }
@@ -200,7 +319,7 @@ html.ion-palette-dark ion-card.glass-surface {
 .session-result-content h2 {
   font-family: var(--app-font-ui);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: var(--ion-text-color);
 }
 
@@ -214,7 +333,7 @@ html.ion-palette-dark ion-card.glass-surface {
 .app-kicker {
   margin: 0 0 var(--app-space-3);
   font-size: 0.72rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--app-text-muted);
@@ -228,14 +347,19 @@ html.ion-palette-dark ion-card.glass-surface {
 }
 
 .app-metric-card {
+  position: relative;
+  overflow: hidden;
   padding: var(--app-space-3);
   border-radius: var(--glass-radius);
   border: 1px solid var(--glass-border);
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   box-shadow: var(--glass-shadow);
   text-align: center;
+  transition:
+    transform var(--app-duration-fast) var(--app-ease-out),
+    box-shadow var(--app-duration-base) var(--app-ease-out);
 
   ion-icon {
     font-size: 1.2rem;
@@ -245,8 +369,9 @@ html.ion-palette-dark ion-card.glass-surface {
   &__value {
     margin: 0;
     font-size: 1.5rem;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1;
+    letter-spacing: -0.02em;
     color: var(--ion-text-color);
   }
 
@@ -273,13 +398,32 @@ html.ion-palette-dark ion-card.glass-surface {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Progress / fill bars                                                       */
+/* -------------------------------------------------------------------------- */
+
+.app-progress-track {
+  height: 8px;
+  border-radius: var(--glass-radius-pill);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ion-color-primary) 14%, transparent);
+}
+
+.app-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--app-accent-gradient);
+  transition: width var(--app-duration-slow) var(--app-ease-out);
+}
+
+/* -------------------------------------------------------------------------- */
 /* Ionic primitives                                                           */
 /* -------------------------------------------------------------------------- */
 
 ion-tab-bar {
   --background: transparent;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-top: 1px solid var(--glass-border);
 }
 
@@ -303,10 +447,10 @@ ion-accordion.settings-accordion {
 ion-popover.app-glass-popover,
 ion-popover.knowledge-hints-popover {
   --background: var(--app-surface-solid);
-  --box-shadow: var(--glass-shadow);
+  --box-shadow: var(--glass-shadow-elevated);
   --border: 1px solid var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 }
 
 ion-item.app-glass-item {
@@ -317,4 +461,22 @@ ion-item.app-glass-item {
 ion-list.app-glass-list {
   background: transparent;
   border-radius: var(--glass-radius);
+}
+
+/* Glass chip / pill control */
+.app-glass-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--glass-radius-pill);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(16px) saturate(var(--glass-saturate));
+  color: var(--ion-text-color);
+  font-family: var(--app-font-ui);
+  font-size: 0.78rem;
+  font-weight: 500;
+  box-shadow: var(--glass-shadow);
 }

@@ -3,10 +3,12 @@ import { Router } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 import { ToastController, ViewWillEnter } from '@ionic/angular';
 
+import { DonatePromptService } from '../core/services/donate-prompt.service';
 import { LegalLinksService } from '../core/services/legal-links.service';
 import { LocaleService } from '../core/services/locale.service';
 import { SessionAccessService } from '../core/services/session-access.service';
 import { SubscriptionService } from '../core/services/subscription.service';
+import { isBillingEnabled } from '../core/utils/billing-mode';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -18,15 +20,19 @@ import { environment } from '../../environments/environment';
 export class PaywallPage implements OnInit, ViewWillEnter {
   readonly sub = inject(SubscriptionService);
   private readonly sessionAccess = inject(SessionAccessService);
+  private readonly donatePrompt = inject(DonatePromptService);
   private readonly router = inject(Router);
   private readonly toastCtrl = inject(ToastController);
   private readonly legal = inject(LegalLinksService);
   protected readonly locale = inject(LocaleService);
 
+  readonly billingEnabled = isBillingEnabled();
   readonly billingDebugEnabled = this.sub.canUseBillingDebug();
   readonly isProduction = environment.production;
   readonly isNative = Capacitor.isNativePlatform();
   readonly freeGamesLimit = environment.freeGamesLimit;
+  readonly hasDonateUrl = this.legal.hasDonateUrl();
+  readonly gamesThreshold = this.donatePrompt.gamesThreshold;
 
   legalReady = false;
   busy = false;
@@ -41,6 +47,9 @@ export class PaywallPage implements OnInit, ViewWillEnter {
   }
 
   async refresh(): Promise<void> {
+    if (!this.billingEnabled) {
+      return;
+    }
     await this.sub.init();
     await this.sessionAccess.hydrate();
     this.freeGamesLeft = this.sessionAccess.remainingFreeGames(this.sub.isSubscribed());
@@ -50,11 +59,15 @@ export class PaywallPage implements OnInit, ViewWillEnter {
   }
 
   goBack(): void {
-    void this.router.navigate(['/tabs/home']);
+    void this.router.navigate(['/tabs/play']);
+  }
+
+  async openDonate(): Promise<void> {
+    await this.donatePrompt.openDonateLink();
   }
 
   async subscribeMonthly(): Promise<void> {
-    if (this.busy || !this.sub.canSubscribeMonthly()) {
+    if (!this.billingEnabled || this.busy || !this.sub.canSubscribeMonthly()) {
       return;
     }
     this.busy = true;
@@ -64,7 +77,7 @@ export class PaywallPage implements OnInit, ViewWillEnter {
   }
 
   async restore(): Promise<void> {
-    if (this.busy) {
+    if (!this.billingEnabled || this.busy) {
       return;
     }
     this.busy = true;
@@ -83,6 +96,9 @@ export class PaywallPage implements OnInit, ViewWillEnter {
   }
 
   async toggleDebugPremium(): Promise<void> {
+    if (!this.billingEnabled) {
+      return;
+    }
     await this.sub.toggleDebugPremium();
     await this.refresh();
     const key = this.sub.isSubscribed()

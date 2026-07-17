@@ -22,6 +22,7 @@ import { UserLearningService } from '../core/services/user-learning.service';
 import { PerfLogService } from '../core/services/perf-log.service';
 import { SessionAccessService } from '../core/services/session-access.service';
 import { SubscriptionService } from '../core/services/subscription.service';
+import { isBillingEnabled } from '../core/utils/billing-mode';
 import { environment } from '../../environments/environment';
 
 export interface PathChapterDot {
@@ -54,6 +55,7 @@ export class ProgressPage implements ViewWillEnter, ViewDidEnter {
   private readonly sessionAccess = inject(SessionAccessService);
   private readonly router = inject(Router);
 
+  readonly billingEnabled = isBillingEnabled();
   readonly freeGamesLimit = environment.freeGamesLimit;
 
   practicedCount = 0;
@@ -83,7 +85,9 @@ export class ProgressPage implements ViewWillEnter, ViewDidEnter {
 
   async refresh(): Promise<void> {
     const span = this.perf.span('Progress', 'refresh');
-    await this.sub.init();
+    if (this.billingEnabled) {
+      await this.sub.init();
+    }
     await this.sessionAccess.hydrate();
     await this.manifest.ensureLoaded();
     await this.catalog.ensureLoaded();
@@ -105,7 +109,9 @@ export class ProgressPage implements ViewWillEnter, ViewDidEnter {
       this.dailyTarget > 0
         ? Math.min(100, Math.round((this.dailyDone / this.dailyTarget) * 100))
         : 0;
-    this.freeGamesLeft = this.sessionAccess.remainingFreeGames(this.sub.isSubscribed());
+    this.freeGamesLeft = this.sessionAccess.remainingFreeGames(
+      !this.billingEnabled || this.sub.isSubscribed(),
+    );
     this.correctToday = this.learning.countCorrectToday();
     this.streakDays = this.learning.getActivityStreak();
     this.bestDayRecord = this.learning.getBestDayCorrect();

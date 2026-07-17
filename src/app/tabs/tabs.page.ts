@@ -38,6 +38,7 @@ export class TabsPage implements OnInit {
   private applyActiveTabClass(tab: string): void {
     const root = document.documentElement;
     for (const id of ['play', 'knowledge', 'progress', 'settings'] as const) {
+      // Settings is off the tab bar; keep the class for CSS when that stack is open.
       root.classList.toggle(`flagfield-active-tab-${id}`, tab === id);
     }
   }

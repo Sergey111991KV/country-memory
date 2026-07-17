@@ -113,7 +113,9 @@ export function resolvePlayModeLaunch(
         setsPool: false,
         premiumOnly: true,
       };
-    default:
-      return { kind: 'paywall' };
+    default: {
+      const _exhaustive: never = action;
+      return _exhaustive;
+    }
   }
 }

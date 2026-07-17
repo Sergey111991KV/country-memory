@@ -4,8 +4,8 @@ import type { AppLang } from './messages';
 export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>> = {
   en: {
     'knowledge.collectionsSection': 'Collections',
-    'knowledge.allThemes': 'All regions',
     'knowledge.filterActive': 'Showing: {{region}}',
+    'knowledge.clearFilter': 'Clear filter: {{region}}',
     'knowledge.collectionSelected': 'selected',
     'knowledge.collection.europe': 'Europe',
     'knowledge.collection.americas': 'Americas',
@@ -18,8 +18,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   ru: {
     'knowledge.collectionsSection': 'Коллекции',
-    'knowledge.allThemes': 'Все регионы',
     'knowledge.filterActive': 'Показан регион: {{region}}',
+    'knowledge.clearFilter': 'Сбросить фильтр: {{region}}',
     'knowledge.collectionSelected': 'выбрано',
     'knowledge.collection.europe': 'Европа',
     'knowledge.collection.americas': 'Америка',
@@ -32,8 +32,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   es: {
     'knowledge.collectionsSection': 'Colecciones',
-    'knowledge.allThemes': 'Todas las regiones',
     'knowledge.filterActive': 'Mostrando: {{region}}',
+    'knowledge.clearFilter': 'Quitar filtro: {{region}}',
     'knowledge.collectionSelected': 'seleccionado',
     'knowledge.collection.europe': 'Europa',
     'knowledge.collection.americas': 'América',
@@ -46,8 +46,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   de: {
     'knowledge.collectionsSection': 'Sammlungen',
-    'knowledge.allThemes': 'Alle Regionen',
     'knowledge.filterActive': 'Angezeigt: {{region}}',
+    'knowledge.clearFilter': 'Filter löschen: {{region}}',
     'knowledge.collectionSelected': 'ausgewählt',
     'knowledge.collection.europe': 'Europa',
     'knowledge.collection.americas': 'Amerika',
@@ -60,8 +60,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   fr: {
     'knowledge.collectionsSection': 'Collections',
-    'knowledge.allThemes': 'Toutes les régions',
     'knowledge.filterActive': 'Affichage : {{region}}',
+    'knowledge.clearFilter': 'Effacer le filtre : {{region}}',
     'knowledge.collectionSelected': 'sélectionné',
     'knowledge.collection.europe': 'Europe',
     'knowledge.collection.americas': 'Amériques',
@@ -74,8 +74,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   uk: {
     'knowledge.collectionsSection': 'Колекції',
-    'knowledge.allThemes': 'Усі регіони',
     'knowledge.filterActive': 'Показано: {{region}}',
+    'knowledge.clearFilter': 'Скинути фільтр: {{region}}',
     'knowledge.collectionSelected': 'обрано',
     'knowledge.collection.europe': 'Європа',
     'knowledge.collection.americas': 'Америка',
@@ -88,8 +88,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   zh: {
     'knowledge.collectionsSection': '合集',
-    'knowledge.allThemes': '全部地区',
     'knowledge.filterActive': '当前：{{region}}',
+    'knowledge.clearFilter': '清除筛选：{{region}}',
     'knowledge.collectionSelected': '已选',
     'knowledge.collection.europe': '欧洲',
     'knowledge.collection.americas': '美洲',
@@ -102,8 +102,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   hi: {
     'knowledge.collectionsSection': 'संग्रह',
-    'knowledge.allThemes': 'सभी क्षेत्र',
     'knowledge.filterActive': 'दिखाया जा रहा: {{region}}',
+    'knowledge.clearFilter': 'फ़िल्टर हटाएँ: {{region}}',
     'knowledge.collectionSelected': 'चयनित',
     'knowledge.collection.europe': 'यूरोप',
     'knowledge.collection.americas': 'अमेरिका',
@@ -116,8 +116,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   ar: {
     'knowledge.collectionsSection': 'المجموعات',
-    'knowledge.allThemes': 'كل المناطق',
     'knowledge.filterActive': 'عرض: {{region}}',
+    'knowledge.clearFilter': 'مسح التصفية: {{region}}',
     'knowledge.collectionSelected': 'محدّد',
     'knowledge.collection.europe': 'أوروبا',
     'knowledge.collection.americas': 'الأمريكتان',
@@ -130,8 +130,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   pt: {
     'knowledge.collectionsSection': 'Coleções',
-    'knowledge.allThemes': 'Todas as regiões',
     'knowledge.filterActive': 'A mostrar: {{region}}',
+    'knowledge.clearFilter': 'Limpar filtro: {{region}}',
     'knowledge.collectionSelected': 'selecionado',
     'knowledge.collection.europe': 'Europa',
     'knowledge.collection.americas': 'Américas',
@@ -144,8 +144,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   ja: {
     'knowledge.collectionsSection': 'コレクション',
-    'knowledge.allThemes': 'すべての地域',
     'knowledge.filterActive': '表示中: {{region}}',
+    'knowledge.clearFilter': 'フィルター解除: {{region}}',
     'knowledge.collectionSelected': '選択中',
     'knowledge.collection.europe': 'ヨーロッパ',
     'knowledge.collection.americas': 'アメリカ',
@@ -158,8 +158,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   ko: {
     'knowledge.collectionsSection': '컬렉션',
-    'knowledge.allThemes': '모든 지역',
     'knowledge.filterActive': '표시: {{region}}',
+    'knowledge.clearFilter': '필터 해제: {{region}}',
     'knowledge.collectionSelected': '선택됨',
     'knowledge.collection.europe': '유럽',
     'knowledge.collection.americas': '아메리카',
@@ -172,8 +172,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   it: {
     'knowledge.collectionsSection': 'Collezioni',
-    'knowledge.allThemes': 'Tutte le regioni',
     'knowledge.filterActive': 'Visualizzazione: {{region}}',
+    'knowledge.clearFilter': 'Rimuovi filtro: {{region}}',
     'knowledge.collectionSelected': 'selezionato',
     'knowledge.collection.europe': 'Europa',
     'knowledge.collection.americas': 'Americhe',
@@ -186,8 +186,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   tr: {
     'knowledge.collectionsSection': 'Koleksiyonlar',
-    'knowledge.allThemes': 'Tüm bölgeler',
     'knowledge.filterActive': 'Gösterilen: {{region}}',
+    'knowledge.clearFilter': 'Filtreyi temizle: {{region}}',
     'knowledge.collectionSelected': 'seçili',
     'knowledge.collection.europe': 'Avrupa',
     'knowledge.collection.americas': 'Amerika',
@@ -200,8 +200,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   vi: {
     'knowledge.collectionsSection': 'Bộ sưu tập',
-    'knowledge.allThemes': 'Tất cả khu vực',
     'knowledge.filterActive': 'Đang hiển thị: {{region}}',
+    'knowledge.clearFilter': 'Xóa bộ lọc: {{region}}',
     'knowledge.collectionSelected': 'đã chọn',
     'knowledge.collection.europe': 'Châu Âu',
     'knowledge.collection.americas': 'Châu Mỹ',
@@ -214,8 +214,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   id: {
     'knowledge.collectionsSection': 'Koleksi',
-    'knowledge.allThemes': 'Semua wilayah',
     'knowledge.filterActive': 'Menampilkan: {{region}}',
+    'knowledge.clearFilter': 'Hapus filter: {{region}}',
     'knowledge.collectionSelected': 'dipilih',
     'knowledge.collection.europe': 'Eropa',
     'knowledge.collection.americas': 'Amerika',
@@ -228,8 +228,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   pl: {
     'knowledge.collectionsSection': 'Kolekcje',
-    'knowledge.allThemes': 'Wszystkie regiony',
     'knowledge.filterActive': 'Widok: {{region}}',
+    'knowledge.clearFilter': 'Wyczyść filtr: {{region}}',
     'knowledge.collectionSelected': 'wybrane',
     'knowledge.collection.europe': 'Europa',
     'knowledge.collection.americas': 'Ameryka',
@@ -242,8 +242,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   nl: {
     'knowledge.collectionsSection': 'Collecties',
-    'knowledge.allThemes': 'Alle regio’s',
     'knowledge.filterActive': 'Weergave: {{region}}',
+    'knowledge.clearFilter': 'Filter wissen: {{region}}',
     'knowledge.collectionSelected': 'geselecteerd',
     'knowledge.collection.europe': 'Europa',
     'knowledge.collection.americas': 'Amerika',
@@ -256,8 +256,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   bn: {
     'knowledge.collectionsSection': 'সংগ্রহ',
-    'knowledge.allThemes': 'সব অঞ্চল',
     'knowledge.filterActive': 'দেখানো হচ্ছে: {{region}}',
+    'knowledge.clearFilter': 'ফিল্টার মুছুন: {{region}}',
     'knowledge.collectionSelected': 'নির্বাচিত',
     'knowledge.collection.europe': 'ইউরোপ',
     'knowledge.collection.americas': 'আমেরিকা',
@@ -270,8 +270,8 @@ export const KNOWLEDGE_COLLECTIONS_I18N: Record<AppLang, Record<string, string>>
   },
   ur: {
     'knowledge.collectionsSection': 'مجموعے',
-    'knowledge.allThemes': 'تمام علاقے',
     'knowledge.filterActive': 'دکھایا جا رہا: {{region}}',
+    'knowledge.clearFilter': 'فلٹر صاف کریں: {{region}}',
     'knowledge.collectionSelected': 'منتخب',
     'knowledge.collection.europe': 'یورپ',
     'knowledge.collection.americas': 'امریکہ',

@@ -26,6 +26,7 @@ export interface CountryMarkRow {
   displayName: string;
   status: CountryLearnStatus;
   expanded: boolean;
+  detailsReady: boolean;
   fields: CountryProfileField[];
   facts: CountryFact[];
   fieldStates: Map<string, FactLearnStateId>;
@@ -37,6 +38,8 @@ export interface CollectionCardStats {
   total: number;
   saved: number;
 }
+
+const LIST_PAGE_SIZE = 40;
 
 @Component({
   selector: 'app-knowledge-base',
@@ -66,10 +69,24 @@ export class KnowledgeBasePage implements ViewWillEnter {
   searchQuery = '';
   continentFilter: string | null = null;
   learnedSet = new Set<string>();
+  listLimit = LIST_PAGE_SIZE;
+  engagedCountryCount = 0;
 
   private rowsCacheReady = false;
   private lastMarksRevision = -1;
   private lastBuiltLanguage: AppLang | null = null;
+
+  get visibleCountryRows(): CountryMarkRow[] {
+    return this.displayCountryRows.slice(0, this.listLimit);
+  }
+
+  get hasMoreCountries(): boolean {
+    return this.displayCountryRows.length > this.listLimit;
+  }
+
+  get remainingCountryCount(): number {
+    return Math.max(0, this.displayCountryRows.length - this.listLimit);
+  }
 
   ionViewWillEnter(): void {
     void this.scrollToTop();
@@ -87,20 +104,14 @@ export class KnowledgeBasePage implements ViewWillEnter {
   }
 
   onSearchQueryChange(): void {
+    this.resetListWindow();
     this.applyListFilter();
     this.cdr.markForCheck();
   }
 
-  clearCollectionFilter(): void {
-    void this.tapHaptic();
-    this.continentFilter = null;
-    this.searchQuery = '';
-    this.applyListFilter();
+  showMoreCountries(): void {
+    this.listLimit += LIST_PAGE_SIZE;
     this.cdr.markForCheck();
-  }
-
-  isAllRegionsActive(): boolean {
-    return this.continentFilter === null;
   }
 
   factText(fact: CountryFact): string {
@@ -159,6 +170,7 @@ export class KnowledgeBasePage implements ViewWillEnter {
     for (const r of this.countryRows) {
       r.expanded = r === row;
     }
+    this.ensureRowDetails(row);
     this.cdr.markForCheck();
   }
 
@@ -166,7 +178,15 @@ export class KnowledgeBasePage implements ViewWillEnter {
     void this.tapHaptic();
     this.continentFilter =
       this.continentFilter === col.continent ? null : col.continent;
-    this.searchQuery = '';
+    this.resetListWindow();
+    this.applyListFilter();
+    this.cdr.markForCheck();
+  }
+
+  clearCollectionFilter(): void {
+    void this.tapHaptic();
+    this.continentFilter = null;
+    this.resetListWindow();
     this.applyListFilter();
     this.cdr.markForCheck();
   }
@@ -236,6 +256,7 @@ export class KnowledgeBasePage implements ViewWillEnter {
       await this.userLearned.unmarkFactLearned(markId);
     }
     await this.tapHaptic();
+    this.ensureRowDetails(row);
     row.fieldStates = this.buildFieldStateMap(row.fields);
     row.factStates = this.buildFactStateMap(row.facts);
     this.learnedSet = await this.userLearned.getLearnedCountryIsos();
@@ -295,6 +316,7 @@ export class KnowledgeBasePage implements ViewWillEnter {
       this.lastMarksRevision = marksRevision;
       this.lastBuiltLanguage = language;
       this.rowsCacheReady = true;
+      this.resetListWindow();
       this.rebuildCollectionStats();
       this.applyListFilter();
       totalSpan.end({
@@ -311,6 +333,10 @@ export class KnowledgeBasePage implements ViewWillEnter {
 
   private async scrollToTop(): Promise<void> {
     await this.knowledgeContent?.scrollToTop(0);
+  }
+
+  private resetListWindow(): void {
+    this.listLimit = LIST_PAGE_SIZE;
   }
 
   private applyListFilter(): void {
@@ -337,6 +363,7 @@ export class KnowledgeBasePage implements ViewWillEnter {
         (totalsByContinent.get(country.continent) ?? 0) + 1,
       );
     }
+    let engagedTotal = 0;
     for (const col of this.collections) {
       let engaged = 0;
       let saved = 0;
@@ -351,12 +378,14 @@ export class KnowledgeBasePage implements ViewWillEnter {
           engaged += 1;
         }
       }
+      engagedTotal += engaged;
       this.collectionStatsMap.set(col.continent, {
         engaged,
         saved,
         total: totalsByContinent.get(col.continent) ?? 0,
       });
     }
+    this.engagedCountryCount = engagedTotal;
   }
 
   private buildCountryRow(country: Country, language: AppLang): CountryMarkRow {
@@ -364,18 +393,29 @@ export class KnowledgeBasePage implements ViewWillEnter {
       country.iso2,
       this.learnedSet,
     );
-    const fields = this.countryKnowledge.getProfileFields(country, language);
-    const facts = this.countryKnowledge.getTriviaFacts(country.iso2);
     return {
       country,
       displayName: this.catalog.localizedName(country, language),
       status,
       expanded: false,
-      fields,
-      facts,
-      fieldStates: this.buildFieldStateMap(fields),
-      factStates: this.buildFactStateMap(facts),
+      detailsReady: false,
+      fields: [],
+      facts: [],
+      fieldStates: new Map(),
+      factStates: new Map(),
     };
+  }
+
+  private ensureRowDetails(row: CountryMarkRow): void {
+    if (row.detailsReady) {
+      return;
+    }
+    const language = this.locale.language;
+    row.fields = this.countryKnowledge.getProfileFields(row.country, language);
+    row.facts = this.countryKnowledge.getTriviaFacts(row.country.iso2);
+    row.fieldStates = this.buildFieldStateMap(row.fields);
+    row.factStates = this.buildFactStateMap(row.facts);
+    row.detailsReady = true;
   }
 
   private buildFieldStateMap(

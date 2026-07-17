@@ -35,7 +35,7 @@ import {
   politicalCapColor,
   politicalStrokeColor,
 } from '../../core/utils/globe-geo';
-import { ensurePlaySessionAccess } from '../../core/utils/play-access';
+import { ensurePlaySessionAccess, ensurePremiumPlayAccess } from '../../core/utils/play-access';
 import { playDebug } from '../../core/utils/play-debug';
 import { buildMapMarkSessionResult } from '../../core/utils/play-session-result-builders';
 
@@ -194,9 +194,7 @@ export class MapMarkPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   }
 
   private async startSession(): Promise<void> {
-    await this.subscription.init();
-    if (!this.subscription.isSubscribed()) {
-      void this.router.navigate(['/paywall']);
+    if (!(await ensurePremiumPlayAccess(this.subscription, this.router))) {
       this.loading = false;
       return;
     }

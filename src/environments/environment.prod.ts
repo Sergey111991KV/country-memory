@@ -8,7 +8,10 @@
  */
 export const environment = {
   production: true,
+  /** false = free app + donate prompts; true = restore Premium IAP. */
+  billingEnabled: false,
   freeGamesLimit: 10,
+  donatePromptAfterGames: 10,
   androidMonthlyBasePlanId: 'monthly',
   devMockBilling: false,
   billingDebugEnabled: false,
@@ -23,7 +26,7 @@ export const environment = {
   /** Shown on Settings — contact for help */
   supportEmail: 'supp0rt.serg@yandex.com',
 
-  appVersion: '1.0.2',
-  donateUrl: '',
+  appVersion: '1.0.3',
+  donateUrl: 'https://destream.net/live/SergeyKosilov/donate',
   developerWebsiteUrl: 'https://addeo.github.io',
 };

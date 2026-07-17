@@ -14,14 +14,15 @@ const routes: Routes = [
     loadChildren: () =>
       import('./tabs/tabs.module').then((m) => m.TabsPageModule),
   },
-  { path: 'home', redirectTo: 'tabs/home', pathMatch: 'full' },
+  { path: 'home', redirectTo: 'tabs/play', pathMatch: 'full' },
   { path: 'settings', redirectTo: 'tabs/settings', pathMatch: 'full' },
   {
-    path: 'paywall',
+    path: 'donate',
     canActivate: [authGuard],
     loadChildren: () =>
       import('./paywall/paywall.module').then((m) => m.PaywallPageModule),
   },
+  { path: 'paywall', redirectTo: 'donate', pathMatch: 'full' },
   {
     path: '',
     redirectTo: 'login',

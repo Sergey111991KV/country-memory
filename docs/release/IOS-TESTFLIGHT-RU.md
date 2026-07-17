@@ -1,6 +1,6 @@
 # Flagfield — загрузка билда в TestFlight (iOS)
 
-Версия для теста: **1.0.1 (3)** · Bundle ID: `com.flagfield.learn`
+Версия для теста: **1.0.3 (6)** · Bundle ID: `com.flagfield.learn`
 
 ## Перед сборкой
 
@@ -52,16 +52,16 @@ npm run cap:open:ios
 ## После загрузки
 
 1. **Activity** — статус *Processing* (15–60 мин).
-2. **TestFlight → Builds** — билд **1.0.1 (2)** → *Ready to Test*.
+2. **TestFlight → Builds** — билд **1.0.3 (6)** → *Ready to Test*.
 3. **Export Compliance** — в Connect: **None of the algorithms mentioned above** (только HTTPS через iOS). В `Info.plist` уже есть `ITSAppUsesNonExemptEncryption = false` для следующих билдов.
 4. **INTERNAL TESTING → My** — включить билд для группы.
-5. **Distribution → iOS App 1.0 → Build** — выбрать билд 1.0.1 (2).
+5. **Distribution → iOS App 1.0 → Build** — выбрать билд 1.0.3 (6).
 
 ## Если билд не появляется
 
 - Проверь почту Apple (Invalid Binary / ITMS).
 - **Agreements, Tax, and Banking** — всё Active.
-- Нельзя повторно загрузить тот же **Build** `2` — увеличь `CURRENT_PROJECT_VERSION` в Xcode.
+- Нельзя повторно загрузить тот же **Build** `6` — увеличь `CURRENT_PROJECT_VERSION` в Xcode.
 - Bundle ID в Xcode = `com.flagfield.learn`.
 
 ## Ссылки в Connect (как в приложении)

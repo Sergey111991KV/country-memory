@@ -16,7 +16,10 @@ const PUBLIC_SITE = 'https://YOUR_DOMAIN';
 
 export const environment = {
   production: true,
+  /** Set true only when App Store / Play products are ready for sale. */
+  billingEnabled: false,
   freeGamesLimit: 10,
+  donatePromptAfterGames: 10,
   androidMonthlyBasePlanId: 'monthly',
   /** false before App Store submit; never true in production builds. */
   devMockBilling: false,
@@ -30,7 +33,7 @@ export const environment = {
     'https://play.google.com/store/account/subscriptions?package=com.flagfield.learn',
 
   supportEmail: 'supp0rt.serg@yandex.com',
-  appVersion: '1.0.2',
-  donateUrl: `${PUBLIC_SITE}/donate`,
+  appVersion: '1.0.3',
+  donateUrl: 'https://destream.net/live/SergeyKosilov/donate',
   developerWebsiteUrl: PUBLIC_SITE,
 };

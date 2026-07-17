@@ -26,7 +26,7 @@ export class ProductInfoPage implements OnInit {
   readonly locale = inject(LocaleService);
 
   readonly appVersion = environment.appVersion;
-  readonly freeGamesLimit = environment.freeGamesLimit;
+  readonly freeGamesLimit = environment.donatePromptAfterGames;
 
   activeSlideIndex = 0;
   freeCountryCount = 30;

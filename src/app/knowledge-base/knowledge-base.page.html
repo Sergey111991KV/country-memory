@@ -3,10 +3,19 @@
   <div class="knowledge-shell">
     <header class="knowledge-header">
       <div class="knowledge-header__text">
-        <p class="knowledge-header__brand">Flagfield</p>
         <h1>{{ 'knowledge.title' | i18n:null:lang}}</h1>
-        <p class="knowledge-header__sub">{{ 'knowledge.subtitle' | i18n:null:lang}}</p>
+        <p class="knowledge-header__sub">
+          {{ 'knowledge.summaryEngaged' | i18n:{ n: engagedCountryCount }:lang}}
+        </p>
       </div>
+      <ion-button
+        fill="clear"
+        class="knowledge-header__settings"
+        routerLink="/tabs/settings"
+        [attr.aria-label]="'tabs.settings' | i18n:null:lang"
+      >
+        <ion-icon slot="icon-only" name="settings-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
     </header>
 
     <p *ngIf="loading" class="knowledge-loading">{{ 'knowledge.loading' | i18n:null:lang}}</p>
@@ -15,56 +24,56 @@
     <section class="knowledge-block" aria-labelledby="knowledge-collections-heading">
       <div class="knowledge-block__head">
         <h2 id="knowledge-collections-heading" class="knowledge-kicker knowledge-block__kicker">{{ 'knowledge.collectionsSection' | i18n:null:lang}}</h2>
-        <button
-          type="button"
-          class="knowledge-link-btn"
-          [class.knowledge-link-btn--active]="isAllRegionsActive()"
-          (click)="clearCollectionFilter()"
-        >
-          {{ 'knowledge.allThemes' | i18n:null:lang}}
-        </button>
       </div>
-      <div class="knowledge-collections-scroll">
-        <button
-          type="button"
-          *ngFor="let col of collections; trackBy: trackCollection"
-          class="knowledge-collection-card"
-          [class.knowledge-collection-card--active]="isCollectionActive(col)"
-          [attr.aria-pressed]="isCollectionActive(col)"
-          [attr.aria-label]="collectionCardAriaLabel(col)"
-          (click)="filterByCollection(col)"
-        >
-          <img [src]="col.image" alt="" loading="lazy" aria-hidden="true" />
-          <span class="knowledge-collection-card__shade" aria-hidden="true"></span>
-          <span
-            *ngIf="isCollectionActive(col)"
-            class="knowledge-collection-card__selected"
-            aria-hidden="true"
+      <div class="knowledge-collections-wrap">
+        <div class="knowledge-collections-scroll">
+          <button
+            type="button"
+            *ngFor="let col of collections; trackBy: trackCollection"
+            class="knowledge-collection-card"
+            [class.knowledge-collection-card--active]="isCollectionActive(col)"
+            [attr.aria-pressed]="isCollectionActive(col)"
+            [attr.aria-label]="collectionCardAriaLabel(col)"
+            (click)="filterByCollection(col)"
           >
-            <ion-icon name="checkmark-circle"></ion-icon>
-          </span>
-          <span class="knowledge-collection-card__title">{{ col.titleKey | i18n:null:lang}}</span>
-          <span class="knowledge-collection-card__meta">
-            {{
-              'knowledge.collectionCardMeta'
-                | i18n:{
-                  engaged: collectionStats(col).engaged,
-                  total: collectionStats(col).total,
-                  saved: collectionStats(col).saved
-                }:lang}}
-          </span>
-        </button>
+            <img [src]="col.image" alt="" loading="lazy" aria-hidden="true" />
+            <span class="knowledge-collection-card__shade" aria-hidden="true"></span>
+            <span
+              *ngIf="isCollectionActive(col)"
+              class="knowledge-collection-card__selected"
+              aria-hidden="true"
+            >
+              <ion-icon name="checkmark-circle"></ion-icon>
+            </span>
+            <span class="knowledge-collection-card__title">{{ col.titleKey | i18n:null:lang}}</span>
+            <span class="knowledge-collection-card__meta">
+              {{
+                'knowledge.collectionCardMeta'
+                  | i18n:{
+                    engaged: collectionStats(col).engaged,
+                    total: collectionStats(col).total,
+                    saved: collectionStats(col).saved
+                  }:lang}}
+            </span>
+          </button>
+        </div>
       </div>
-      <p *ngIf="activeCollectionLabel" class="knowledge-filter-hint">
-        {{ 'knowledge.filterActive' | i18n:{ region: activeCollectionLabel }:lang}}
-      </p>
+      <button
+        *ngIf="activeCollectionLabel as region"
+        type="button"
+        class="knowledge-filter-chip"
+        (click)="clearCollectionFilter()"
+        [attr.aria-label]="'knowledge.clearFilter' | i18n:{ region: region }:lang"
+      >
+        <span>{{ 'knowledge.filterActive' | i18n:{ region: region }:lang}}</span>
+        <ion-icon name="close-circle" aria-hidden="true"></ion-icon>
+      </button>
     </section>
 
     <section class="knowledge-block knowledge-block--mark" aria-labelledby="knowledge-countries-heading">
       <div class="knowledge-mark-toolbar">
         <div class="knowledge-mark-toolbar__text">
           <h2 id="knowledge-countries-heading" class="knowledge-kicker">{{ 'knowledge.markTitle' | i18n:null:lang}}</h2>
-          <p class="knowledge-mark-lead">{{ 'knowledge.markHint' | i18n:null:lang}}</p>
         </div>
         <ion-searchbar
           class="knowledge-search"
@@ -75,9 +84,17 @@
         ></ion-searchbar>
       </div>
 
-      <div class="knowledge-country-list">
+      <p class="knowledge-results-meta" *ngIf="displayCountryRows.length">
+        {{ 'knowledge.resultsCount' | i18n:{ n: displayCountryRows.length }:lang}}
+      </p>
+
+      <p *ngIf="!displayCountryRows.length" class="knowledge-empty" role="status">
+        {{ 'knowledge.emptyResults' | i18n:null:lang}}
+      </p>
+
+      <div class="knowledge-country-list" *ngIf="displayCountryRows.length">
         <article
-          *ngFor="let row of displayCountryRows; trackBy: trackCountryRow"
+          *ngFor="let row of visibleCountryRows; trackBy: trackCountryRow"
           class="knowledge-country-card glass-surface"
           [class.knowledge-country-card--expanded]="row.expanded"
         >
@@ -116,18 +133,18 @@
             ></ion-icon>
           </button>
 
-          <div class="knowledge-country-card__actions">
-            <button
-              type="button"
-              class="knowledge-action-btn"
-              [class.knowledge-action-btn--secondary]="row.status.manual"
-              (click)="onCountryAction(row, $event)"
-            >
-              {{ countryActionKey(row.status) | i18n:null:lang}}
-            </button>
-          </div>
-
           <div *ngIf="row.expanded" class="knowledge-detail-panel">
+            <div class="knowledge-detail-panel__actions">
+              <button
+                type="button"
+                class="knowledge-action-btn"
+                [class.knowledge-action-btn--secondary]="row.status.manual"
+                (click)="onCountryAction(row, $event)"
+              >
+                {{ countryActionKey(row.status) | i18n:null:lang}}
+              </button>
+            </div>
+
             <section
               *ngIf="row.fields.length"
               class="knowledge-detail-section"
@@ -177,6 +194,16 @@
           </div>
         </article>
       </div>
+
+      <ion-button
+        *ngIf="hasMoreCountries"
+        expand="block"
+        fill="outline"
+        class="knowledge-show-more"
+        (click)="showMoreCountries()"
+      >
+        {{ 'knowledge.showMore' | i18n:{ remaining: remainingCountryCount }:lang}}
+      </ion-button>
     </section>
     </ng-container>
   </div>

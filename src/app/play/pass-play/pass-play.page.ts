@@ -130,10 +130,10 @@ export class PassPlayPage implements ViewWillEnter {
     this.starting = true;
     try {
       const allowed = await ensurePlaySessionAccess(
-        this.subscription,
-        this.sessionAccess,
-        this.router,
-      );
+      this.subscription,
+      this.sessionAccess,
+      this.router,
+    );
       if (!allowed) {
         return;
       }

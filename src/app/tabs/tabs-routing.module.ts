@@ -10,8 +10,8 @@ const routes: Routes = [
     children: [
       {
         path: 'home',
-        loadChildren: () =>
-          import('../home/home.module').then((m) => m.HomePageModule),
+        redirectTo: 'play',
+        pathMatch: 'full',
       },
       {
         path: 'play',
@@ -42,7 +42,7 @@ const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: 'home',
+        redirectTo: 'play',
         pathMatch: 'full',
       },
     ],

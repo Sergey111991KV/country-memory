@@ -6,8 +6,15 @@ import { CountriesCatalogService } from './countries-catalog.service';
 import { CountryKnowledgeService } from './country-knowledge.service';
 import { FlagAssetsService } from './flag-assets.service';
 import { LocaleService } from './locale.service';
+import { UserLearnedService } from './user-learned.service';
 
-export type HomeFeedCardKind = 'flag' | 'fact' | 'capital';
+/** Prompt types that can appear on the Play hub — same family as facts-drill rounds. */
+export type HomeFeedCardKind =
+  | 'flag'
+  | 'capital'
+  | 'currency'
+  | 'language'
+  | 'fact';
 
 export interface HomeFeedCard {
   id: string;
@@ -15,6 +22,7 @@ export interface HomeFeedCard {
   iso: string;
   countryName: string;
   titleKey: string;
+  /** Clue shown to the player (capital / currency / language / fact). Empty for flag. */
   body: string;
   flagUrl: string;
 }
@@ -25,14 +33,17 @@ export class HomeFeedService {
   private readonly knowledge = inject(CountryKnowledgeService);
   private readonly flags = inject(FlagAssetsService);
   private readonly locale = inject(LocaleService);
+  private readonly userLearned = inject(UserLearnedService);
 
   private deck: HomeFeedCard[] = [];
   private deckIndex = 0;
-  private builtForLang: AppLang | null = null;
+  private builtForKey: string | null = null;
 
   async ensureDeck(): Promise<void> {
+    await this.userLearned.hydrate();
     const lang = this.locale.language;
-    if (this.deck.length > 0 && this.builtForLang === lang) {
+    const key = `${lang}:${this.userLearned.getMarksRevision()}`;
+    if (this.deck.length > 0 && this.builtForKey === key) {
       return;
     }
     await this.catalog.ensureLoaded();
@@ -41,13 +52,13 @@ export class HomeFeedService {
     const cards: HomeFeedCard[] = [];
     for (const country of countries) {
       cards.push(...this.cardsForCountry(country, lang));
-      if (cards.length >= 48) {
+      if (cards.length >= 64) {
         break;
       }
     }
     this.deck = this.shuffle(cards).slice(0, 36);
     this.deckIndex = 0;
-    this.builtForLang = lang;
+    this.builtForKey = key;
   }
 
   currentCard(): HomeFeedCard | null {
@@ -73,10 +84,15 @@ export class HomeFeedService {
         iso,
         countryName: name,
         titleKey: 'home.feed.flagTitle',
-        body: name,
+        body: '',
         flagUrl,
       },
-      {
+    ];
+
+    const fields = this.knowledge.getProfileFields(country, lang);
+
+    if (this.userLearned.isFactMarked(this.knowledge.profileFieldMarkId(iso, 'capital'))) {
+      out.push({
         id: `${iso}-capital`,
         kind: 'capital',
         iso,
@@ -84,11 +100,43 @@ export class HomeFeedService {
         titleKey: 'home.feed.capitalTitle',
         body: this.catalog.localizedCapital(country, lang),
         flagUrl,
-      },
-    ];
-    const trivia = this.knowledge.getTriviaFacts(country.iso2);
-    const fact = trivia[0];
-    if (fact) {
+      });
+    }
+
+    if (this.userLearned.isFactMarked(this.knowledge.profileFieldMarkId(iso, 'currency'))) {
+      const currency = fields.find((f) => f.fieldId === 'currency');
+      if (currency && currency.value !== '—') {
+        out.push({
+          id: `${iso}-currency`,
+          kind: 'currency',
+          iso,
+          countryName: name,
+          titleKey: 'home.feed.currencyTitle',
+          body: currency.value,
+          flagUrl,
+        });
+      }
+    }
+
+    if (this.userLearned.isFactMarked(this.knowledge.profileFieldMarkId(iso, 'language'))) {
+      const language = fields.find((f) => f.fieldId === 'language');
+      if (language && language.value !== '—') {
+        out.push({
+          id: `${iso}-language`,
+          kind: 'language',
+          iso,
+          countryName: name,
+          titleKey: 'home.feed.languageTitle',
+          body: language.value,
+          flagUrl,
+        });
+      }
+    }
+
+    for (const fact of this.knowledge.getTriviaFacts(country.iso2)) {
+      if (!this.userLearned.isFactMarked(fact.id)) {
+        continue;
+      }
       out.push({
         id: fact.id,
         kind: 'fact',
@@ -99,6 +147,7 @@ export class HomeFeedService {
         flagUrl,
       });
     }
+
     return out;
   }
 

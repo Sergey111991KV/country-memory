@@ -2,60 +2,22 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()" [attr.aria-label]="'paywall.back' | i18n:null:lang">
+      <ion-button
+        (click)="goBack()"
+        [attr.aria-label]="(billingEnabled ? 'paywall.back' : 'donatePrompt.back') | i18n:null:lang"
+      >
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'paywall.title' | i18n:null:lang}}</ion-title>
+    <ion-title>
+      {{ (billingEnabled ? 'paywall.title' : 'donatePrompt.title') | i18n:null:lang}}
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding paywall-content page-safe-top">
-  <div *ngIf="!sub.readySig()" class="paywall-loading">
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>{{ 'paywall.connecting' | i18n:null:lang}}</p>
-  </div>
-
-  <ng-container *ngIf="sub.readySig()">
-    <ion-text
-      *ngIf="isNative && !sub.storeConfiguredSig() && !sub.canSimulateBillingSig()"
-      color="warning"
-      class="paywall-warn ion-text-wrap"
-    >
-      <p>{{ sub.billingBannerText() }}</p>
-    </ion-text>
-
-    <ion-text
-      *ngIf="!sub.isSubscribed() && !sub.canSimulateBillingSig() && sub.canPurchaseInApp() && !sub.monthlyPriceSig() && !sub.offeringsLoadingSig()"
-      color="warning"
-      class="paywall-warn ion-text-wrap"
-    >
-      <p>{{ 'paywall.storeProductPending' | i18n:null:lang}}</p>
-    </ion-text>
-
-    <ion-text
-      *ngIf="!isNative && !sub.isSubscribed() && !sub.canSimulateBillingSig()"
-      color="medium"
-      class="paywall-warn ion-text-wrap"
-    >
-      <p>{{ 'paywall.webOnly' | i18n:null:lang}}</p>
-    </ion-text>
-
-    <ion-text
-      *ngIf="!isProduction && sub.canSimulateBillingSig() && !sub.isSubscribed()"
-      color="medium"
-      class="paywall-warn ion-text-wrap"
-    >
-      <p>{{ 'paywall.testModeHint' | i18n:null:lang}}</p>
-    </ion-text>
-
-    <p
-      *ngIf="sub.canPurchaseInApp()"
-      class="paywall-store-badge"
-    >
-      {{ 'paywall.storeBadge' | i18n:{ store: sub.storeLabel() }:lang}}
-    </p>
-
+  <!-- Donate mode (billingEnabled = false) -->
+  <ng-container *ngIf="!billingEnabled">
     <section class="paywall-hero glass-surface">
       <img
         class="paywall-hero__mark"
@@ -64,100 +26,192 @@
         height="72"
         alt=""
       />
-      <h1>{{ 'paywall.heroTitle' | i18n:null:lang}}</h1>
-      <p class="paywall-hero__lead">{{ 'paywall.heroLead' | i18n:null:lang}}</p>
-      <p *ngIf="!sub.isSubscribed()" class="paywall-hero__free">
-        {{ 'paywall.freeGamesLine' | i18n:{ n: freeGamesLeft, limit: freeGamesLimit }:lang}}
+      <h1>{{ 'donatePrompt.heroTitle' | i18n:null:lang}}</h1>
+      <p class="paywall-hero__lead">{{ 'donatePrompt.heroLead' | i18n:null:lang}}</p>
+      <p class="paywall-hero__free">
+        {{ 'donatePrompt.gamesMilestone' | i18n:{ n: gamesThreshold }:lang}}
       </p>
     </section>
 
-    <ion-card *ngIf="sub.isSubscribed()" class="paywall-active-card glass-surface">
-      <ion-card-content>
-        <ion-chip color="warning">
-          <app-icon icon="ui-premium" size="sm"></app-icon>
-          <ion-label>{{ 'paywall.premiumActive' | i18n:null:lang}}</ion-label>
-        </ion-chip>
-        <p>{{ 'paywall.premiumSub' | i18n:null:lang}}</p>
-        <ng-container [ngSwitch]="sub.premiumKindSig()">
-          <p *ngSwitchCase="'lifetime'">{{ 'settings.premiumTypeLifetime' | i18n:null:lang}}</p>
-          <p *ngSwitchCase="'subscription'">{{ 'settings.premiumTypeSubscription' | i18n:null:lang}}</p>
-          <p *ngSwitchCase="'trial'">{{ 'settings.premiumTypeTrial' | i18n:null:lang}}</p>
-          <p *ngSwitchCase="'intro'">{{ 'settings.premiumTypeIntro' | i18n:null:lang}}</p>
-        </ng-container>
-        <p *ngIf="sub.premiumExpiresIsoSig() as exp" class="muted">
-          {{ 'settings.premiumValidUntil' | i18n:{ date: formatPremiumExpiry(exp) }:lang}}
-        </p>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card *ngIf="!sub.isSubscribed()" class="glass-surface">
+    <ion-card class="glass-surface">
       <ion-card-header>
-        <ion-card-title>{{ 'paywall.featuresCardTitle' | i18n:null:lang}}</ion-card-title>
+        <ion-card-title>{{ 'donatePrompt.whyTitle' | i18n:null:lang}}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
         <ul class="paywall-features">
-          <li>{{ 'paywall.f1' | i18n:null:lang}}</li>
-          <li>{{ 'paywall.f2' | i18n:null:lang}}</li>
-          <li>{{ 'paywall.f3' | i18n:null:lang}}</li>
-          <li>{{ 'paywall.f4' | i18n:null:lang}}</li>
+          <li>{{ 'donatePrompt.f1' | i18n:null:lang}}</li>
+          <li>{{ 'donatePrompt.f2' | i18n:null:lang}}</li>
+          <li>{{ 'donatePrompt.f3' | i18n:null:lang}}</li>
         </ul>
       </ion-card-content>
     </ion-card>
 
-    <ng-container *ngIf="!sub.isSubscribed()">
+    <ion-button
+      expand="block"
+      color="primary"
+      class="paywall-cta"
+      [disabled]="!hasDonateUrl"
+      (click)="openDonate()"
+    >
+      {{ 'donatePrompt.openLink' | i18n:null:lang}}
+    </ion-button>
+
+    <p class="paywall-fine muted ion-text-wrap">
+      {{ 'donatePrompt.hint' | i18n:null:lang}}
+    </p>
+
+    <ion-button expand="block" fill="clear" (click)="goBack()">
+      {{ 'donatePrompt.later' | i18n:null:lang}}
+    </ion-button>
+  </ng-container>
+
+  <!-- Purchase mode (billingEnabled = true) -->
+  <ng-container *ngIf="billingEnabled">
+    <div *ngIf="!sub.readySig()" class="paywall-loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>{{ 'paywall.connecting' | i18n:null:lang}}</p>
+    </div>
+
+    <ng-container *ngIf="sub.readySig()">
+      <ion-text
+        *ngIf="isNative && !sub.storeConfiguredSig() && !sub.canSimulateBillingSig()"
+        color="warning"
+        class="paywall-warn ion-text-wrap"
+      >
+        <p>{{ sub.billingBannerText() }}</p>
+      </ion-text>
+
+      <ion-text
+        *ngIf="!sub.isSubscribed() && !sub.canSimulateBillingSig() && sub.canPurchaseInApp() && !sub.monthlyPriceSig() && !sub.offeringsLoadingSig()"
+        color="warning"
+        class="paywall-warn ion-text-wrap"
+      >
+        <p>{{ 'paywall.storeProductPending' | i18n:null:lang}}</p>
+      </ion-text>
+
+      <ion-text
+        *ngIf="!isNative && !sub.isSubscribed() && !sub.canSimulateBillingSig()"
+        color="medium"
+        class="paywall-warn ion-text-wrap"
+      >
+        <p>{{ 'paywall.webOnly' | i18n:null:lang}}</p>
+      </ion-text>
+
+      <ion-text
+        *ngIf="!isProduction && sub.canSimulateBillingSig() && !sub.isSubscribed()"
+        color="medium"
+        class="paywall-warn ion-text-wrap"
+      >
+        <p>{{ 'paywall.testModeHint' | i18n:null:lang}}</p>
+      </ion-text>
+
+      <p *ngIf="sub.canPurchaseInApp()" class="paywall-store-badge">
+        {{ 'paywall.storeBadge' | i18n:{ store: sub.storeLabel() }:lang}}
+      </p>
+
+      <section class="paywall-hero glass-surface">
+        <img
+          class="paywall-hero__mark"
+          src="assets/brand/flagfield-mark.svg"
+          width="72"
+          height="72"
+          alt=""
+        />
+        <h1>{{ 'paywall.heroTitle' | i18n:null:lang}}</h1>
+        <p class="paywall-hero__lead">{{ 'paywall.heroLead' | i18n:null:lang}}</p>
+        <p *ngIf="!sub.isSubscribed()" class="paywall-hero__free">
+          {{ 'paywall.freeGamesLine' | i18n:{ n: freeGamesLeft, limit: freeGamesLimit }:lang}}
+        </p>
+      </section>
+
+      <ion-card *ngIf="sub.isSubscribed()" class="paywall-active-card glass-surface">
+        <ion-card-content>
+          <ion-chip color="warning">
+            <app-icon icon="ui-premium" size="sm"></app-icon>
+            <ion-label>{{ 'paywall.premiumActive' | i18n:null:lang}}</ion-label>
+          </ion-chip>
+          <p>{{ 'paywall.premiumSub' | i18n:null:lang}}</p>
+          <ng-container [ngSwitch]="sub.premiumKindSig()">
+            <p *ngSwitchCase="'lifetime'">{{ 'settings.premiumTypeLifetime' | i18n:null:lang}}</p>
+            <p *ngSwitchCase="'subscription'">{{ 'settings.premiumTypeSubscription' | i18n:null:lang}}</p>
+            <p *ngSwitchCase="'trial'">{{ 'settings.premiumTypeTrial' | i18n:null:lang}}</p>
+            <p *ngSwitchCase="'intro'">{{ 'settings.premiumTypeIntro' | i18n:null:lang}}</p>
+          </ng-container>
+          <p *ngIf="sub.premiumExpiresIsoSig() as exp" class="muted">
+            {{ 'settings.premiumValidUntil' | i18n:{ date: formatPremiumExpiry(exp) }:lang}}
+          </p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card *ngIf="!sub.isSubscribed()" class="glass-surface">
+        <ion-card-header>
+          <ion-card-title>{{ 'paywall.featuresCardTitle' | i18n:null:lang}}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ul class="paywall-features">
+            <li>{{ 'paywall.f1' | i18n:null:lang}}</li>
+            <li>{{ 'paywall.f2' | i18n:null:lang}}</li>
+            <li>{{ 'paywall.f3' | i18n:null:lang}}</li>
+            <li>{{ 'paywall.f4' | i18n:null:lang}}</li>
+          </ul>
+        </ion-card-content>
+      </ion-card>
+
+      <ng-container *ngIf="!sub.isSubscribed()">
+        <ion-button
+          expand="block"
+          color="primary"
+          class="paywall-cta"
+          [disabled]="busy || !sub.canSubscribeMonthlySig()"
+          (click)="subscribeMonthly()"
+        >
+          <span *ngIf="sub.canSimulateBillingSig()">{{ 'paywall.subscribe' | i18n:null:lang}}</span>
+          <span *ngIf="!sub.canSimulateBillingSig() && sub.monthlyPriceSig() as price">{{ 'paywall.subscribe' | i18n:null:lang}} — {{ price }}</span>
+          <span *ngIf="!sub.canSimulateBillingSig() && !sub.monthlyPriceSig()">{{ 'paywall.subscribe' | i18n:null:lang}}</span>
+        </ion-button>
+
+        <p *ngIf="sub.canPurchaseInApp()" class="paywall-fine muted ion-text-wrap">
+          {{ sub.monthlyFinePrintKey() | i18n:{ store: sub.storeLabel() }:lang}}
+        </p>
+      </ng-container>
+
       <ion-button
         expand="block"
-        color="primary"
-        class="paywall-cta"
-        [disabled]="busy || !sub.canSubscribeMonthlySig()"
-        (click)="subscribeMonthly()"
+        fill="clear"
+        (click)="restore()"
+        [disabled]="busy || (!sub.canPurchaseInApp() && !sub.canSimulateBillingSig())"
       >
-        <span *ngIf="sub.canSimulateBillingSig()">{{ 'paywall.subscribe' | i18n:null:lang}}</span>
-        <span *ngIf="!sub.canSimulateBillingSig() && sub.monthlyPriceSig() as price">{{ 'paywall.subscribe' | i18n:null:lang}} — {{ price }}</span>
-        <span *ngIf="!sub.canSimulateBillingSig() && !sub.monthlyPriceSig()">{{ 'paywall.subscribe' | i18n:null:lang}}</span>
+        {{ 'paywall.restore' | i18n:null:lang}}
       </ion-button>
 
-      <p *ngIf="sub.canPurchaseInApp()" class="paywall-fine muted ion-text-wrap">
-        {{ sub.monthlyFinePrintKey() | i18n:{ store: sub.storeLabel() }:lang}}
-      </p>
+      <ion-button
+        *ngIf="sub.isSubscribed() && sub.premiumKindSig() === 'subscription' && sub.manageSubscriptionsUrl()"
+        expand="block"
+        fill="clear"
+        (click)="openManageSubscriptions()"
+      >
+        {{ 'paywall.manageSubs' | i18n:{ store: sub.storeLabel() }:lang}}
+      </ion-button>
+
+      <ion-button
+        *ngIf="billingDebugEnabled && !sub.canSimulateBillingSig()"
+        expand="block"
+        fill="clear"
+        color="medium"
+        (click)="toggleDebugPremium()"
+      >
+        {{ 'paywall.devToggle' | i18n:null:lang}}
+      </ion-button>
+
+      <div class="legal-row">
+        <ion-button fill="clear" size="small" (click)="openPrivacy()" [disabled]="!legalReady">
+          {{ 'paywall.privacy' | i18n:null:lang}}
+        </ion-button>
+        <ion-button fill="clear" size="small" (click)="openTerms()" [disabled]="!legalReady">
+          {{ 'paywall.terms' | i18n:null:lang}}
+        </ion-button>
+      </div>
+      <p *ngIf="!legalReady" class="muted ion-text-wrap">{{ 'paywall.legalWarn' | i18n:null:lang}}</p>
     </ng-container>
-
-    <ion-button
-      expand="block"
-      fill="clear"
-      (click)="restore()"
-      [disabled]="busy || (!sub.canPurchaseInApp() && !sub.canSimulateBillingSig())"
-    >
-      {{ 'paywall.restore' | i18n:null:lang}}
-    </ion-button>
-
-    <ion-button
-      *ngIf="sub.isSubscribed() && sub.premiumKindSig() === 'subscription' && sub.manageSubscriptionsUrl()"
-      expand="block"
-      fill="clear"
-      (click)="openManageSubscriptions()"
-    >
-      {{ 'paywall.manageSubs' | i18n:{ store: sub.storeLabel() }:lang}}
-    </ion-button>
-
-    <ion-button
-      *ngIf="billingDebugEnabled && !sub.canSimulateBillingSig()"
-      expand="block"
-      fill="clear"
-      color="medium"
-      (click)="toggleDebugPremium()"
-    >
-      {{ 'paywall.devToggle' | i18n:null:lang}}
-    </ion-button>
-
-    <div class="legal-row">
-      <ion-button fill="clear" size="small" (click)="openPrivacy()" [disabled]="!legalReady">
-        {{ 'paywall.privacy' | i18n:null:lang}}
-      </ion-button>
-      <ion-button fill="clear" size="small" (click)="openTerms()" [disabled]="!legalReady">
-        {{ 'paywall.terms' | i18n:null:lang}}
-      </ion-button>
-    </div>
-    <p *ngIf="!legalReady" class="muted ion-text-wrap">{{ 'paywall.legalWarn' | i18n:null:lang}}</p>
   </ng-container>
 </ion-content>

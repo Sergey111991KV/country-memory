@@ -1,34 +1,33 @@
 import { TestBed } from '@angular/core/testing';
 
 import { I18nModule } from '../i18n/i18n.module';
-import { SessionAccessService } from './session-access.service';
 import { StorageService } from './storage.service';
 import { SubscriptionService } from './subscription.service';
+import { environment } from '../../../environments/environment';
 
 describe('SubscriptionService', () => {
   let service: SubscriptionService;
-  let sessionAccess: SessionAccessService;
   let storage: StorageService;
+  let previousBillingEnabled: boolean;
 
   beforeEach(async () => {
+    previousBillingEnabled = environment.billingEnabled;
+    (environment as { billingEnabled: boolean }).billingEnabled = true;
     TestBed.configureTestingModule({
       imports: [I18nModule],
     });
     service = TestBed.inject(SubscriptionService);
-    sessionAccess = TestBed.inject(SessionAccessService);
     storage = TestBed.inject(StorageService);
     localStorage.removeItem('flagfield_dev_premium');
     await storage.remove('flagfield_billing_debug_premium');
   });
 
-  it('should create', () => {
-    expect(service).toBeTruthy();
+  afterEach(() => {
+    (environment as { billingEnabled: boolean }).billingEnabled = previousBillingEnabled;
   });
 
-  it('should allow free games before limit', async () => {
-    await sessionAccess.hydrate();
-    expect(sessionAccess.canStartGame(false)).toBeTrue();
-    expect(sessionAccess.remainingFreeGames(false)).toBe(sessionAccess.freeGamesLimit);
+  it('should create', () => {
+    expect(service).toBeTruthy();
   });
 
   it('should use debug premium when enabled', async () => {

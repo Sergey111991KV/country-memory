@@ -20,6 +20,10 @@ describe('SessionAccessService', () => {
               storage[key] = value;
               return Promise.resolve();
             },
+            remove: (key: string) => {
+              delete storage[key];
+              return Promise.resolve();
+            },
           },
         },
       ],
@@ -27,25 +31,19 @@ describe('SessionAccessService', () => {
     service = TestBed.inject(SessionAccessService);
   });
 
-  it('allows games under the free limit', async () => {
-    await service.hydrate();
-    expect(service.canStartGame(false)).toBeTrue();
-  });
-
-  it('blocks new games after the free limit', async () => {
-    await service.hydrate();
-    for (let i = 0; i < service.freeGamesLimit; i++) {
-      await service.recordCompletedGame();
-    }
-    expect(service.canStartGame(false)).toBeFalse();
-    expect(service.isAtFreeLimit(false)).toBeTrue();
-  });
-
-  it('always allows games for premium', async () => {
+  it('always allows games when billing is disabled', async () => {
     await service.hydrate();
     for (let i = 0; i < service.freeGamesLimit + 5; i++) {
       await service.recordCompletedGame();
     }
-    expect(service.canStartGame(true)).toBeTrue();
+    expect(service.canStartGame(false)).toBeTrue();
+    expect(service.isAtFreeLimit(false)).toBeFalse();
+  });
+
+  it('tracks completed games', async () => {
+    await service.hydrate();
+    await service.recordCompletedGame();
+    await service.recordCompletedGame();
+    expect(service.completedGamesSig()).toBe(2);
   });
 });

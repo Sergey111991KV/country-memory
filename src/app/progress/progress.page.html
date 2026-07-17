@@ -2,8 +2,18 @@
 <ion-content #progressContent class="progress-page page-safe-top" [fullscreen]="true">
   <div class="progress-shell">
     <header class="progress-header">
-      <h1>{{ 'progress.title' | i18n:null:lang}}</h1>
-      <p>{{ 'progress.subtitle' | i18n:null:lang}}</p>
+      <div class="progress-header__text">
+        <h1>{{ 'progress.title' | i18n:null:lang}}</h1>
+        <p>{{ 'progress.subtitle' | i18n:null:lang}}</p>
+      </div>
+      <ion-button
+        fill="clear"
+        class="progress-header__settings"
+        routerLink="/tabs/settings"
+        [attr.aria-label]="'tabs.settings' | i18n:null:lang"
+      >
+        <ion-icon slot="icon-only" name="settings-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
     </header>
 
     <section class="progress-block progress-daily glass-surface" aria-labelledby="progress-daily-heading">
@@ -26,22 +36,24 @@
       >
         <span class="progress-daily__bar-fill" [style.width.%]="dailyProgressPercent"></span>
       </div>
-      <p *ngIf="!sub.isSubscribedSig()" class="progress-daily__meta">
-        {{ 'paywall.freeGamesLine' | i18n:{ n: freeGamesLeft, limit: freeGamesLimit }:lang}}
-      </p>
-      <p *ngIf="sub.isSubscribedSig()" class="progress-daily__meta progress-daily__meta--premium">
-        {{ 'home.premiumActive' | i18n:null:lang}}
-      </p>
-      <ion-button
-        *ngIf="!sub.isSubscribedSig()"
-        expand="block"
-        fill="clear"
-        color="warning"
-        class="progress-premium-cta"
-        (click)="openPaywall()"
-      >
-        {{ 'home.getPremiumCta' | i18n:null:lang}}
-      </ion-button>
+      <ng-container *ngIf="billingEnabled">
+        <p *ngIf="!sub.isSubscribedSig()" class="progress-daily__meta">
+          {{ 'paywall.freeGamesLine' | i18n:{ n: freeGamesLeft, limit: freeGamesLimit }:lang}}
+        </p>
+        <p *ngIf="sub.isSubscribedSig()" class="progress-daily__meta progress-daily__meta--premium">
+          {{ 'home.premiumActive' | i18n:null:lang}}
+        </p>
+        <ion-button
+          *ngIf="!sub.isSubscribedSig()"
+          expand="block"
+          fill="clear"
+          color="warning"
+          class="progress-premium-cta"
+          (click)="openPaywall()"
+        >
+          {{ 'home.getPremiumCta' | i18n:null:lang}}
+        </ion-button>
+      </ng-container>
     </section>
 
     <section class="progress-block glass-surface" aria-labelledby="progress-activity-heading">

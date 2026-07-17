@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-label="Flagfield icon background">
+  <!-- Legacy/Capacitor flat background only. Icon Composer uses document fill. -->
+  <defs>
+    <linearGradient id="ff-bg" x1="180" y1="80" x2="860" y2="960" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="0.55" stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#ff-bg)"/>
+</svg>

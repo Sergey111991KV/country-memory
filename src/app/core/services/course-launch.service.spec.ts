@@ -36,10 +36,19 @@ describe('CourseLaunchService', () => {
     expect(service.launches.length).toBe(7);
   });
 
-  it('resolves continent-africa pool from catalog', async () => {
-    const pool = await service.resolvePool('continent-africa');
-    expect(pool.length).toBe(1);
-    expect(pool[0]?.iso2).toBe('NG');
+  it('resolves every continent launch pool from catalog', async () => {
+    const africa = await service.resolvePool('continent-africa');
+    expect(africa.map((c) => c.iso2)).toEqual(['NG']);
+
+    const asia = await service.resolvePool('continent-asia');
+    expect(asia.map((c) => c.iso2)).toEqual(['CN']);
+
+    const europe = await service.resolvePool('continent-europe');
+    expect(europe.map((c) => c.iso2).sort()).toEqual(['DE', 'ES', 'FR']);
+
+    // Fixture has no oceania/americas countries — empty pools are valid.
+    expect(await service.resolvePool('continent-oceania')).toEqual([]);
+    expect(await service.resolvePool('continent-americas')).toEqual([]);
   });
 
   it('resolves capitals-free from free pool', async () => {

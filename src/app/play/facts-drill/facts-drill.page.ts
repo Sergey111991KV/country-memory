@@ -163,7 +163,11 @@ export class FactsDrillPage implements ViewDidEnter {
     }
     const mixFlags =
       this.playSession.mixFlags || this.playSession.sessionKind === 'facts_mixed';
-    this.roundKind = pickFactsDrillRoundKind(mixFlags);
+    const pinnedKind = this.playSession.factsDrillKind;
+    this.roundKind =
+      this.round === 1 && pinnedKind
+        ? pinnedKind
+        : pickFactsDrillRoundKind(mixFlags);
     const idx = Math.floor(Math.random() * this.pool.length);
     this.target = this.pool[idx] ?? null;
     if (!this.target) {

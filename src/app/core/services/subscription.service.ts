@@ -22,6 +22,7 @@ import {
   type BillingStorePlatform,
 } from '../utils/billing-platform';
 import { withTimeout } from '../utils/promise-timeout';
+import { isBillingEnabled } from '../utils/billing-mode';
 import { LocaleService } from './locale.service';
 import { AppLogService } from './app-log.service';
 import { StorageService } from './storage.service';
@@ -86,6 +87,14 @@ export class SubscriptionService {
 
   private async runInit(): Promise<void> {
     this.billingPlatformSig.set(detectBillingStorePlatform());
+
+    if (!isBillingEnabled()) {
+      this.readySig.set(true);
+      this.storeConfiguredSig.set(false);
+      void this.logBilling('init_skipped', { reason: 'billing_disabled' });
+      return;
+    }
+
     await this.syncDebugPremiumFromStorage();
     void this.logBilling('init_start', {
       platform: this.billingPlatformSig(),
@@ -125,14 +134,23 @@ export class SubscriptionService {
   }
 
   isSubscribed(): boolean {
+    if (!isBillingEnabled()) {
+      return false;
+    }
     return this.isSubscribedSig();
   }
 
   hasPremiumAccess(): boolean {
+    if (!isBillingEnabled()) {
+      return true;
+    }
     return this.isSubscribed();
   }
 
   canPurchaseInApp(): boolean {
+    if (!isBillingEnabled()) {
+      return false;
+    }
     return this.canPurchaseInAppSig();
   }
 
@@ -152,6 +170,9 @@ export class SubscriptionService {
   }
 
   canUseBillingDebug(): boolean {
+    if (!isBillingEnabled()) {
+      return false;
+    }
     return (
       environment.billingDebugEnabled ||
       environment.devMockBilling ||
@@ -164,6 +185,9 @@ export class SubscriptionService {
    * When true, `purchaseMonthly()` always simulates (even on native with StoreKit).
    */
   canSimulateBilling(): boolean {
+    if (!isBillingEnabled()) {
+      return false;
+    }
     if (environment.production) {
       return false;
     }

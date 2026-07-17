@@ -1,42 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-label="Flagfield">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" fill="none" role="img" aria-label="Flagfield">
+  <!-- Capacitor/legacy master: full square, NO baked corner radius (iOS masks). -->
   <defs>
-    <linearGradient id="ff-bg" x1="80" y1="40" x2="432" y2="472" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#2563eb"/>
-      <stop offset="0.55" stop-color="#1d4ed8"/>
-      <stop offset="1" stop-color="#0f172a"/>
+    <linearGradient id="ff-bg" x1="180" y1="80" x2="860" y2="960" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="0.55" stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#0F172A"/>
     </linearGradient>
-    <clipPath id="ff-globe-clip">
-      <circle cx="256" cy="256" r="172"/>
+    <clipPath id="flag-shape">
+      <rect x="332" y="372" width="360" height="280" rx="44"/>
     </clipPath>
   </defs>
-  <rect width="512" height="512" rx="108" fill="url(#ff-bg)"/>
 
-  <g clip-path="url(#ff-globe-clip)">
-    <!-- row 1 · 2 flags -->
-    <g transform="translate(194 104)"><rect width="50" height="38" rx="6" fill="#16a34a"/><rect y="12.7" width="50" height="12.6" fill="#facc15"/><rect y="25.3" width="50" height="12.7" fill="#ef4444"/></g>
-    <g transform="translate(268 104)"><rect width="50" height="38" rx="6" fill="#2563eb"/><rect y="12.7" width="50" height="12.6" fill="#ffffff"/><rect y="25.3" width="50" height="12.7" fill="#ef4444"/></g>
+  <rect width="1024" height="1024" fill="url(#ff-bg)"/>
 
-    <!-- row 2 · 4 flags -->
-    <g transform="translate(114 158)"><rect width="50" height="38" rx="6" fill="#dc2626"/><rect y="12.7" width="50" height="12.6" fill="#ffffff"/><rect y="25.3" width="50" height="12.7" fill="#2563eb"/></g>
-    <g transform="translate(178 158)"><rect width="50" height="38" rx="6" fill="#0ea5e9"/><rect y="12.7" width="50" height="12.6" fill="#facc15"/><rect y="25.3" width="50" height="12.7" fill="#16a34a"/></g>
-    <g transform="translate(242 158)"><rect width="50" height="38" rx="6" fill="#7c3aed"/><rect y="12.7" width="50" height="12.6" fill="#ffffff"/><rect y="25.3" width="50" height="12.7" fill="#22c55e"/></g>
-    <g transform="translate(306 158)"><rect width="50" height="38" rx="6" fill="#f97316"/><rect y="12.7" width="50" height="12.6" fill="#ffffff"/><rect y="25.3" width="50" height="12.7" fill="#16a34a"/></g>
+  <circle cx="512" cy="512" r="300" stroke="#FFFFFF" stroke-width="30" stroke-opacity="0.92"/>
+  <ellipse cx="512" cy="512" rx="120" ry="300" stroke="#FFFFFF" stroke-width="16" stroke-opacity="0.55"/>
+  <path d="M212 512H812" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" stroke-opacity="0.55"/>
 
-    <!-- row 3 · 3 hero flags (equator) -->
-    <g transform="translate(148 218)"><rect width="62" height="48" rx="7" fill="#16a34a"/><rect y="16" width="62" height="16" fill="#facc15"/><rect y="32" width="62" height="16" fill="#ef4444"/></g>
-    <g transform="translate(225 214)"><rect width="62" height="48" rx="7" fill="#2563eb"/><rect y="16" width="62" height="16" fill="#ffffff"/><rect y="32" width="62" height="16" fill="#ef4444"/></g>
-    <g transform="translate(302 218)"><rect width="62" height="48" rx="7" fill="#dc2626"/><rect y="16" width="62" height="16" fill="#facc15"/><rect y="32" width="62" height="16" fill="#16a34a"/></g>
-
-    <!-- row 4 · 4 flags -->
-    <g transform="translate(114 284)"><rect width="50" height="38" rx="6" fill="#2563eb"/><rect y="12.7" width="50" height="12.6" fill="#facc15"/><rect y="25.3" width="50" height="12.7" fill="#16a34a"/></g>
-    <g transform="translate(178 284)"><rect width="50" height="38" rx="6" fill="#ef4444"/><rect y="12.7" width="50" height="12.6" fill="#ffffff"/><rect y="25.3" width="50" height="12.7" fill="#2563eb"/></g>
-    <g transform="translate(242 284)"><rect width="50" height="38" rx="6" fill="#0284c7"/><rect y="12.7" width="50" height="12.6" fill="#ffffff"/><rect y="25.3" width="50" height="12.7" fill="#0284c7"/></g>
-    <g transform="translate(306 284)"><rect width="50" height="38" rx="6" fill="#f59e0b"/><rect y="12.7" width="50" height="12.6" fill="#ffffff"/><rect y="25.3" width="50" height="12.7" fill="#22c55e"/></g>
-
-    <!-- row 5 · 2 flags -->
-    <g transform="translate(194 338)"><rect width="50" height="38" rx="6" fill="#0284c7"/><rect y="12.7" width="50" height="12.6" fill="#ffffff"/><rect y="25.3" width="50" height="12.7" fill="#0284c7"/></g>
-    <g transform="translate(268 338)"><rect width="50" height="38" rx="6" fill="#1e3a8a"/><rect y="12.7" width="50" height="12.6" fill="#facc15"/><rect y="25.3" width="50" height="12.7" fill="#ef4444"/></g>
+  <g transform="rotate(-12 512 512)">
+    <g clip-path="url(#flag-shape)">
+      <rect x="332" y="372" width="360" height="94" fill="#2563EB"/>
+      <rect x="332" y="466" width="360" height="94" fill="#FFFFFF"/>
+      <rect x="332" y="560" width="360" height="92" fill="#EF4444"/>
+    </g>
   </g>
-
-  <circle cx="256" cy="256" r="172" stroke="#ffffff" stroke-width="8" stroke-opacity="0.28"/>
 </svg>

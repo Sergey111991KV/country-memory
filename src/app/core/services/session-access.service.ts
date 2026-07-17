@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import { environment } from '../../../environments/environment';
+import { isBillingEnabled } from '../utils/billing-mode';
 import { StorageService } from './storage.service';
 
 const GAMES_KEY = 'flagfield_completed_games_v1';
@@ -25,8 +26,14 @@ export class SessionAccessService {
     this.hydrated = true;
   }
 
-  /** Premium: unlimited. Free: up to `freeGamesLimit` completed sessions. */
+  /**
+   * When billing is off, always allow. When billing is on:
+   * Premium unlimited; free up to `freeGamesLimit` completed sessions.
+   */
   canStartGame(isPremium: boolean): boolean {
+    if (!isBillingEnabled()) {
+      return true;
+    }
     if (isPremium) {
       return true;
     }
@@ -34,11 +41,14 @@ export class SessionAccessService {
   }
 
   isAtFreeLimit(isPremium: boolean): boolean {
+    if (!isBillingEnabled()) {
+      return false;
+    }
     return !isPremium && this.completedGamesSig() >= this.freeGamesLimit;
   }
 
   remainingFreeGames(isPremium: boolean): number {
-    if (isPremium) {
+    if (!isBillingEnabled() || isPremium) {
       return Number.POSITIVE_INFINITY;
     }
     return Math.max(0, this.freeGamesLimit - this.completedGamesSig());

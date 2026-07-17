@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, ChangeDetectorRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ViewDidEnter } from '@ionic/angular';
 
@@ -8,8 +8,8 @@ import {
   rankMedalIcon,
   sessionResultHeroIcon,
 } from '../../core/icons/app-icon-ui';
+import { DonatePromptService } from '../../core/services/donate-prompt.service';
 import { LocaleService } from '../../core/services/locale.service';
-import { PlaySessionCompleteService } from '../../core/services/play-session-complete.service';
 import { PlaySessionResultService } from '../../core/services/play-session-result.service';
 import { PlaySessionService } from '../../core/services/play-session.service';
 import { createPassPlaySession } from '../../core/services/pass-play-session';
@@ -27,18 +27,29 @@ export class SessionResultPage implements ViewDidEnter {
   private readonly router = inject(Router);
   private readonly results = inject(PlaySessionResultService);
   private readonly playSession = inject(PlaySessionService);
-  private readonly sessionComplete = inject(PlaySessionCompleteService);
+  private readonly donatePrompt = inject(DonatePromptService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   result: PlaySessionResultPayload | null = null;
-  atLimit = false;
+  showDonatePrompt = false;
 
   ionViewDidEnter(): void {
-    this.atLimit = this.sessionComplete.isAtFreeLimit();
     this.result = this.results.consume();
     if (!this.result) {
       playDebug('SessionResult', 'no payload — redirect play hub');
       void this.router.navigate(['/tabs/play'], { replaceUrl: true });
+      return;
     }
+    void this.checkDonatePrompt();
+  }
+
+  private async checkDonatePrompt(): Promise<void> {
+    const show = await this.donatePrompt.claimPrompt();
+    if (this.showDonatePrompt === show) {
+      return;
+    }
+    this.showDonatePrompt = show;
+    this.cdr.detectChanges();
   }
 
   get isPassPlay(): boolean {
@@ -69,8 +80,7 @@ export class SessionResultPage implements ViewDidEnter {
   get canPlayAgain(): boolean {
     return (
       !!this.result?.passPlayMode &&
-      !!this.result.passPlayPlayers?.length &&
-      !this.atLimit
+      !!this.result.passPlayPlayers?.length
     );
   }
 
@@ -154,8 +164,11 @@ export class SessionResultPage implements ViewDidEnter {
     this.goBack();
   }
 
-  openPaywall(): void {
-    this.playSession.clear();
-    void this.router.navigate(['/paywall']);
+  async openDonate(): Promise<void> {
+    await this.donatePrompt.openDonateLink();
+  }
+
+  openDonatePage(): void {
+    void this.router.navigate(['/donate']);
   }
 }
