@@ -9,13 +9,7 @@
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
 
-html.ion-palette-dark body {
-  background: var(--premium-bg, #070b14);
-}
-
-html:not(.ion-palette-dark) body {
-  background: var(--ion-background-color, #e8f3fb);
-}
+/* Body atmosphere tokens live in theme/design-system.scss (Liquid Glass field). */
 
 .page-safe-top {
   --padding-top: max(env(safe-area-inset-top, 0px), 12px);
@@ -59,7 +53,13 @@ app-root {
 /* @import "@ionic/angular/css/palettes/dark.system.css"; */
 
 ion-content {
-  --background: var(--app-mesh-bg);
+  --background: transparent;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  ion-content {
+    --background: var(--app-mesh-bg);
+  }
 }
 
 ion-title,

@@ -1,21 +1,26 @@
 /**
  * Flagfield design system — Apple Liquid Glass (CSS approximation).
- * Single source: tokens, surfaces, hub layout, Ionic primitives, a11y fallbacks.
+ * Single source: tokens, atmosphere, surfaces, hub layout, Ionic primitives, a11y.
+ *
+ * Background model (iOS 26-like depth):
+ * 1. Fixed luminous atmosphere on body (orbs + specular veil)
+ * 2. Hub ion-content is transparent so glass blur samples that field
+ * 3. Game shells keep solid --ion-background-color for canvas perf
  */
 
 /* -------------------------------------------------------------------------- */
-/* Glass + mesh tokens                                                        */
+/* Glass + atmosphere tokens                                                  */
 /* -------------------------------------------------------------------------- */
 
 :root {
-  /* Light Liquid Glass — translucent sky tint, not opaque white cards */
-  --glass-bg: color-mix(in srgb, #ffffff 52%, rgba(186, 230, 253, 0.38));
-  --glass-bg-elevated: color-mix(in srgb, #ffffff 68%, rgba(224, 242, 254, 0.45));
-  --glass-bg-tint: color-mix(in srgb, #7dd3fc 18%, rgba(255, 255, 255, 0.28));
-  --glass-border: color-mix(in srgb, #ffffff 72%, rgba(14, 165, 233, 0.22));
-  --glass-highlight: rgba(255, 255, 255, 0.92);
-  --glass-blur: 44px;
-  --glass-saturate: 1.55;
+  /* Light Liquid Glass — more translucent so atmosphere reads through panels */
+  --glass-bg: color-mix(in srgb, #ffffff 42%, rgba(186, 230, 253, 0.28));
+  --glass-bg-elevated: color-mix(in srgb, #ffffff 58%, rgba(224, 242, 254, 0.36));
+  --glass-bg-tint: color-mix(in srgb, #7dd3fc 22%, rgba(255, 255, 255, 0.22));
+  --glass-border: color-mix(in srgb, #ffffff 78%, rgba(14, 165, 233, 0.18));
+  --glass-highlight: rgba(255, 255, 255, 0.94);
+  --glass-blur: 48px;
+  --glass-saturate: 1.7;
   --glass-radius: 24px;
   --glass-radius-sm: 16px;
   --glass-radius-pill: 999px;
@@ -30,28 +35,49 @@
     0 18px 48px rgba(14, 116, 144, 0.14),
     0 4px 14px rgba(15, 23, 42, 0.06);
 
-  --app-mesh-bg:
+  /* Atmosphere base + luminous liquid orbs (sampled by backdrop-filter) */
+  --app-atmosphere-base: #dceefb;
+  --app-atmosphere-orbs:
     radial-gradient(
-      ellipse 110% 80% at 8% -12%,
-      color-mix(in srgb, #38bdf8 34%, transparent),
+      ellipse 90% 70% at 12% 8%,
+      color-mix(in srgb, #7dd3fc 72%, transparent),
       transparent 58%
     ),
     radial-gradient(
-      ellipse 95% 70% at 96% 4%,
-      color-mix(in srgb, #67e8f9 26%, transparent),
-      transparent 52%
+      ellipse 80% 65% at 92% 12%,
+      color-mix(in srgb, #a5f3fc 58%, transparent),
+      transparent 55%
     ),
     radial-gradient(
-      ellipse 80% 55% at 48% 108%,
-      color-mix(in srgb, #2dd4bf 18%, transparent),
-      transparent 56%
+      ellipse 70% 55% at 78% 78%,
+      color-mix(in srgb, #67e8f9 42%, transparent),
+      transparent 60%
     ),
     radial-gradient(
-      ellipse 55% 40% at 72% 42%,
-      color-mix(in srgb, #0ea5e9 10%, transparent),
-      transparent 65%
+      ellipse 85% 60% at 18% 88%,
+      color-mix(in srgb, #2dd4bf 38%, transparent),
+      transparent 58%
     ),
-    #e8f3fb;
+    radial-gradient(
+      ellipse 55% 45% at 48% 42%,
+      color-mix(in srgb, #38bdf8 28%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 40% 30% at 62% 28%,
+      color-mix(in srgb, #ffffff 55%, transparent),
+      transparent 70%
+    );
+  --app-atmosphere-veil:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, #ffffff 38%, transparent) 0%,
+      transparent 38%,
+      color-mix(in srgb, #bae6fd 18%, transparent) 72%,
+      color-mix(in srgb, #ffffff 22%, transparent) 100%
+    );
+  /* Static composite — fallbacks, reduced-transparency, paint-on-content */
+  --app-mesh-bg: var(--app-atmosphere-orbs), var(--app-atmosphere-base);
 
   --app-surface-solid: color-mix(in srgb, #ffffff 88%, #bae6fd 12%);
   --app-surface-muted: color-mix(in srgb, #f1f5f9 86%, #e0f2fe 14%);
@@ -66,12 +92,12 @@
 }
 
 html.ion-palette-dark {
-  --glass-bg: rgba(22, 32, 48, 0.42);
-  --glass-bg-elevated: rgba(30, 44, 64, 0.55);
-  --glass-bg-tint: rgba(56, 189, 248, 0.12);
-  --glass-border: rgba(186, 230, 253, 0.22);
-  --glass-highlight: rgba(255, 255, 255, 0.18);
-  --glass-saturate: 1.6;
+  --glass-bg: rgba(18, 28, 44, 0.38);
+  --glass-bg-elevated: rgba(28, 42, 62, 0.5);
+  --glass-bg-tint: rgba(56, 189, 248, 0.14);
+  --glass-border: rgba(186, 230, 253, 0.2);
+  --glass-highlight: rgba(255, 255, 255, 0.2);
+  --glass-saturate: 1.75;
   --glass-shadow:
     0 1px 0 var(--glass-highlight) inset,
     0 12px 40px rgba(0, 0, 0, 0.4),
@@ -81,28 +107,47 @@ html.ion-palette-dark {
     0 20px 56px rgba(0, 0, 0, 0.5),
     0 4px 16px rgba(0, 0, 0, 0.28);
 
-  --app-mesh-bg:
+  --app-atmosphere-base: #060a12;
+  --app-atmosphere-orbs:
     radial-gradient(
-      ellipse 110% 80% at 10% -15%,
-      color-mix(in srgb, #38bdf8 42%, transparent),
+      ellipse 95% 75% at 10% 6%,
+      color-mix(in srgb, #0ea5e9 48%, transparent),
       transparent 58%
     ),
     radial-gradient(
-      ellipse 95% 70% at 95% 5%,
-      color-mix(in srgb, #67e8f9 28%, transparent),
-      transparent 52%
+      ellipse 85% 70% at 94% 10%,
+      color-mix(in srgb, #22d3ee 36%, transparent),
+      transparent 55%
     ),
     radial-gradient(
-      ellipse 80% 55% at 55% 105%,
-      color-mix(in srgb, #2dd4bf 22%, transparent),
+      ellipse 75% 55% at 72% 82%,
+      color-mix(in srgb, #2dd4bf 28%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 80% 55% at 22% 90%,
+      color-mix(in srgb, #38bdf8 32%, transparent),
       transparent 58%
     ),
     radial-gradient(
-      ellipse 60% 40% at 70% 45%,
-      color-mix(in srgb, #0ea5e9 12%, transparent),
+      ellipse 50% 40% at 50% 40%,
+      color-mix(in srgb, #0284c7 22%, transparent),
       transparent 65%
     ),
-    var(--ion-background-color);
+    radial-gradient(
+      ellipse 35% 28% at 58% 24%,
+      color-mix(in srgb, #e0f2fe 12%, transparent),
+      transparent 70%
+    );
+  --app-atmosphere-veil:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, #38bdf8 12%, transparent) 0%,
+      transparent 40%,
+      color-mix(in srgb, #0ea5e9 10%, transparent) 75%,
+      color-mix(in srgb, #020617 35%, transparent) 100%
+    );
+  --app-mesh-bg: var(--app-atmosphere-orbs), var(--app-atmosphere-base);
 
   --app-surface-solid: color-mix(
     in srgb,
@@ -120,6 +165,118 @@ html.ion-palette-dark {
   --app-tab-color: #64748b;
   --app-tab-color-selected: #e0f2fe;
   --app-overlay-scrim: color-mix(in srgb, var(--ion-background-color) 68%, transparent);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Living Liquid Glass atmosphere (fixed field behind the app)                */
+/* -------------------------------------------------------------------------- */
+
+@keyframes app-liquid-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(2.5%, -1.8%, 0) scale(1.04);
+  }
+  66% {
+    transform: translate3d(-2%, 2.2%, 0) scale(0.98);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes app-liquid-drift-alt {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1.02);
+  }
+  40% {
+    transform: translate3d(-3%, 1.5%, 0) scale(1.06);
+  }
+  70% {
+    transform: translate3d(2.2%, -2.4%, 0) scale(0.97);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.02);
+  }
+}
+
+body {
+  background-color: var(--app-atmosphere-base);
+  background-image: none;
+  isolation: isolate;
+}
+
+/* Deep luminous orbs — slow liquid motion */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -18% -12%;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--app-atmosphere-orbs);
+  background-repeat: no-repeat;
+  filter: saturate(1.15) blur(0.5px);
+  animation: app-liquid-drift 28s var(--app-ease-out, ease) infinite;
+  will-change: transform;
+}
+
+/* Specular sheet + soft caustic wash over the orbs */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -8%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    var(--app-atmosphere-veil),
+    radial-gradient(
+      ellipse 120% 40% at 50% -10%,
+      color-mix(in srgb, var(--glass-highlight) 55%, transparent),
+      transparent 55%
+    );
+  mix-blend-mode: soft-light;
+  opacity: 0.85;
+  animation: app-liquid-drift-alt 36s var(--app-ease-out, ease) infinite;
+  will-change: transform;
+}
+
+html.ion-palette-dark body::after {
+  mix-blend-mode: screen;
+  opacity: 0.45;
+}
+
+/* App chrome sits above the atmosphere; stay transparent so orbs show */
+app-root,
+ion-app,
+.ion-page,
+ion-tabs,
+ion-router-outlet {
+  background: transparent !important;
+}
+
+app-root {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  body {
+    background: var(--app-mesh-bg);
+  }
+
+  body::before,
+  body::after {
+    display: none;
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -280,7 +437,7 @@ html.ion-palette-dark ion-card.glass-surface {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Hub pages — mesh background + UI typography                                */
+/* Hub pages — transparent so fixed atmosphere shows through glass            */
 /* -------------------------------------------------------------------------- */
 
 .app-hub-page,
@@ -288,6 +445,7 @@ html.ion-palette-dark ion-card.glass-surface {
 .knowledge-page,
 .progress-page,
 .settings-page,
+.settings-page--rhythm,
 .paywall-content,
 .login-page,
 .home-about-content,
@@ -295,9 +453,27 @@ html.ion-palette-dark ion-card.glass-surface {
 .play-hub,
 .session-result-content,
 .learning-path-page {
-  --background: var(--app-mesh-bg);
+  --background: transparent;
   font-family: var(--app-font-ui);
   color: var(--ion-text-color);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .app-hub-page,
+  .home-content,
+  .knowledge-page,
+  .progress-page,
+  .settings-page,
+  .settings-page--rhythm,
+  .paywall-content,
+  .login-page,
+  .home-about-content,
+  .product-info-content,
+  .play-hub,
+  .session-result-content,
+  .learning-path-page {
+    --background: var(--app-mesh-bg);
+  }
 }
 
 .app-hub-page h1,
@@ -395,6 +571,11 @@ html.ion-palette-dark ion-card.glass-surface {
   --background: var(--ion-background-color);
   font-family: var(--app-font-ui);
   color: var(--ion-text-color);
+}
+
+/* Ensure game pages paint opaque even when global ion-content is transparent */
+ion-content.app-game-shell {
+  --background: var(--ion-background-color);
 }
 
 /* -------------------------------------------------------------------------- */

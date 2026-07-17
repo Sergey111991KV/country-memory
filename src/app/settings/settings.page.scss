@@ -18,7 +18,7 @@
 }
 
 .settings-page--rhythm {
-  --background: var(--app-mesh-bg);
+  --background: transparent;
   --color: var(--ion-text-color);
   --padding-bottom: calc(var(--app-tab-bar-height, 74px) + var(--app-space-4));
 }

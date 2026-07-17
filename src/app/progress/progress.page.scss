@@ -4,7 +4,7 @@
 }
 
 .progress-page {
-  --background: var(--app-mesh-bg);
+  --background: transparent;
   --color: var(--ion-text-color);
   font-family: var(--app-font-ui);
   --padding-bottom: calc(var(--app-tab-bar-height, 74px) + var(--app-space-2));
