@@ -6,8 +6,10 @@
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'play.globeFindTitle' | i18n:null:lang}}</ion-title>
-    <ion-note slot="end" class="globe-round-note">
+    <ion-title>
+      {{ (previewMode ? 'globe.previewTitle' : 'play.globeFindTitle') | i18n:null:lang}}
+    </ion-title>
+    <ion-note *ngIf="!previewMode" slot="end" class="globe-round-note">
       {{ 'globe.round' | i18n:{ current: round, total: roundsTotal }:lang}}
     </ion-note>
   </ion-toolbar>
@@ -23,13 +25,21 @@
     <ion-text color="danger">{{ 'globe.loadError' | i18n:null:lang}}</ion-text>
   </div>
 
-  <ng-container *ngIf="!loading && !loadError && target">
+  <ng-container *ngIf="!loading && !loadError && target && !previewMode">
     <section class="globe-prompt mem-surface">
       <p class="globe-prompt__kicker">{{ 'globe.findTitle' | i18n:null:lang}}</p>
       <h1 class="globe-prompt__country">{{ targetLabel }}</h1>
       <p *ngIf="phase === 'pick' && selectedIso" class="globe-prompt__hint">
         {{ 'globe.hintSelected' | i18n:null:lang}}
       </p>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="!loading && !loadError && target && previewMode">
+    <section class="globe-prompt mem-surface">
+      <p class="globe-prompt__kicker">{{ 'globe.previewKicker' | i18n:null:lang}}</p>
+      <h1 class="globe-prompt__country">{{ targetLabel }}</h1>
+      <p class="globe-prompt__hint">{{ explainLine(target) }}</p>
     </section>
   </ng-container>
 
@@ -41,7 +51,7 @@
     aria-label="Interactive world globe"
   ></div>
 
-  <ng-container *ngIf="!loading && !loadError && target">
+  <ng-container *ngIf="!loading && !loadError && target && !previewMode">
     <section *ngIf="showFeedback" class="globe-feedback mem-surface">
       <h2 [class.globe-feedback--ok]="feedbackCorrect" [class.globe-feedback--bad]="!feedbackCorrect">
         {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}
@@ -72,4 +82,10 @@
       </ion-button>
     </div>
   </ng-container>
+
+  <div *ngIf="!loading && !loadError && previewMode && target" class="globe-actions">
+    <ion-button expand="block" color="primary" (click)="goBack()">
+      {{ 'common.back' | i18n:null:lang}}
+    </ion-button>
+  </div>
 </ion-content>

@@ -6,61 +6,49 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs';
-import { AlertController, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { AlertController, ViewWillEnter } from '@ionic/angular';
 
+import type { Country } from '../core/data/country.types';
+import type { HomeFeedCard } from '../core/services/home-feed.service';
+import { HomeFeedService } from '../core/services/home-feed.service';
+import { CountriesCatalogService } from '../core/services/countries-catalog.service';
 import { CourseLaunchService } from '../core/services/course-launch.service';
-import {
-  buildPlayCategories,
-  buildPlayModesByCategory,
-} from './play-mode-catalog';
-import { resolveLevelLaunchPlan } from './play-level-route';
-import { resolvePlayModeLaunch } from './play-mode-launch';
+import { DailyGoalService } from '../core/services/daily-goal.service';
+import { DonatePromptService } from '../core/services/donate-prompt.service';
+import { LearningPathService } from '../core/services/learning-path.service';
+import { LocaleService } from '../core/services/locale.service';
+import { PlayModePreferenceService } from '../core/services/play-mode-preference.service';
+import { PlayPoolService } from '../core/services/play-pool.service';
+import { PlaySessionService } from '../core/services/play-session.service';
+import { SessionAccessService } from '../core/services/session-access.service';
+import { SubscriptionService } from '../core/services/subscription.service';
+import { UserLearningService } from '../core/services/user-learning.service';
+import { PerfLogService } from '../core/services/perf-log.service';
+import { isBillingEnabled } from '../core/utils/billing-mode';
+import { ensurePlaySessionAccess } from '../core/utils/play-access';
 import { playDebug } from '../core/utils/play-debug';
-import type {
-  PlayCategoryId,
-  PlayCategorySlide,
-  PlayModeSlide,
-} from './play-mode.types';
+import { buildQuizChoices, type QuizChoice } from '../core/utils/quiz-options';
+import { feedPromptKey, resolveFeedCardLaunch } from './play-feed-launch';
+import { resolveLevelLaunchPlan } from './play-level-route';
+import { resolveSettingsPlayMode } from './play-mode-catalog';
+import { resolvePlayModeLaunch } from './play-mode-launch';
+import type { PlayModeSlide } from './play-mode.types';
 export type {
   PlayCategoryId,
   PlayCategorySlide,
   PlayModeAction,
   PlayModeSlide,
 } from './play-mode.types';
-import { LearningPathService } from '../core/services/learning-path.service';
-import { LocaleService } from '../core/services/locale.service';
-import { PlayPoolService } from '../core/services/play-pool.service';
-import { PlaySessionService } from '../core/services/play-session.service';
-import { SessionAccessService } from '../core/services/session-access.service';
-import { SubscriptionService } from '../core/services/subscription.service';
-import { PerfLogService } from '../core/services/perf-log.service';
-import { ensurePlaySessionAccess } from '../core/utils/play-access';
-import {
-  buildPlayDockWheelSlots,
-  nearestPlayDockSlotIndex,
-  playDockFocusFromAngle,
-  playDockMiddleSlotIndex,
-  resolvePlayDockSnapWheel,
-  snapPlayDockSlotIndex,
-  type PlayDockWheelSlot,
-} from '../core/utils/play-dock-arc';
-
-export type PlayDockLevel = 'categories' | 'modes';
-
-export type PlayDockPhase = 'idle' | 'exit' | 'enter';
-
-const DOCK_TRANSITION_MS = 280;
 
 interface PlayRefreshSnapshot {
   subscribed: boolean;
   atGameLimit: boolean;
-  dockLevel: PlayDockLevel;
-  selectedCategoryId: PlayCategoryId | null;
-  categoryIds: string;
 }
+
+type FeedPhase = 'pick' | 'feedback';
+
+const FEED_ROTATE_MS = 14_000;
 
 @Component({
   selector: 'app-play',
@@ -69,341 +57,185 @@ interface PlayRefreshSnapshot {
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PlayPage implements OnInit, ViewWillEnter, ViewWillLeave {
+export class PlayPage implements OnInit, ViewWillEnter {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly alertCtrl = inject(AlertController);
   protected readonly locale = inject(LocaleService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly catalog = inject(CountriesCatalogService);
   private readonly courseLaunch = inject(CourseLaunchService);
   private readonly learningPath = inject(LearningPathService);
   private readonly playPool = inject(PlayPoolService);
   private readonly playSession = inject(PlaySessionService);
-  readonly sub = inject(SubscriptionService);
+  private readonly playModePreference = inject(PlayModePreferenceService);
+  private readonly homeFeed = inject(HomeFeedService);
+  private readonly learning = inject(UserLearningService);
+  private readonly dailyGoal = inject(DailyGoalService);
   readonly sessionAccess = inject(SessionAccessService);
+  readonly sub = inject(SubscriptionService);
+  private readonly donatePrompt = inject(DonatePromptService);
   private readonly perf = inject(PerfLogService);
 
   atGameLimit = false;
-
-  dockLevel: PlayDockLevel = 'categories';
-  dockPhase: PlayDockPhase = 'idle';
-  /** False when leaving Play tab so the dock cannot cover other tabs. */
-  showModeDock = false;
-  playCategories: PlayCategorySlide[] = [];
-  recallCategory: PlayCategorySlide | null = null;
-  categoryModes: PlayModeSlide[] = [];
-  selectedCategory: PlayCategorySlide | null = null;
-  activeSlideIndex = 0;
-
-  playDockWheelSlots: PlayDockWheelSlot[] = [];
-  playDockFocusedSlotIndex = 0;
-  playDockWheelDeg = 0;
-  playDockDragging = false;
-  playDockDragArmed = false;
-  playDockAnimating = false;
-
-  private playDockDragStartX = 0;
-  private playDockDragStartWheelDeg = 0;
-  private playDockTapSlotIndex: number | null = null;
-  private playDockDragRaf: number | null = null;
+  feedCard: HomeFeedCard | null = null;
+  feedCardPhase: 'idle' | 'fade' = 'idle';
+  feedPhase: FeedPhase = 'pick';
+  choices: QuizChoice[] = [];
+  feedbackCorrect = false;
+  selectedIso: string | null = null;
+  private choicePool: Country[] = [];
+  private feedRotateTimer: ReturnType<typeof setInterval> | null = null;
   private lastRefreshSnapshot: PlayRefreshSnapshot | null = null;
 
   ngOnInit(): void {
-    this.rebuildPlayDockWheel();
-    this.snapPlayDockToLogical(0, false);
-    this.syncModeDockFromRoute();
-    this.router.events
-      .pipe(
-        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(() => this.syncModeDockFromRoute());
+    this.feedRotateTimer = setInterval(() => this.rotateFeedCard(), FEED_ROTATE_MS);
+    this.destroyRef.onDestroy(() => {
+      if (this.feedRotateTimer !== null) {
+        clearInterval(this.feedRotateTimer);
+      }
+    });
     void this.refresh();
   }
 
   ionViewWillEnter(): void {
-    this.syncModeDockFromRoute();
     void this.refresh({ fromViewEnter: true });
+    void this.refreshFeed();
+    void this.donatePrompt.maybeNavigateToDonate();
   }
 
-  ionViewWillLeave(): void {
-    this.showModeDock = false;
+  get promptText(): string {
+    if (!this.feedCard) {
+      return '';
+    }
+    return this.locale.translate(feedPromptKey(this.feedCard.kind));
+  }
+
+  hasPlayPremium(): boolean {
+    return !isBillingEnabled() || this.sub.isSubscribed();
+  }
+
+  trackChoice(_index: number, choice: QuizChoice): string {
+    return choice.country.iso2;
+  }
+
+  choiceState(choice: QuizChoice): 'default' | 'correct' | 'wrong' {
+    if (this.feedPhase !== 'feedback' || !this.feedCard) {
+      return 'default';
+    }
+    if (choice.country.iso2.toUpperCase() === this.feedCard.iso) {
+      return 'correct';
+    }
+    if (choice.country.iso2 === this.selectedIso) {
+      return 'wrong';
+    }
+    return 'default';
+  }
+
+  async refreshFeed(): Promise<void> {
+    await this.homeFeed.ensureDeck();
+    await this.catalog.ensureLoaded();
+    this.choicePool = await this.playPool.getFilteredFreePool();
+    this.feedCard = this.homeFeed.currentCard();
+    this.resetRoundState();
+    this.buildChoicesForCard();
     this.cdr.markForCheck();
   }
 
-  /** Tab switches may skip ionViewWillLeave; also hide dock off /tabs/play. */
-  private syncModeDockFromRoute(): void {
-    const path = this.router.url.split('?')[0].split('#')[0];
-    const onPlayHub = /^\/tabs\/play\/?$/.test(path);
-    if (this.showModeDock === onPlayHub) {
+  rotateFeedCard(): void {
+    if (!this.feedCard || this.feedPhase === 'feedback') {
       return;
     }
-    this.showModeDock = onPlayHub;
-    this.cdr.markForCheck();
+    this.advanceCardWithFade();
   }
 
-  get dockSliderAriaKey(): string {
-    return this.dockLevel === 'categories'
-      ? 'play.categoriesSliderAria'
-      : 'play.modesSliderAria';
+  nextFeedCard(): void {
+    this.advanceCardWithFade();
   }
 
-  get dockItemCount(): number {
-    return this.dockLevel === 'categories'
-      ? this.dockCategoryItems.length
-      : this.categoryModes.length;
-  }
-
-  get dockCategoryItems(): PlayCategorySlide[] {
-    if (!this.recallCategory) {
-      return this.playCategories;
-    }
-    return [...this.playCategories, this.recallCategory];
-  }
-
-  get playDockTileCount(): number {
-    return this.dockLevel === 'categories'
-      ? this.dockCategoryItems.length
-      : this.categoryModes.length;
-  }
-
-  get canStepPlayDock(): boolean {
-    return this.dockPhase === 'idle' && this.playDockTileCount > 1;
-  }
-
-  trackPlayDockSlot(_index: number, slot: PlayDockWheelSlot): number {
-    return slot.slotIndex;
-  }
-
-  trackPlayCategory(_index: number, category: PlayCategorySlide): string {
-    return category.id;
-  }
-
-  trackPlayMode(_index: number, mode: PlayModeSlide): string {
-    return mode.id;
-  }
-
-  isModeLocked(mode: PlayModeSlide): boolean {
-    return (
-      (mode.action.type === 'globe' ||
-        mode.action.type === 'map' ||
-        mode.action.type === 'explore_mark') &&
-      !this.sub.isSubscribed()
-    );
-  }
-
-  playDockSpokeTransform(slotIndex: number): string {
-    const angle = this.playDockWheelSlots[slotIndex]?.angle ?? 0;
-    return `rotate(${angle}deg) translateY(calc(-1 * var(--play-arc-radius) + var(--play-arc-spoke-lift, -20px)))`;
-  }
-
-  playDockSlotFocus(slotIndex: number): number {
-    const angle =
-      (this.playDockWheelSlots[slotIndex]?.angle ?? 0) + this.playDockWheelDeg;
-    return playDockFocusFromAngle(angle);
-  }
-
-  playDockCardTransform(slotIndex: number): string {
-    const angle =
-      (this.playDockWheelSlots[slotIndex]?.angle ?? 0) + this.playDockWheelDeg;
-    const slot = this.playDockWheelSlots[slotIndex];
-    const focus = playDockFocusFromAngle(angle);
-    const isLogicalCenter = slot?.logicalIndex === this.activeSlideIndex;
-    const scale = isLogicalCenter && focus > 0.45 ? 1 : 0.76 + focus * 0.12;
-    return `rotate(${-angle}deg) scale(${scale.toFixed(3)})`;
-  }
-
-  playDockIsActiveSlot(slotIndex: number): boolean {
-    return this.playDockSlotFocus(slotIndex) > 0.45;
-  }
-
-  playDockSpokeZIndex(slotIndex: number): number {
-    return Math.round(10 + this.playDockSlotFocus(slotIndex) * 90);
-  }
-
-  private resolvePlayDockSlotIndex(event: PointerEvent): number | null {
-    if (!(event.target instanceof Element)) {
-      return null;
-    }
-    const el = event.target.closest('[data-slot-index]');
-    if (!el) {
-      return null;
-    }
-    const index = Number(el.getAttribute('data-slot-index'));
-    return Number.isFinite(index) ? index : null;
-  }
-
-  onPlayDockPointerDown(event: PointerEvent): void {
-    if (this.dockPhase !== 'idle' || this.playDockTileCount < 2) {
-      playDebug('PlayDock', 'pointerdown ignored', {
-        phase: this.dockPhase,
-        tiles: this.playDockTileCount,
-      });
+  openFeedCountryOnGlobe(): void {
+    const iso = this.feedCard?.iso;
+    if (!iso) {
       return;
     }
-    this.playDockDragArmed = true;
-    this.playDockDragStartX = event.clientX;
-    this.playDockDragStartWheelDeg = this.playDockWheelDeg;
-    this.playDockTapSlotIndex = this.resolvePlayDockSlotIndex(event);
-    playDebug('PlayDock', 'pointerdown', {
-      slot: this.playDockTapSlotIndex,
-      dockLevel: this.dockLevel,
+    void this.router.navigate(['/tabs/play/globe-find'], {
+      queryParams: { focus: iso.toUpperCase() },
     });
   }
 
-  onPlayDockPointerMove(event: PointerEvent): void {
-    if (!this.playDockDragArmed && !this.playDockDragging) {
+  async answerChoice(choice: QuizChoice): Promise<void> {
+    if (this.feedPhase !== 'pick' || !this.feedCard) {
       return;
     }
-    const deltaX = event.clientX - this.playDockDragStartX;
-    if (!this.playDockDragging) {
-      if (Math.abs(deltaX) < 8) {
-        return;
-      }
-      const target = event.currentTarget;
-      if (target instanceof HTMLElement) {
-        target.setPointerCapture(event.pointerId);
-      }
-      this.playDockDragging = true;
-      this.playDockTapSlotIndex = null;
-      playDebug('PlayDock', 'drag start', { deltaX });
-    }
-    this.playDockWheelDeg = this.playDockDragStartWheelDeg + deltaX * 0.38;
-    this.updatePlayDockFocusedSlot();
-    this.schedulePlayDockDragCheck();
-  }
-
-  onPlayDockPointerEnd(event: PointerEvent): void {
-    if (!this.playDockDragArmed && !this.playDockDragging) {
-      return;
-    }
-    this.playDockDragArmed = false;
-    this.cancelPlayDockDragCheck();
-    const target = event.currentTarget;
-    if (target instanceof HTMLElement && target.hasPointerCapture(event.pointerId)) {
-      target.releasePointerCapture(event.pointerId);
-    }
-
-    if (this.playDockDragging) {
-      this.playDockDragging = false;
-      const dragDelta = this.playDockWheelDeg - this.playDockDragStartWheelDeg;
-      const snappedSlot = snapPlayDockSlotIndex(
-        this.playDockWheelSlots,
-        this.playDockWheelDeg,
-        dragDelta,
-        this.playDockTileCount,
-      );
-      playDebug('PlayDock', 'drag end snap', {
-        dragDelta,
-        snappedSlot,
-        logicalIndex: this.playDockWheelSlots[snappedSlot]?.logicalIndex,
-      });
-      this.snapPlayDockToSlot(snappedSlot);
-      this.cdr.markForCheck();
-      return;
-    }
-
-    const tapSlot = this.playDockTapSlotIndex;
-    this.playDockTapSlotIndex = null;
-    if (tapSlot !== null) {
-      playDebug('PlayDock', 'tap', { slot: tapSlot });
-      this.onPlayDockCardClick(tapSlot);
-    }
-  }
-
-  onPlayDockCardClick(slotIndex: number): void {
-    if (this.playDockAnimating || this.playDockDragging) {
-      playDebug('PlayDock', 'cardClick ignored', {
-        slotIndex,
-        animating: this.playDockAnimating,
-        dragging: this.playDockDragging,
-      });
-      return;
-    }
-    const slot = this.playDockWheelSlots[slotIndex];
-    if (!slot) {
-      playDebug('PlayDock', 'cardClick ignored', { slotIndex, reason: 'missing slot' });
-      return;
-    }
-    const focus = this.playDockSlotFocus(slotIndex);
-    playDebug('PlayDock', 'cardClick', {
-      slotIndex,
-      logicalIndex: slot.logicalIndex,
-      focus,
-      activeSlideIndex: this.activeSlideIndex,
-      dockLevel: this.dockLevel,
-    });
-    if (focus <= 0.45) {
-      playDebug('PlayDock', 'snap to logical', { logicalIndex: slot.logicalIndex });
-      this.snapPlayDockToLogical(slot.logicalIndex);
-      this.cdr.markForCheck();
-      return;
-    }
-    if (this.dockLevel === 'categories') {
-      const category = this.dockCategoryItems[slot.logicalIndex];
-      if (category) {
-        playDebug('PlayDock', 'open category', { id: category.id });
-        void this.onCategoryTap(category);
-      }
-      return;
-    }
-    const mode = this.categoryModes[slot.logicalIndex];
-    if (mode) {
-      playDebug('PlayDock', 'launch mode', { id: mode.id });
-      void this.launchMode(mode);
-    }
-  }
-
-  playDockIsLocked(slot: PlayDockWheelSlot): boolean {
-    if (this.dockLevel === 'categories') {
-      return this.playDockCategory(slot)?.premiumLocked === true;
-    }
-    const mode = this.playDockMode(slot);
-    if (!mode) {
-      return false;
-    }
-    return (
-      (mode.action.type === 'globe' ||
-        mode.action.type === 'map' ||
-        mode.action.type === 'explore_mark') &&
-      !this.sub.isSubscribed()
-    );
-  }
-
-  playDockCategory(slot: PlayDockWheelSlot): PlayCategorySlide | null {
-    return this.dockCategoryItems[slot.logicalIndex] ?? null;
-  }
-
-  playDockMode(slot: PlayDockWheelSlot): PlayModeSlide | null {
-    return this.categoryModes[slot.logicalIndex] ?? null;
-  }
-
-  stepPlayDock(direction: -1 | 1): void {
-    if (!this.canStepPlayDock) {
-      playDebug('PlayDock', 'step ignored', { direction, canStep: false });
-      return;
-    }
-    const count = this.playDockTileCount;
-    const next = (this.activeSlideIndex + direction + count) % count;
-    playDebug('PlayDock', 'step', { direction, from: this.activeSlideIndex, to: next });
-    this.snapPlayDockToLogical(next, true);
+    this.selectedIso = choice.country.iso2;
+    const correct = choice.country.iso2.toUpperCase() === this.feedCard.iso;
+    this.feedbackCorrect = correct;
+    this.feedPhase = 'feedback';
     this.cdr.markForCheck();
+    await this.learning.recordAttempt('quiz', this.feedCard.iso, correct, false);
+    if (correct) {
+      await this.dailyGoal.bumpProgress();
+    }
+    playDebug('PlayHub', 'feedAnswer', {
+      kind: this.feedCard.kind,
+      iso: this.feedCard.iso,
+      correct,
+    });
+  }
+
+  /** Starts the mode chosen in Settings → Game settings. */
+  async playQuick(): Promise<void> {
+    await this.playModePreference.hydrate();
+    const slide = resolveSettingsPlayMode(
+      this.playModePreference.getModeId(),
+      this.hasPlayPremium(),
+    );
+    await this.launchMode(slide);
+  }
+
+  async playFeedCard(): Promise<void> {
+    if (!this.feedCard) {
+      return;
+    }
+    const card = this.feedCard;
+    const pool = this.choicePool.length
+      ? this.choicePool
+      : await this.playPool.getFilteredFreePool();
+    const iso = card.iso;
+    const match = pool.find((c) => c.iso2.toUpperCase() === iso);
+    const sessionPool = match
+      ? [match, ...pool.filter((c) => c.iso2.toUpperCase() !== iso).slice(0, 3)]
+      : pool.slice(0, 4);
+    if (sessionPool.length < 2) {
+      await this.presentRecallEmptyAlert('settings.metricFilterEmptyPool');
+      return;
+    }
+    if (!(await this.guardPlayAccess())) {
+      return;
+    }
+    const launch = resolveFeedCardLaunch(card.kind);
+    this.playSession.clear();
+    this.playSession.setPool(sessionPool);
+    this.playSession.setMeta(launch.meta);
+    playDebug('PlayHub', 'playFeedCard', { kind: card.kind, iso: card.iso });
+    void this.router.navigate(launch.commands);
   }
 
   async refresh(options?: { fromViewEnter?: boolean }): Promise<void> {
     const span = this.perf.span('PlayHub', 'refresh');
-    await this.sub.init();
+    if (isBillingEnabled()) {
+      await this.sub.init();
+    }
     await this.sessionAccess.hydrate();
     this.atGameLimit =
-      !this.sub.isSubscribed() && !this.sessionAccess.canStartGame(false);
+      isBillingEnabled() &&
+      !this.sub.isSubscribed() &&
+      !this.sessionAccess.canStartGame(false);
 
-    const subscribed = this.sub.isSubscribed();
+    const subscribed = this.hasPlayPremium();
     const snapshot: PlayRefreshSnapshot = {
       subscribed,
       atGameLimit: this.atGameLimit,
-      dockLevel: this.dockLevel,
-      selectedCategoryId: this.selectedCategory?.id ?? null,
-      categoryIds: this.playCategories.map((c) => c.id).join(','),
     };
     if (
       options?.fromViewEnter &&
@@ -415,85 +247,62 @@ export class PlayPage implements OnInit, ViewWillEnter, ViewWillLeave {
       return;
     }
 
-    const modesByCategory = buildPlayModesByCategory(
-      subscribed,
-      this.courseLaunch.launches,
-    );
-    const { wheel, recall } = buildPlayCategories(modesByCategory, subscribed);
-    this.playCategories = wheel;
-    this.recallCategory = recall;
-    snapshot.categoryIds = wheel.map((c) => c.id).join(',');
-
-    if (this.dockLevel === 'modes' && this.selectedCategory) {
-      this.categoryModes = modesByCategory[this.selectedCategory.id] ?? [];
-      this.activeSlideIndex = Math.min(
-        this.activeSlideIndex,
-        Math.max(0, this.categoryModes.length - 1),
-      );
-    } else {
-      this.dockLevel = 'categories';
-      this.selectedCategory = null;
-      this.categoryModes = [];
-      this.activeSlideIndex = Math.min(
-        this.activeSlideIndex,
-        Math.max(0, this.dockCategoryItems.length - 1),
-      );
-    }
     this.lastRefreshSnapshot = snapshot;
-    this.rebuildPlayDockWheel();
-    this.snapPlayDockToLogical(this.activeSlideIndex, false);
     this.cdr.markForCheck();
-    span.end({
-      skipped: false,
-      dockLevel: this.dockLevel,
-      tiles: this.playDockTileCount,
-      slots: this.playDockWheelSlots.length,
-    });
+    span.end({ skipped: false });
+  }
+
+  private advanceCardWithFade(): void {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.feedCard = this.homeFeed.advance();
+      this.resetRoundState();
+      this.buildChoicesForCard();
+      this.cdr.markForCheck();
+      return;
+    }
+    this.feedCardPhase = 'fade';
+    this.cdr.markForCheck();
+    window.setTimeout(() => {
+      this.feedCard = this.homeFeed.advance();
+      this.resetRoundState();
+      this.buildChoicesForCard();
+      this.feedCardPhase = 'idle';
+      this.cdr.markForCheck();
+    }, 220);
+  }
+
+  private resetRoundState(): void {
+    this.feedPhase = 'pick';
+    this.feedbackCorrect = false;
+    this.selectedIso = null;
+    this.choices = [];
+  }
+
+  private buildChoicesForCard(): void {
+    if (!this.feedCard || this.choicePool.length < 2) {
+      this.choices = [];
+      return;
+    }
+    const target =
+      this.choicePool.find((c) => c.iso2.toUpperCase() === this.feedCard!.iso) ??
+      null;
+    if (!target) {
+      this.choices = [];
+      return;
+    }
+    this.choices = buildQuizChoices(target, this.choicePool, (c) =>
+      this.catalog.localizedName(c, this.locale.language),
+    );
   }
 
   private refreshSnapshotsEqual(
     a: PlayRefreshSnapshot,
     b: PlayRefreshSnapshot,
   ): boolean {
-    return (
-      a.subscribed === b.subscribed &&
-      a.atGameLimit === b.atGameLimit &&
-      a.dockLevel === b.dockLevel &&
-      a.selectedCategoryId === b.selectedCategoryId &&
-      a.categoryIds === b.categoryIds
-    );
-  }
-
-  async onCategoryTap(category: PlayCategorySlide): Promise<void> {
-    if (this.dockLevel !== 'categories' || this.dockPhase !== 'idle') {
-      return;
-    }
-    if (category.premiumLocked) {
-      void this.router.navigate(['/paywall']);
-      return;
-    }
-    await this.openCategory(category);
-  }
-
-  async backToCategories(): Promise<void> {
-    if (this.dockLevel !== 'modes' || this.dockPhase !== 'idle') {
-      return;
-    }
-    await this.runDockTransition(() => {
-      this.dockLevel = 'categories';
-      this.selectedCategory = null;
-      this.categoryModes = [];
-      this.activeSlideIndex = 0;
-      this.rebuildPlayDockWheel();
-      this.snapPlayDockToLogical(0, false);
-    });
+    return a.subscribed === b.subscribed && a.atGameLimit === b.atGameLimit;
   }
 
   async launchMode(slide: PlayModeSlide): Promise<void> {
-    if (this.dockLevel !== 'modes' || this.dockPhase !== 'idle') {
-      return;
-    }
-
     playDebug('PlayHub', 'launchMode', { id: slide.id, action: slide.action });
 
     const courseLaunch =
@@ -501,7 +310,7 @@ export class PlayPage implements OnInit, ViewWillEnter, ViewWillLeave {
         ? this.courseLaunch.getLaunch(slide.action.launchId)
         : undefined;
     const launch = resolvePlayModeLaunch(slide.action, {
-      isSubscribed: this.sub.isSubscribed(),
+      isSubscribed: this.hasPlayPremium(),
       courseLaunch,
     });
 
@@ -582,127 +391,6 @@ export class PlayPage implements OnInit, ViewWillEnter, ViewWillLeave {
 
     playDebug('PlayHub', 'navigate', launch.commands);
     void this.router.navigate(launch.commands);
-  }
-
-  openPaywall(): void {
-    void this.router.navigate(['/paywall']);
-  }
-
-  private async openCategory(category: PlayCategorySlide): Promise<void> {
-    const modes =
-      buildPlayModesByCategory(this.sub.isSubscribed(), this.courseLaunch.launches)[
-        category.id
-      ] ?? [];
-    await this.runDockTransition(() => {
-      this.selectedCategory = category;
-      this.dockLevel = 'modes';
-      this.categoryModes = modes;
-      this.activeSlideIndex = 0;
-      this.rebuildPlayDockWheel();
-      this.snapPlayDockToLogical(0, false);
-    });
-  }
-
-  private rebuildPlayDockWheel(): void {
-    const count = this.playDockTileCount;
-    this.playDockWheelSlots = buildPlayDockWheelSlots(count);
-    if (count > 0) {
-      this.playDockFocusedSlotIndex = playDockMiddleSlotIndex(
-        Math.min(this.activeSlideIndex, count - 1),
-        count,
-      );
-    } else {
-      this.playDockFocusedSlotIndex = 0;
-    }
-  }
-
-  private updatePlayDockFocusedSlot(): void {
-    this.playDockFocusedSlotIndex = nearestPlayDockSlotIndex(
-      this.playDockWheelSlots,
-      this.playDockWheelDeg,
-      this.playDockTileCount,
-    );
-    const slot = this.playDockWheelSlots[this.playDockFocusedSlotIndex];
-    if (slot) {
-      this.activeSlideIndex = slot.logicalIndex;
-    }
-  }
-
-  private snapPlayDockToLogical(logicalIndex: number, animate = true): void {
-    const slotIndex = playDockMiddleSlotIndex(logicalIndex, this.playDockTileCount);
-    this.snapPlayDockToSlot(slotIndex, animate);
-  }
-
-  private snapPlayDockToSlot(slotIndex: number, animate = true): void {
-    const slot = this.playDockWheelSlots[slotIndex];
-    if (!slot) {
-      return;
-    }
-    if (animate) {
-      this.beginPlayDockSnap();
-    }
-    const middleSlotIndex = playDockMiddleSlotIndex(
-      slot.logicalIndex,
-      this.playDockTileCount,
-    );
-    this.playDockWheelDeg = resolvePlayDockSnapWheel(
-      this.playDockWheelSlots,
-      middleSlotIndex,
-      this.playDockWheelDeg,
-      this.playDockTileCount,
-    );
-    this.playDockFocusedSlotIndex = middleSlotIndex;
-    this.activeSlideIndex = slot.logicalIndex;
-
-    if (!animate) {
-      this.playDockDragging = true;
-      queueMicrotask(() => {
-        this.playDockDragging = false;
-        this.cdr.markForCheck();
-      });
-    }
-  }
-
-  private async runDockTransition(swap: () => void): Promise<void> {
-    this.dockPhase = 'exit';
-    this.cdr.markForCheck();
-    await this.wait(DOCK_TRANSITION_MS);
-    swap();
-    this.dockPhase = 'enter';
-    this.cdr.markForCheck();
-    await this.wait(DOCK_TRANSITION_MS);
-    this.dockPhase = 'idle';
-    this.cdr.markForCheck();
-  }
-
-  private wait(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  private schedulePlayDockDragCheck(): void {
-    if (this.playDockDragRaf !== null) {
-      return;
-    }
-    this.playDockDragRaf = requestAnimationFrame(() => {
-      this.playDockDragRaf = null;
-      this.cdr.markForCheck();
-    });
-  }
-
-  private cancelPlayDockDragCheck(): void {
-    if (this.playDockDragRaf === null) {
-      return;
-    }
-    cancelAnimationFrame(this.playDockDragRaf);
-    this.playDockDragRaf = null;
-  }
-
-  private beginPlayDockSnap(): void {
-    this.playDockAnimating = true;
-    window.setTimeout(() => {
-      this.playDockAnimating = false;
-      this.cdr.markForCheck();
-    }, 560);
   }
 
   private guardPlayAccess(): Promise<boolean> {

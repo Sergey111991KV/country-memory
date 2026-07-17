@@ -7,7 +7,8 @@ import {
   effect,
   inject,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Location } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   AlertController,
   ToastController,
@@ -43,7 +44,7 @@ import {
   globeFlyAltitude,
   globeRevealMinControlDistance,
 } from '../../core/utils/globe-fly-altitude';
-import { ensurePlaySessionAccess } from '../../core/utils/play-access';
+import { ensurePlaySessionAccess, ensurePremiumPlayAccess } from '../../core/utils/play-access';
 import { ensureThreeGlobal } from '../../core/utils/three-global';
 import { buildSoloSessionResult } from '../../core/utils/play-session-result-builders';
 import { GlobeRenderLoop } from '../../core/utils/globe-render-loop';
@@ -91,6 +92,8 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private globeHost?: ElementRef<HTMLDivElement>;
 
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
   readonly catalog = inject(CountriesCatalogService);
   readonly locale = inject(LocaleService);
   private readonly learning = inject(UserLearningService);
@@ -110,6 +113,8 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
   loading = true;
   loadError = false;
+  /** Lookup mode from quiz (query ?focus=ISO) — no scoring session. */
+  previewMode = false;
   target: Country | null = null;
   selectedIso: string | null = null;
   phase: PickPhase = 'pick';
@@ -186,13 +191,27 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       this.renderLoop?.requestRender();
       return;
     }
+    const focusIso = (this.route.snapshot.queryParamMap.get('focus') ?? '')
+      .trim()
+      .toUpperCase();
+    if (focusIso.length === 2) {
+      void this.startPreview(focusIso);
+      return;
+    }
     void this.startSession();
   }
 
+  private async startPreview(iso2: string): Promise<void> {
+    if (this.bootStarted) {
+      return;
+    }
+    this.bootStarted = true;
+    this.previewMode = true;
+    await this.bootPreview(iso2);
+  }
+
   private async startSession(): Promise<void> {
-    await this.subscription.init();
-    if (!this.subscription.isSubscribed()) {
-      void this.router.navigate(['/paywall']);
+    if (!(await ensurePremiumPlayAccess(this.subscription, this.router))) {
       this.loading = false;
       return;
     }
@@ -299,6 +318,10 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   }
 
   goBack(): void {
+    if (this.previewMode) {
+      this.location.back();
+      return;
+    }
     void this.router.navigate(['/tabs/play']);
   }
 
@@ -311,6 +334,49 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       capital: this.catalog.localizedCapital(country, this.locale.language),
       continent: this.continentLabel(country),
     });
+  }
+
+  private async bootPreview(iso2: string): Promise<void> {
+    const totalSpan = this.perf.span('GlobeQuest', 'bootPreview');
+    try {
+      await this.catalog.ensureLoaded();
+      await this.knowledge.ensureLoaded();
+      const allFeatures = await this.geoCache.getPoliticalFeatures();
+      const mapIso = new Set(
+        allFeatures
+          .map((f) => iso2FromNaturalEarth(f.properties))
+          .filter((x): x is string => Boolean(x)),
+      );
+      this.playable = this.catalog.filterPlayable(mapIso);
+      const playableIso = new Set(this.playable.map((c) => c.iso2.toUpperCase()));
+      this.geoFeatures = allFeatures.filter((f) =>
+        playableIso.has(iso2FromNaturalEarth(f.properties) ?? ''),
+      );
+      const country =
+        this.playable.find((c) => c.iso2.toUpperCase() === iso2) ?? null;
+      if (!country) {
+        throw new Error(`Country not found for preview: ${iso2}`);
+      }
+      await this.waitForGlobeHost();
+      await this.initGlobe();
+      this.target = country;
+      this.selectedIso = country.iso2;
+      this.feedbackCorrectIso = country.iso2;
+      this.feedbackWrongIso = null;
+      this.feedbackCorrect = true;
+      this.phase = 'feedback';
+      this.refreshPolygonColors();
+      this.loading = false;
+      this.flyToCountry(country, 0);
+      queueMicrotask(() => this.flyToCountry(country, 1400, { reveal: true }));
+      totalSpan.end({ iso2 });
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      console.error('Globe preview boot failed:', detail, err);
+      this.loadError = true;
+      this.loading = false;
+      totalSpan.end({ error: detail });
+    }
   }
 
   private async boot(): Promise<void> {

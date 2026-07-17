@@ -1,7 +1,18 @@
 @let lang = i18n.langSig();
+<ion-header class="ion-no-border settings-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button
+        defaultHref="/tabs/play"
+        [text]="'common.back' | i18n:null:lang"
+      ></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ 'tabs.settings' | i18n:null:lang}}</ion-title>
+  </ion-toolbar>
+</ion-header>
 <ion-content
   #settingsContent
-  class="ion-padding settings-page page-safe-top settings-page--rhythm"
+  class="ion-padding settings-page settings-page--rhythm"
 >
   <ion-accordion-group
     [multiple]="false"
@@ -9,7 +20,45 @@
     (ionChange)="onAccordionChange($event)"
     class="settings-accordion-group"
   >
-    <ion-accordion value="premium" class="settings-accordion glass-surface">
+    <ion-accordion
+      *ngIf="!billingEnabled"
+      value="donate"
+      class="settings-accordion glass-surface"
+    >
+      <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
+        <ion-label>
+          <h2>{{ 'donatePrompt.title' | i18n:null:lang}}</h2>
+          <p>{{ 'donatePrompt.settingsSub' | i18n:null:lang}}</p>
+        </ion-label>
+      </ion-item>
+      <div slot="content" class="settings-acc-panel">
+        <ion-text color="medium" class="ion-text-wrap premium-benefits">
+          <p class="premium-benefits__lead">{{ 'donatePrompt.heroLead' | i18n:null:lang}}</p>
+        </ion-text>
+
+        <ion-button
+          expand="block"
+          color="primary"
+          fill="solid"
+          class="premium-star-btn"
+          [disabled]="!hasDonateUrl"
+          (click)="openDonateLink()"
+        >
+          <ion-icon slot="start" name="heart-outline"></ion-icon>
+          {{ 'donatePrompt.openLink' | i18n:null:lang}}
+        </ion-button>
+
+        <ion-button expand="block" fill="outline" (click)="openDonatePage()">
+          {{ 'donatePrompt.learnMore' | i18n:null:lang}}
+        </ion-button>
+      </div>
+    </ion-accordion>
+
+    <ion-accordion
+      *ngIf="billingEnabled"
+      value="premium"
+      class="settings-accordion glass-surface"
+    >
       <ion-item slot="header" lines="inset" detail="false" class="settings-acc-header">
         <ion-label>
           <h2>{{ 'settings.sectionPremium' | i18n:null:lang}}</h2>
@@ -155,6 +204,29 @@
         </ion-label>
       </ion-item>
       <div slot="content" class="settings-acc-panel">
+        <ion-list [inset]="true" class="settings-list settings-list--in-card">
+          <ion-item>
+            <ion-select
+              [label]="'settings.playMode' | i18n:null:lang"
+              [value]="preferredPlayModeId"
+              (ionChange)="onPlayModeChange($event)"
+              interface="popover"
+            >
+              <ion-select-option
+                *ngFor="let mode of playModeOptions"
+                [value]="mode.id"
+              >
+                {{ mode.titleKey | i18n:null:lang }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-text color="medium" class="ion-text-wrap small-hint">
+              <p class="ion-no-margin">{{ 'settings.playModeHint' | i18n:null:lang}}</p>
+            </ion-text>
+          </ion-item>
+        </ion-list>
+
         <ion-text color="medium" class="ion-text-wrap settings-learning-intro">
           <p>{{ 'settings.metricFilterIntro' | i18n:{ year: metricsReferenceYear }:lang}}</p>
         </ion-text>
@@ -449,6 +521,20 @@
               (ionChange)="onDebugPremiumToggle($event)"
             ></ion-toggle>
           </ion-item>
+          <ion-item button detail="false" lines="none" (click)="openIconGallery()">
+            <ion-icon name="grid-outline" slot="start" aria-hidden="true"></ion-icon>
+            <ion-label class="ion-text-wrap">
+              <h3>{{ 'icons.galleryNavTitle' | i18n:null:lang}}</h3>
+              <p>{{ 'icons.galleryDevHint' | i18n:null:lang}}</p>
+            </ion-label>
+            <ion-note slot="end">{{ 'icons.galleryNavAction' | i18n:null:lang}}</ion-note>
+          </ion-item>
+        </ion-list>
+        <ion-list
+          *ngIf="!billingEnabled && showDevIconGallery"
+          [inset]="true"
+          class="settings-list settings-list--in-card ion-margin-top"
+        >
           <ion-item button detail="false" lines="none" (click)="openIconGallery()">
             <ion-icon name="grid-outline" slot="start" aria-hidden="true"></ion-icon>
             <ion-label class="ion-text-wrap">

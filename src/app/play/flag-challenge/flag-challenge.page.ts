@@ -22,7 +22,7 @@ import {
   passPlayRejectBuzz,
   passPlayTotalRounds,
 } from '../../core/services/pass-play-session';
-import { ensurePlaySessionAccess } from '../../core/utils/play-access';
+import { ensurePlaySessionAccess, ensurePremiumPlayAccess } from '../../core/utils/play-access';
 import { playDebug } from '../../core/utils/play-debug';
 import {
   buildPassPlaySessionResult,
@@ -252,6 +252,16 @@ export class FlagChallengePage implements ViewDidEnter {
     void this.router.navigate(['/tabs/play']);
   }
 
+  openTargetOnGlobe(): void {
+    const iso = this.target?.iso2;
+    if (!iso) {
+      return;
+    }
+    void this.router.navigate(['/tabs/play/globe-find'], {
+      queryParams: { focus: iso.toUpperCase() },
+    });
+  }
+
   choiceState(iso2: string): 'default' | 'correct' | 'wrong' {
     if (this.phase !== 'feedback') {
       return 'default';
@@ -281,9 +291,7 @@ export class FlagChallengePage implements ViewDidEnter {
 
   private async startMapMode(): Promise<void> {
     this.bootStarted = true;
-    await this.subscription.init();
-    if (!this.subscription.isSubscribed()) {
-      void this.router.navigate(['/paywall'], { replaceUrl: true });
+    if (!(await ensurePremiumPlayAccess(this.subscription, this.router))) {
       return;
     }
     const allowed = await ensurePlaySessionAccess(

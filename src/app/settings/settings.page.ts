@@ -26,6 +26,7 @@ import type { GlobeThemeId } from '../core/data/globe-theme';
 import { VisualQualityService } from '../core/services/visual-quality.service';
 import { GlobeThemeService } from '../core/services/globe-theme.service';
 import { DisplayTextService } from '../core/services/display-text.service';
+import { DonatePromptService } from '../core/services/donate-prompt.service';
 import { LegalLinksService } from '../core/services/legal-links.service';
 import { LocaleService } from '../core/services/locale.service';
 import { SessionAccessService } from '../core/services/session-access.service';
@@ -41,7 +42,14 @@ import {
   type MetricFilterTier,
 } from '../core/data/country-metric-filters';
 import { CountryMetricFilterService } from '../core/services/country-metric-filter.service';
+import { PlayModePreferenceService } from '../core/services/play-mode-preference.service';
 import { PlayPoolService } from '../core/services/play-pool.service';
+import { isBillingEnabled } from '../core/utils/billing-mode';
+import {
+  listSettingsPlayModes,
+  resolveSettingsPlayMode,
+} from '../play/play-mode-catalog';
+import type { PlayModeSlide } from '../play/play-mode.types';
 import { environment } from '../../environments/environment';
 
 export interface SettingsSupportBlock {
@@ -76,7 +84,9 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   private readonly alertCtrl = inject(AlertController);
   readonly sub = inject(SubscriptionService);
   private readonly sessionAccess = inject(SessionAccessService);
+  private readonly donatePrompt = inject(DonatePromptService);
   private readonly metricFiltersService = inject(CountryMetricFilterService);
+  private readonly playModePreference = inject(PlayModePreferenceService);
   private readonly playPool = inject(PlayPoolService);
   readonly displayText = inject(DisplayTextService);
   private readonly visualQualityService = inject(VisualQualityService);
@@ -85,7 +95,13 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   readonly metricsReferenceYear = METRICS_REFERENCE_YEAR;
   readonly metricFilterTiers = METRIC_FILTER_TIER_OPTIONS;
 
-  readonly billingDebugEnabled = environment.billingDebugEnabled || environment.devMockBilling || !environment.production;
+  readonly billingEnabled = isBillingEnabled();
+  readonly isProduction = environment.production;
+  readonly billingDebugEnabled =
+    this.billingEnabled &&
+    (environment.billingDebugEnabled || environment.devMockBilling || !environment.production);
+  readonly showDevIconGallery = !environment.production;
+  readonly hasDonateUrl = this.legal.hasDonateUrl();
   readonly freeGamesLimit = environment.freeGamesLimit;
   debugPremium = false;
   logsBusy = false;
@@ -133,9 +149,8 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   readonly hasPrivacyUrl = this.legal.hasPrivacyUrl();
   readonly hasTermsUrl = this.legal.hasTermsUrl();
   readonly hasSupportEmail = this.legal.hasSupportEmail();
-  readonly hasDonateUrl = this.legal.hasDonateUrl();
 
-  accordionValue = 'premium';
+  accordionValue = this.billingEnabled ? 'premium' : 'donate';
   freeGamesLeft = environment.freeGamesLimit;
   isDarkTheme = false;
   localeCode: AppLang = 'en';
@@ -156,6 +171,8 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   metricFiltersActive = false;
   filteredPoolCount = 0;
   tierPoolCount = 0;
+  preferredPlayModeId = 'flag_pick_country';
+  playModeOptions: PlayModeSlide[] = [];
 
   ngOnInit(): void {
     this.applyPanelFromRoute();
@@ -217,7 +234,7 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   }
 
   openIconGallery(): void {
-    if (!this.billingDebugEnabled) {
+    if (!this.billingDebugEnabled && !this.showDevIconGallery) {
       return;
     }
     void this.router.navigate(['/tabs/settings/icon-gallery']);
@@ -365,7 +382,18 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
     await t.present();
   }
 
+  openDonatePage(): void {
+    void this.router.navigate(['/donate']);
+  }
+
+  async openDonateLink(): Promise<void> {
+    await this.donatePrompt.openDonateLink();
+  }
+
   async onDebugPremiumToggle(ev: CustomEvent): Promise<void> {
+    if (!this.billingEnabled) {
+      return;
+    }
     const checked = Boolean(ev.detail.checked);
     await this.sub.setDebugPremium(checked);
     this.debugPremium = checked;
@@ -431,6 +459,18 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
     await this.theme.setTheme(checked ? 'dark' : 'light');
   }
 
+  async onPlayModeChange(ev: CustomEvent): Promise<void> {
+    const modeId = String(ev.detail.value ?? '');
+    const slide = resolveSettingsPlayMode(modeId, this.hasPlayPremium());
+    const persistId = slide.id.endsWith('_locked')
+      ? slide.id.slice(0, -'_locked'.length)
+      : slide.id;
+    await this.playModePreference.setModeId(persistId);
+    this.preferredPlayModeId = slide.id;
+    this.cdr.markForCheck();
+    await this.toastSaved();
+  }
+
   async onMetricFilterChange(
     kind: CountryMetricKind,
     ev: CustomEvent,
@@ -442,6 +482,19 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
     });
     await this.syncMetricFilters();
     await this.toastSaved();
+  }
+
+  private hasPlayPremium(): boolean {
+    return !this.billingEnabled || this.sub.isSubscribed();
+  }
+
+  private syncPlayModeOptions(): void {
+    const premium = this.hasPlayPremium();
+    this.playModeOptions = listSettingsPlayModes(premium);
+    this.preferredPlayModeId = resolveSettingsPlayMode(
+      this.playModePreference.getModeId(),
+      premium,
+    ).id;
   }
 
   async resetMetricFilters(): Promise<void> {
@@ -457,7 +510,7 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   private async syncMetricFilters(): Promise<void> {
     this.metricFilters = this.metricFiltersService.getFilters();
     this.metricFiltersActive = this.metricFiltersService.isActive();
-    const base = this.sub.isSubscribed()
+    const base = this.playPool.isPremium()
       ? await this.playPool.getFullPool()
       : await this.playPool.getFreePool();
     this.tierPoolCount = base.length;
@@ -466,12 +519,13 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   }
 
   async load(): Promise<void> {
-    await this.sub.init();
-    await this.sessionAccess.hydrate();
+    if (this.billingEnabled) {
+      await this.sub.init();
+      await this.sessionAccess.hydrate();
+      this.debugPremium = this.sub.debugPremiumActive();
+      this.freeGamesLeft = this.sessionAccess.remainingFreeGames(this.sub.isSubscribed());
+    }
     await this.auth.hydrate();
-    this.debugPremium = this.sub.debugPremiumActive();
-    this.freeGamesLeft = this.sessionAccess.remainingFreeGames(this.sub.isSubscribed());
-
     await this.displayText.ensureLoaded();
     this.heroTitleCustom = this.displayText.getOverride('home.heroTitle');
     this.heroSubShortCustom = this.displayText.getOverride('home.heroSubShort');
@@ -490,6 +544,8 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
     applyColorPaletteClass(settings.colorPalette);
     await this.metricFiltersService.hydrate();
     await this.syncMetricFilters();
+    await this.playModePreference.hydrate();
+    this.syncPlayModeOptions();
     this.cdr.markForCheck();
   }
 
@@ -497,6 +553,8 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
     const panel = this.route.snapshot.queryParamMap.get('panel');
     if (panel === 'support') {
       this.accordionValue = 'support';
+    } else if (panel === 'learning' || panel === 'game') {
+      this.accordionValue = 'learning';
     } else if (panel === 'how-it-works' || panel === 'tour' || panel === 'about') {
       this.accordionValue = 'about';
     }

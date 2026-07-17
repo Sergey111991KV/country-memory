@@ -33,6 +33,14 @@
         </div>
 
         <div *ngIf="showFlag" class="challenge-flag">
+          <button
+            type="button"
+            class="challenge-flag__globe"
+            (click)="openTargetOnGlobe()"
+            [attr.aria-label]="'globe.openPreview' | i18n:null:lang"
+          >
+            <ion-icon name="earth-outline" aria-hidden="true"></ion-icon>
+          </button>
           <app-flag-display
             [iso2]="target.iso2"
             size="hero"

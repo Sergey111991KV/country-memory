@@ -1,199 +1,64 @@
 @let lang = locale.langSig();
 <ion-content class="play-hub page-safe-top" [fullscreen]="true">
-  <div class="play-shell">
-    <header class="play-hero">
-      <h1 class="play-hero__title">{{ 'play.hubTitle' | i18n:null:lang}}</h1>
-      <p class="play-hero__sub">{{ 'play.hubSub' | i18n:null:lang}}</p>
-      <ion-button fill="clear" size="small" class="play-progress-link" routerLink="/tabs/progress">
-        {{ 'play.viewProgress' | i18n:null:lang}}
-        <ion-icon slot="end" name="chevron-forward" aria-hidden="true"></ion-icon>
+  <div class="play-shell play-shell--game">
+    <header class="play-topbar play-topbar--cta">
+      <ion-button
+        fill="clear"
+        class="play-topbar__settings"
+        routerLink="/tabs/settings"
+        [queryParams]="{ panel: 'learning' }"
+        [attr.aria-label]="'play.gameSettings' | i18n:null:lang"
+      >
+        <ion-icon slot="icon-only" name="settings-outline" aria-hidden="true"></ion-icon>
       </ion-button>
     </header>
 
     <section
-      class="play-tablet-grid"
-      *ngIf="showModeDock && dockItemCount > 0"
-      [attr.aria-label]="dockSliderAriaKey | i18n:null:lang"
+      *ngIf="feedCard as c"
+      class="play-quiz glass-surface"
+      [class.play-quiz--fade]="feedCardPhase === 'fade'"
+      aria-live="polite"
     >
-      <ng-container *ngIf="dockLevel === 'categories'">
+      <p class="play-quiz__kicker">{{ c.titleKey | i18n:null:lang}}</p>
+      <p class="play-quiz__prompt">{{ promptText }}</p>
+
+      <div *ngIf="c.kind === 'flag'" class="play-quiz__flag">
         <button
           type="button"
-          class="play-tablet-card glass-surface"
-          *ngFor="let category of dockCategoryItems; trackBy: trackPlayCategory"
-          [class.play-tablet-card--locked]="category.premiumLocked"
-          [attr.aria-label]="category.titleKey | i18n:null:lang"
-          (click)="onCategoryTap(category)"
+          class="play-quiz__globe"
+          (click)="openFeedCountryOnGlobe()"
+          [attr.aria-label]="'globe.openPreview' | i18n:null:lang"
         >
-          <app-icon
-            *ngIf="category.premiumLocked"
-            class="play-tablet-card__lock"
-            icon="ui-premium"
-            size="sm"
-          ></app-icon>
-          <app-icon
-            class="play-tablet-card__icon"
-            [icon]="category.icon"
-            size="dock-lg"
-            aria-hidden="true"
-          ></app-icon>
-          <span class="play-tablet-card__title">{{ category.titleKey | i18n:null:lang }}</span>
+          <ion-icon name="earth-outline" aria-hidden="true"></ion-icon>
         </button>
-      </ng-container>
-
-      <ng-container *ngIf="dockLevel === 'modes' && selectedCategory">
-        <div class="play-tablet-grid__nav">
-          <button
-            type="button"
-            class="play-tablet-grid__back"
-            (click)="backToCategories()"
-            [attr.aria-label]="'common.back' | i18n:null:lang"
-          >
-            <ion-icon name="chevron-back" aria-hidden="true"></ion-icon>
-            <span>{{ 'common.back' | i18n:null:lang }}</span>
-          </button>
-          <p class="play-tablet-grid__nav-title">{{ selectedCategory.titleKey | i18n:null:lang }}</p>
-        </div>
-
-        <button
-          type="button"
-          class="play-tablet-card glass-surface"
-          *ngFor="let mode of categoryModes; trackBy: trackPlayMode"
-          [class.play-tablet-card--locked]="isModeLocked(mode)"
-          [attr.aria-label]="mode.titleKey | i18n:null:lang"
-          (click)="launchMode(mode)"
-        >
-          <app-icon
-            *ngIf="isModeLocked(mode)"
-            class="play-tablet-card__lock"
-            icon="ui-premium"
-            size="sm"
-          ></app-icon>
-          <app-icon
-            class="play-tablet-card__icon"
-            [icon]="mode.icon"
-            size="dock-lg"
-            aria-hidden="true"
-          ></app-icon>
-          <span class="play-tablet-card__title">{{ mode.titleKey | i18n:null:lang }}</span>
-        </button>
-      </ng-container>
-    </section>
-  </div>
-
-  <aside
-    slot="fixed"
-    class="play-mode-dock"
-    *ngIf="showModeDock && dockItemCount > 0"
-    [class.play-mode-dock--modes]="dockLevel === 'modes'"
-    [class.play-mode-dock--exit]="dockPhase === 'exit'"
-    [class.play-mode-dock--enter]="dockPhase === 'enter'"
-  >
-    <div class="play-mode-dock__nav" *ngIf="dockLevel === 'modes' && selectedCategory">
-      <button
-        type="button"
-        class="play-mode-dock__back"
-        (click)="backToCategories()"
-        [attr.aria-label]="'common.back' | i18n:null:lang"
-      >
-        <ion-icon name="chevron-back" aria-hidden="true"></ion-icon>
-        <span>{{ 'common.back' | i18n:null:lang}}</span>
-      </button>
-      <p class="play-mode-dock__nav-title">{{ selectedCategory.titleKey | i18n:null:lang}}</p>
-    </div>
-
-    <div class="play-mode-dock__row">
-      <button
-        type="button"
-        class="play-mode-dock__step play-mode-dock__step--prev"
-        [disabled]="!canStepPlayDock"
-        (click)="stepPlayDock(-1)"
-        [attr.aria-label]="'play.dockStepPrev' | i18n:null:lang"
-      >
-        <ion-icon name="chevron-back" aria-hidden="true"></ion-icon>
-      </button>
-
-      <div
-        class="play-mode-dock__arc"
-        [class.play-mode-dock__arc--exit]="dockPhase === 'exit'"
-        [class.play-mode-dock__arc--enter]="dockPhase === 'enter'"
-        (pointerdown)="onPlayDockPointerDown($event)"
-        (pointermove)="onPlayDockPointerMove($event)"
-        (pointerup)="onPlayDockPointerEnd($event)"
-        (pointercancel)="onPlayDockPointerEnd($event)"
-      >
-        <div
-          class="play-mode-dock__wheel"
-          role="list"
-          [attr.aria-label]="dockSliderAriaKey | i18n:null:lang"
-          [class.play-mode-dock__wheel--dragging]="playDockDragging"
-          [class.play-mode-dock__wheel--animating]="playDockAnimating"
-          [style.transform]="'rotate(' + playDockWheelDeg + 'deg)'"
-        >
-          <div
-            *ngFor="let slot of playDockWheelSlots; let i = index; trackBy: trackPlayDockSlot"
-            class="play-mode-dock__spoke"
-            [class.play-mode-dock__spoke--active]="playDockIsActiveSlot(i)"
-            [style.transform]="playDockSpokeTransform(i)"
-            [style.z-index]="playDockSpokeZIndex(i)"
-            role="listitem"
-            [attr.data-slot-index]="i"
-          >
-            <button
-              type="button"
-              class="play-mode-dock__card glass-surface"
-              [class.play-mode-dock__card--active]="playDockIsActiveSlot(i)"
-              [class.play-mode-dock__card--locked]="playDockIsLocked(slot)"
-              [style.transform]="playDockCardTransform(i)"
-              [attr.aria-label]="
-                dockLevel === 'categories'
-                  ? (playDockCategory(slot)?.titleKey ?? 'play.title' | i18n:null:lang)
-                  : (playDockMode(slot)?.titleKey ?? 'play.title' | i18n:null:lang)
-              "
-              (click)="onPlayDockCardClick(i)"
-            >
-              <app-icon
-                *ngIf="playDockIsLocked(slot)"
-                class="play-mode-dock__lock"
-                icon="ui-premium"
-                size="sm"
-              ></app-icon>
-              <ng-container *ngIf="dockLevel === 'categories'">
-                <app-icon
-                  class="play-mode-dock__icon"
-                  [icon]="playDockCategory(slot)!.icon"
-                  size="dock-lg"
-                  aria-hidden="true"
-                ></app-icon>
-                <span class="play-mode-dock__title">{{
-                  playDockCategory(slot)!.titleKey | i18n:null:lang
-                }}</span>
-              </ng-container>
-              <ng-container *ngIf="dockLevel === 'modes'">
-                <app-icon
-                  class="play-mode-dock__icon"
-                  [icon]="playDockMode(slot)!.icon"
-                  size="dock-lg"
-                  aria-hidden="true"
-                ></app-icon>
-                <span class="play-mode-dock__title">{{
-                  playDockMode(slot)!.titleKey | i18n:null:lang
-                }}</span>
-              </ng-container>
-            </button>
-          </div>
-        </div>
-        <div class="play-mode-dock__arc-mask" aria-hidden="true"></div>
+        <img [src]="c.flagUrl" [alt]="promptText" width="220" height="147" />
       </div>
 
-      <button
-        type="button"
-        class="play-mode-dock__step play-mode-dock__step--next"
-        [disabled]="!canStepPlayDock"
-        (click)="stepPlayDock(1)"
-        [attr.aria-label]="'play.dockStepNext' | i18n:null:lang"
-      >
-        <ion-icon name="chevron-forward" aria-hidden="true"></ion-icon>
-      </button>
-    </div>
-  </aside>
+      <p *ngIf="c.kind !== 'flag'" class="play-quiz__clue">{{ c.body }}</p>
+
+      <div class="play-quiz__choices" *ngIf="choices.length">
+        <button
+          type="button"
+          class="play-quiz__choice glass-surface"
+          *ngFor="let choice of choices; trackBy: trackChoice"
+          [class.play-quiz__choice--correct]="choiceState(choice) === 'correct'"
+          [class.play-quiz__choice--wrong]="choiceState(choice) === 'wrong'"
+          [disabled]="feedPhase !== 'pick'"
+          (click)="answerChoice(choice)"
+        >
+          {{ choice.label }}
+        </button>
+      </div>
+
+      <div *ngIf="feedPhase === 'feedback'" class="play-quiz__feedback">
+        <p [class.play-quiz__feedback--ok]="feedbackCorrect" [class.play-quiz__feedback--bad]="!feedbackCorrect">
+          {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}
+        </p>
+        <p class="play-quiz__answer">{{ c.countryName }}</p>
+        <ion-button expand="block" color="primary" (click)="nextFeedCard()">
+          {{ 'home.feed.next' | i18n:null:lang}}
+        </ion-button>
+      </div>
+    </section>
+  </div>
 </ion-content>

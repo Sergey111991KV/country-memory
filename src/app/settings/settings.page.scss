@@ -35,21 +35,15 @@
 }
 
 .settings-acc-header {
-  --background: color-mix(
-    in srgb,
-    var(--ion-color-primary) 14%,
-    var(--ion-background-color)
-  );
+  --background: color-mix(in srgb, var(--glass-bg) 70%, transparent);
   --color: var(--ion-text-color);
   --min-height: 64px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 html.ion-palette-dark .settings-acc-header {
-  --background: color-mix(
-    in srgb,
-    var(--ion-color-primary) 22%,
-    var(--ion-background-color)
-  );
+  --background: color-mix(in srgb, var(--glass-bg) 80%, transparent);
 }
 
 .settings-acc-header ion-label h2 {

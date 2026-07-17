@@ -9,6 +9,8 @@ import {
   buildPlayCategories,
   buildPlayModesByCategory,
   flattenPlayModes,
+  listSettingsPlayModes,
+  resolveSettingsPlayMode,
 } from './play-mode-catalog';
 
 describe('play mode catalog', () => {
@@ -41,7 +43,7 @@ describe('play mode catalog', () => {
     const modes = buildPlayModesByCategory(true, courseLaunches);
     expect(modes.recognition.length).toBe(4);
     expect(modes.recall.length).toBe(6);
-    expect(modes.course.length).toBe(8); // learning_path + 7 launches
+    expect(modes.course.length).toBe(8);
     expect(modes.explore.length).toBe(2 + EXPLORE_FILTER_DEFS.length);
     expect(modes.together.length).toBe(3);
     expect(flattenPlayModes(modes).length).toBe(28);
@@ -82,5 +84,24 @@ describe('play mode catalog', () => {
     for (const def of EXPLORE_FILTER_DEFS) {
       expect(modes.explore.some((m) => m.id === `mark_${def.id}`)).toBeTrue();
     }
+  });
+
+  it('lists a short settings play-mode set for the Play CTA', () => {
+    const options = listSettingsPlayModes(true);
+    expect(options.map((m) => m.id)).toEqual([
+      'flag_pick_country',
+      'flag_type_country',
+      'capital_pick_country',
+      'country_pick_capital',
+      'globe_find',
+      'map_find',
+      'pass_play_flags',
+      'pass_play_capitals',
+      'pass_play_mixed',
+    ]);
+    expect(resolveSettingsPlayMode('map_find', true).id).toBe('map_find');
+    expect(resolveSettingsPlayMode('unknown', true).id).toBe('flag_pick_country');
+    expect(resolveSettingsPlayMode('globe_find_locked', true).id).toBe('globe_find');
+    expect(resolveSettingsPlayMode('globe_find', false).id).toBe('globe_find_locked');
   });
 });

@@ -246,3 +246,34 @@ export function flattenPlayModes(
     ...modesByCategory.together,
   ];
 }
+
+/**
+ * Modes shown in Settings → Game settings for the Play CTA preference.
+ * Keeps the list short: recognition + globe/map + together.
+ */
+export function listSettingsPlayModes(isSubscribed: boolean): PlayModeSlide[] {
+  const byCategory = buildPlayModesByCategory(isSubscribed, []);
+  const exploreCore = byCategory.explore.filter(
+    (m) => m.action.type === 'globe' || m.action.type === 'map',
+  );
+  return [...byCategory.recognition, ...exploreCore, ...byCategory.together];
+}
+
+export function resolveSettingsPlayMode(
+  modeId: string,
+  isSubscribed: boolean,
+  fallbackId = 'flag_pick_country',
+): PlayModeSlide {
+  const options = listSettingsPlayModes(isSubscribed);
+  const normalized = modeId.endsWith('_locked')
+    ? modeId.slice(0, -'_locked'.length)
+    : modeId;
+  const lockedId = `${normalized}_locked`;
+  return (
+    options.find((m) => m.id === normalized) ??
+    options.find((m) => m.id === lockedId) ??
+    options.find((m) => m.id === modeId) ??
+    options.find((m) => m.id === fallbackId) ??
+    options[0]!
+  );
+}
