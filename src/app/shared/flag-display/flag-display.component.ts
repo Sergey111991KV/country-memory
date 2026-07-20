@@ -100,17 +100,17 @@ export class FlagDisplayComponent implements OnInit, AfterViewInit, OnChanges, O
     }
   }
 
-  /** Respects Settings → Globe & flag detail. */
+  /** Respects Settings → Globe & flag detail (signal-backed for CD). */
   get flagAnimActive(): boolean {
-    return this.animate && this.visualQuality.profile().flag.animate;
+    return this.animate && this.visualQuality.profileSig().flag.animate;
   }
 
   get flagWindDisplacement(): boolean {
-    return this.flagAnimActive && this.visualQuality.profile().flag.windDisplacement;
+    return this.flagAnimActive && this.visualQuality.profileSig().flag.windDisplacement;
   }
 
   get flagSheen(): boolean {
-    return this.flagAnimActive && this.visualQuality.profile().flag.sheen;
+    return this.flagAnimActive && this.visualQuality.profileSig().flag.sheen;
   }
 
   get flagWindFilterStyle(): string | null {

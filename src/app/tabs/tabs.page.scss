@@ -12,22 +12,14 @@ ion-tabs {
   background: transparent;
 }
 
-/* Keep the active tab page above cached siblings (fixed Play dock bleed). */
-ion-tabs .tabs-inner > .ion-page:not(.ion-page-hidden) {
-  z-index: 2;
-}
-
-ion-tabs .tabs-inner > .ion-page.ion-page-hidden {
-  z-index: 0;
-  pointer-events: none;
-}
-
 /*
  * Compact tab bar (Apple HIG ~49pt content + home indicator).
- * Selected state = color + soft chip, not a tall vertical pill.
+ * Must stay opaque + above Play quiz — translucent glass made the card
+ * show through and look like it covered the tab bar.
  */
 ion-tab-bar {
   position: relative;
+  z-index: 1000;
   flex-shrink: 0;
   width: 100%;
   max-width: 100%;
@@ -35,10 +27,10 @@ ion-tab-bar {
   height: auto;
   min-height: 0;
   --border: none;
-  --background: color-mix(in srgb, var(--glass-bg) 72%, transparent);
-  background: color-mix(in srgb, var(--glass-bg) 72%, transparent);
-  backdrop-filter: blur(var(--glass-blur, 44px)) saturate(var(--glass-saturate, 1.55));
-  -webkit-backdrop-filter: blur(var(--glass-blur, 44px)) saturate(var(--glass-saturate, 1.55));
+  --background: var(--app-surface-solid);
+  background: var(--app-surface-solid);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border-top: 1px solid var(--glass-border);
   box-shadow:
     0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.7)) inset,
@@ -47,7 +39,7 @@ ion-tab-bar {
   padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-left: max(8px, env(safe-area-inset-left, 0px));
   padding-right: max(8px, env(safe-area-inset-right, 0px));
-  overflow: visible;
+  overflow: hidden;
 }
 
 ion-tab-button {
@@ -103,9 +95,9 @@ ion-tab-button ion-icon {
 }
 
 ion-tab-button.tab-selected::part(native) {
-  background: color-mix(in srgb, var(--ion-color-primary) 16%, var(--glass-bg-tint));
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  background: color-mix(in srgb, var(--ion-color-primary) 16%, var(--app-surface-solid, #fff));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow:
     0 1px 0 color-mix(in srgb, #ffffff 55%, transparent) inset,
     0 0 0 0.5px color-mix(in srgb, var(--ion-color-primary) 22%, transparent),

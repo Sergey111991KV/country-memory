@@ -99,3 +99,34 @@ export function parseGlobeTheme(raw: unknown): GlobeThemeId {
 export function globeThemePalette(id: GlobeThemeId): GlobeThemePalette {
   return PALETTES[id];
 }
+
+/**
+ * Lookup / “show on globe” from feed or quiz (`?focus=`).
+ * Flat gray world + red target only — keeps normal quest themes untouched.
+ */
+const PREVIEW_GRAY = 'rgba(148, 163, 184, 0.82)';
+const PREVIEW_GRAY_CONTINENTS: Record<string, string> = {
+  Africa: PREVIEW_GRAY,
+  Asia: PREVIEW_GRAY,
+  Europe: PREVIEW_GRAY,
+  'North America': PREVIEW_GRAY,
+  'South America': PREVIEW_GRAY,
+  Oceania: PREVIEW_GRAY,
+  Antarctica: 'rgba(148, 163, 184, 0.65)',
+  'Seven seas (open ocean)': 'rgba(100, 116, 139, 0.4)',
+};
+
+export function globePreviewPalette(): GlobeThemePalette {
+  return {
+    continentFill: PREVIEW_GRAY_CONTINENTS,
+    defaultFill: PREVIEW_GRAY,
+    strokeDefault: 'rgba(71, 85, 105, 0.45)',
+    strokeSelected: 'rgba(254, 226, 226, 0.95)',
+    polygonSideColor: 'rgba(51, 65, 85, 0.28)',
+    globeTexture: GLOBE_TEXTURE,
+    selectedFill: 'rgba(239, 68, 68, 0.95)',
+    correctFill: 'rgba(239, 68, 68, 0.95)',
+    wrongFill: 'rgba(239, 68, 68, 0.95)',
+    missedFill: PREVIEW_GRAY,
+  };
+}

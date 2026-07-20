@@ -1,11 +1,13 @@
 .play-hub {
   --play-tab-bar-offset: var(--app-tab-bar-height);
   --background: transparent;
+  /* Keep quiz/actions clear of the bottom tab bar. */
+  --padding-bottom: calc(var(--play-tab-bar-offset) + var(--app-space-5));
   font-family: var(--app-font-ui);
 }
 
 .play-hub::part(scroll) {
-  padding-bottom: calc(var(--play-tab-bar-offset) + var(--app-space-4));
+  padding-bottom: calc(var(--play-tab-bar-offset) + var(--app-space-5));
 }
 
 .play-shell {
@@ -36,13 +38,20 @@
   --padding-start: 8px;
   --padding-end: 8px;
   border-radius: 50%;
+
+  ion-icon {
+    font-size: 1.65rem;
+  }
 }
 
 .play-shell--cta,
 .play-shell--game {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - var(--play-tab-bar-offset) - var(--app-space-6));
+  /* Stay within the tab content area — never cover the bottom tab bar. */
+  min-height: 0;
+  max-height: none;
+  padding-bottom: calc(var(--play-tab-bar-offset) + var(--app-space-3));
 }
 
 .play-topbar--cta {
@@ -51,7 +60,7 @@
 }
 
 .play-cta {
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,9 +69,11 @@
 
 .play-shell--game .play-feed-card,
 .play-shell--game .play-quiz {
-  flex: 1;
+  flex: 0 1 auto;
   align-self: stretch;
   margin-top: var(--app-space-2);
+  min-height: 0;
+  overflow: hidden;
 }
 
 .play-quiz {
@@ -70,15 +81,47 @@
   flex-direction: column;
   gap: var(--app-space-3);
   padding: var(--app-space-4);
-  margin-bottom: var(--app-space-2);
-  transition:
-    opacity var(--app-duration-base, 0.28s) var(--app-ease-out, ease),
-    transform var(--app-duration-base, 0.28s) var(--app-ease-out, ease);
+  margin-bottom: 0;
+  overflow: hidden;
+  transition: opacity var(--app-duration-base, 0.28s) var(--app-ease-out, ease);
+
+  /* Above Liquid Glass ::before wash (positioned z-index 0). */
+  > * {
+    position: relative;
+    z-index: 1;
+  }
 
   &--fade {
     opacity: 0.28;
-    transform: scale(0.985);
   }
+}
+
+.play-quiz__start {
+  display: none;
+}
+
+.play-quiz__empty {
+  margin: 0;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--app-text-muted, var(--ion-color-medium));
+}
+
+.play-hub-actions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-2);
+  margin-top: var(--app-space-3);
+  margin-bottom: var(--app-space-2);
+  padding-bottom: 0;
+}
+
+.play-hub-actions__start {
+  margin: 0;
+  text-transform: none;
+  font-weight: 600;
+  min-height: 3rem;
 }
 
 .play-quiz__kicker {
@@ -161,21 +204,29 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--app-space-2);
+  width: 100%;
 }
 
 .play-quiz__choice {
   display: block;
   width: 100%;
+  min-height: 3rem;
   padding: 0.9rem 1rem;
-  border: 1px solid var(--glass-border, transparent);
+  border: 1px solid color-mix(in srgb, var(--ion-color-primary) 22%, transparent);
+  border-radius: var(--glass-radius-sm, 14px);
+  background: color-mix(in srgb, #ffffff 88%, var(--ion-color-primary) 12%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 4px 14px rgba(15, 23, 42, 0.08);
   text-align: center;
   font: inherit;
   font-weight: 600;
-  color: inherit;
+  color: var(--ion-text-color, #0f172a);
   cursor: pointer;
   transition:
     transform var(--app-duration-fast, 0.18s) var(--app-ease-out, ease),
-    background var(--app-duration-fast, 0.18s) ease;
+    background var(--app-duration-fast, 0.18s) ease,
+    border-color var(--app-duration-fast, 0.18s) ease;
 
   &:active:not(:disabled) {
     transform: scale(0.98);
@@ -187,12 +238,12 @@
 
   &--correct {
     border-color: var(--ion-color-success);
-    background: color-mix(in srgb, var(--ion-color-success) 18%, transparent);
+    background: color-mix(in srgb, var(--ion-color-success) 18%, #ffffff);
   }
 
   &--wrong {
     border-color: var(--ion-color-danger);
-    background: color-mix(in srgb, var(--ion-color-danger) 16%, transparent);
+    background: color-mix(in srgb, var(--ion-color-danger) 16%, #ffffff);
   }
 }
 
@@ -200,6 +251,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--app-space-2);
+  margin-top: auto;
   text-align: center;
 }
 

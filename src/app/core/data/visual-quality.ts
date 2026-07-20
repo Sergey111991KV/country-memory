@@ -33,7 +33,8 @@ const PROFILES: Record<VisualQuality, VisualQualityProfile> = {
       useBumpMap: false,
     },
     flag: {
-      animate: false,
+      /** Keep CSS fabric sway even on Performance — static flags feel broken. */
+      animate: true,
       windDisplacement: false,
       sheen: false,
     },

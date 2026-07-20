@@ -1,7 +1,6 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 
 import {
-  parseVisualQuality,
   type VisualQuality,
   type VisualQualityProfile,
   visualQualityProfile,
@@ -17,8 +16,11 @@ export class VisualQualityService {
   /** Current visual quality preset (globe + flags). */
   readonly level = this.levelSig.asReadonly();
 
+  /** Reactive profile — FlagDisplay / globe read this so CD tracks signal updates. */
+  readonly profileSig = computed(() => visualQualityProfile(this.levelSig()));
+
   profile(): VisualQualityProfile {
-    return visualQualityProfile(this.levelSig());
+    return this.profileSig();
   }
 
   async hydrate(): Promise<void> {

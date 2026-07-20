@@ -1,241 +1,257 @@
-.settings-free-line {
-  margin: 0 0 12px;
-  font-weight: 500;
-  color: var(--ion-color-primary);
-}
-
-.premium-benefits__list {
-  margin: 8px 0 0;
-  padding-left: 1.2rem;
-}
-
-.premium-star-btn {
-  margin-top: 8px;
-}
-
-.premium-active-chip {
-  margin-bottom: 8px;
-}
+/* Settings — quiet iOS-style groups on a single Liquid Glass layer */
 
 .settings-page--rhythm {
   --background: transparent;
   --color: var(--ion-text-color);
-  --padding-bottom: calc(var(--app-tab-bar-height, 74px) + var(--app-space-4));
+  --padding-top: var(--app-space-2);
+  --padding-bottom: calc(var(--app-tab-bar-height, 74px) + var(--app-space-5));
+}
+
+.settings-header ion-toolbar {
+  --background: color-mix(in srgb, var(--glass-bg) 55%, transparent);
+  --border-width: 0;
+  backdrop-filter: blur(20px) saturate(var(--glass-saturate, 1.5));
+  -webkit-backdrop-filter: blur(20px) saturate(var(--glass-saturate, 1.5));
+}
+
+.settings-shell {
+  width: 100%;
+  max-width: min(100%, 28rem);
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+/* Featured donate block — separate from accordion list */
+.settings-donate-card {
+  display: flex;
+  gap: var(--app-space-3);
+  align-items: flex-start;
+  margin: 0 0 var(--app-space-4);
+  padding: var(--app-space-4);
+  border-radius: var(--glass-radius, 24px);
+  border: 1px solid color-mix(in srgb, #f472b6 32%, var(--glass-border));
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #ffffff 55%, transparent) inset,
+    0 12px 32px color-mix(in srgb, #ec4899 14%, transparent);
+  background:
+    radial-gradient(
+      ellipse 90% 70% at 8% 0%,
+      color-mix(in srgb, #f9a8d4 28%, transparent),
+      transparent 55%
+    ),
+    var(--glass-bg);
+}
+
+.settings-donate-card__badge {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, #ec4899 22%, transparent);
+  border: 1px solid color-mix(in srgb, #f472b6 40%, transparent);
+  color: #ec4899;
+  font-size: 1.45rem;
+}
+
+html.ion-palette-dark .settings-donate-card__badge {
+  color: #f9a8d4;
+}
+
+.settings-donate-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-donate-card__kicker {
+  margin: 0 0 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, #ec4899 75%, var(--app-text-muted));
+}
+
+.settings-donate-card__body h2 {
+  margin: 0 0 var(--app-space-2);
+  font-family: var(--app-font-ui);
+  font-size: 1.2rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--ion-text-color);
+}
+
+.settings-donate-card__lead {
+  margin: 0 0 var(--app-space-2);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--ion-text-color);
+}
+
+.settings-donate-card__hint {
+  margin: 0 0 var(--app-space-3);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--app-text-muted);
+}
+
+.settings-donate-card__cta {
+  margin: 0 0 var(--app-space-1);
+  min-height: 48px;
+  --background: linear-gradient(135deg, #ec4899 0%, #db2777 55%, #be185d 100%);
+  --background-activated: #be185d;
+  --box-shadow: 0 8px 20px color-mix(in srgb, #ec4899 35%, transparent);
+  font-weight: 600;
+}
+
+.settings-donate-card__more {
+  margin: 0;
+  --color: color-mix(in srgb, #ec4899 80%, var(--ion-text-color));
+}
+
+.settings-reset-block {
+  margin-top: var(--app-space-4);
 }
 
 .settings-accordion-group {
-  margin-bottom: var(--app-space-3);
-  border-radius: 14px;
-  overflow: hidden;
+  background: transparent;
+  margin: 0;
 }
 
-.settings-accordion {
-  margin-bottom: var(--app-space-3);
+.settings-accordion.glass-surface {
+  margin: 0 0 var(--app-space-3);
+  border-radius: var(--glass-radius, 24px);
   overflow: hidden;
+  /* One glass layer — no nested frosted headers */
+  isolation: isolate;
+}
+
+.settings-accordion.glass-surface::after {
+  /* Softer caustic so dense settings text stays readable */
+  opacity: 0.35;
 }
 
 .settings-acc-header {
-  --background: color-mix(in srgb, var(--glass-bg) 70%, transparent);
+  --background: transparent;
+  --background-hover: color-mix(in srgb, var(--ion-color-primary) 6%, transparent);
+  --background-activated: color-mix(in srgb, var(--ion-color-primary) 10%, transparent);
   --color: var(--ion-text-color);
-  --min-height: 64px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  --min-height: 58px;
+  --inner-padding-end: 8px;
+  --padding-start: 14px;
+  --border-width: 0;
+  font-family: var(--app-font-ui);
 }
 
-html.ion-palette-dark .settings-acc-header {
-  --background: color-mix(in srgb, var(--glass-bg) 80%, transparent);
+.settings-acc-header ion-icon[slot='start'],
+.settings-acc-icon {
+  margin-inline-end: 10px;
+  font-size: 1.35rem;
+  color: var(--ion-color-primary);
 }
 
 .settings-acc-header ion-label h2 {
-  margin: 0 0 4px;
-  font-size: 1.15rem;
-  font-weight: 500;
+  margin: 0 0 2px;
+  font-family: var(--app-font-ui);
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ion-text-color);
 }
 
 .settings-acc-header ion-label p {
   margin: 0;
-  font-size: 0.88rem;
-  color: var(--ion-color-medium-shade);
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--app-text-muted, var(--ion-color-medium));
 }
 
 .settings-acc-panel {
-  padding: var(--app-space-3) var(--app-space-2) var(--app-space-4);
+  padding: 0 var(--app-space-3) var(--app-space-4);
 }
 
-.settings-card {
-  margin-bottom: var(--app-space-4);
-}
-
-.settings-page-footer {
+/* Soft inset groups inside a section — solid-ish, not second glass */
+.settings-list--in-card {
+  margin: 0 0 var(--app-space-3);
+  background: color-mix(in srgb, var(--app-surface-solid) 72%, transparent);
+  border: 1px solid var(--app-border-subtle, var(--glass-border));
+  border-radius: var(--glass-radius-sm, 16px);
+  overflow: hidden;
   box-shadow: none;
 }
 
-.settings-footer-toolbar {
+.settings-list--in-card ion-item {
   --background: transparent;
-  --border-width: 0;
-  --min-height: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
-  --padding-start: 0;
-  --padding-end: 0;
-}
-
-.settings-footer-inner {
-  padding: var(--app-space-2) var(--app-space-3)
-    calc(var(--app-space-2) + env(safe-area-inset-bottom, 0px));
-  display: flex;
-  justify-content: center;
-}
-
-.settings-logout-btn {
-  margin: 0;
+  --background-hover: color-mix(in srgb, var(--ion-color-primary) 5%, transparent);
+  --background-activated: color-mix(in srgb, var(--ion-color-primary) 8%, transparent);
+  --border-color: var(--app-border-subtle, color-mix(in srgb, var(--ion-text-color) 8%, transparent));
+  --color: var(--ion-text-color);
+  --padding-start: 14px;
+  --inner-padding-end: 12px;
   font-family: var(--app-font-ui);
-  font-style: normal;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  --background: transparent;
-  --background-hover: color-mix(in srgb, var(--ion-color-medium) 12%, transparent);
-  --background-activated: color-mix(in srgb, var(--ion-color-medium) 18%, transparent);
+}
+
+.settings-list--in-card ion-item:last-child {
   --border-width: 0;
-  --box-shadow: none;
-  --padding-top: 8px;
-  --padding-bottom: 8px;
-  --padding-start: 12px;
-  --padding-end: 12px;
-  min-height: auto;
-  height: auto;
 }
 
-.settings-card-preview {
-  margin: var(--app-space-3) 0;
-  padding: var(--app-space-3);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--ion-color-primary) 8%, transparent);
+.settings-list--in-card ion-note {
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
 }
 
-.settings-card-preview-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: center;
-  align-items: center;
-}
-
-.settings-mini-cell {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px var(--game-card-matched, rgba(0, 0, 0, 0.1));
-  border: 1px solid var(--game-card-border, rgba(0, 0, 0, 0.06));
-  background: var(--game-card-back);
-  color: var(--game-ink, var(--ion-text-color));
-  font-weight: 500;
-  font-size: 1.25rem;
-}
-
-.settings-card-preview--large .settings-mini-cell {
-  width: 78px;
-  height: 78px;
-  font-size: 1.45rem;
-}
-
-.settings-mini-back--slate {
-  background: linear-gradient(145deg, #475569, #1e293b);
-  color: #e2e8f0;
-}
-
-.settings-mini-back--cream {
-  background: linear-gradient(145deg, #fef9c3, #fde047);
-  color: #713f12;
-}
-
-.settings-mini-back--rose {
-  background: linear-gradient(145deg, #fda4af, #e11d48);
-  color: #fff7f8;
-}
-
-.settings-mini-back--mint {
-  background: linear-gradient(145deg, #6ee7b7, #059669);
-  color: #ecfdf5;
-}
-
-.settings-mini-back--midnight {
-  background: linear-gradient(145deg, #312e81, #0f172a);
-  color: #e0e7ff;
-}
-
-.settings-mini-back--sunset {
-  background: linear-gradient(145deg, #fdba74, #ea580c);
-  color: #431407;
-}
-
-.settings-mini-cell--front {
-  background: var(--game-card-front, #ffffff);
-  color: var(--game-ink, var(--ion-text-color));
-  overflow: hidden;
-}
-
-.settings-mini-emoji {
-  font-size: 1.85rem;
-  line-height: 1;
-}
-
-.settings-card-preview--large .settings-mini-emoji {
-  font-size: 2.15rem;
-}
-
-.settings-mini-face-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.settings-mini-face-icon {
-  font-size: 2rem;
-  color: var(--ion-color-medium);
-}
-
-.settings-card-preview-caption {
-  margin: var(--app-space-3) 0 0;
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--ion-color-medium-shade);
-  line-height: 1.35;
-}
-
-.premium-benefits {
+.settings-callout {
   display: block;
-  margin-bottom: var(--app-space-3);
+  margin: 0 0 var(--app-space-3);
   padding: var(--app-space-3);
-  border-radius: 16px;
+  border-radius: var(--glass-radius-sm, 16px);
   font-size: 0.9rem;
   line-height: 1.45;
-  background: color-mix(in srgb, var(--ion-color-warning) 10%, var(--ion-background-color));
-  border: 1px solid color-mix(in srgb, var(--ion-color-warning) 35%, transparent);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--ion-text-color) 6%, transparent);
+  color: var(--ion-text-color);
+  background: color-mix(in srgb, var(--ion-color-primary) 10%, var(--glass-bg-tint));
+  border: 1px solid color-mix(in srgb, var(--ion-color-primary) 22%, transparent);
 }
 
-html.ion-palette-dark .premium-benefits {
-  background: color-mix(in srgb, var(--ion-color-warning) 14%, var(--ion-background-color));
-  border-color: color-mix(in srgb, var(--ion-color-warning) 42%, transparent);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+.settings-callout--donate {
+  background: color-mix(in srgb, var(--ion-color-tertiary) 12%, var(--glass-bg-tint));
+  border-color: color-mix(in srgb, var(--ion-color-tertiary) 28%, transparent);
 }
 
-.premium-benefits__lead {
-  margin: 0 0 var(--app-space-2);
+.settings-callout--premium {
+  background: color-mix(in srgb, var(--ion-color-warning) 12%, var(--glass-bg-tint));
+  border-color: color-mix(in srgb, var(--ion-color-warning) 28%, transparent);
 }
 
-.premium-benefits__list {
+.settings-callout__lead {
   margin: 0;
+}
+
+.settings-callout__list {
+  margin: var(--app-space-2) 0 0;
   padding-left: 1.15rem;
 }
 
-.premium-benefits__list li {
+.settings-callout__list li {
   margin-bottom: 6px;
+}
+
+.settings-free-line {
+  margin: 0 0 var(--app-space-3);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ion-color-primary);
+}
+
+.premium-star-btn {
+  margin-top: var(--app-space-2);
+  margin-bottom: var(--app-space-2);
+  min-height: 48px;
+}
+
+.premium-active-chip {
+  margin-bottom: var(--app-space-2);
+  min-height: 40px;
 }
 
 .premium-type-line {
@@ -246,198 +262,43 @@ html.ion-palette-dark .premium-benefits {
 }
 
 .premium-expiry-line {
-  margin: 0;
-  font-size: 0.88rem;
-}
-
-.settings-pack-strip-intro {
-  --inner-padding-end: 0;
-  --inner-padding-start: 0;
-}
-
-.settings-pack-strip-title {
-  margin: 0 0 4px;
-  font-size: 1.05rem;
-  font-weight: 500;
-}
-
-.settings-pack-strip-hint {
-  margin: 0;
-  font-size: 0.86rem;
-  color: var(--ion-color-medium-shade);
-  line-height: 1.4;
-}
-
-.settings-pack-strip {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  gap: 10px;
-  overflow-x: auto;
-  padding: var(--app-space-2) var(--app-space-1) var(--app-space-3);
-  margin: 0 calc(-1 * var(--app-space-1)) var(--app-space-2);
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
-}
-
-.settings-pack-thumb {
-  flex: 0 0 auto;
-  width: 76px;
-  border: none;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-  scroll-snap-align: start;
-  text-align: center;
-  border-radius: 12px;
-}
-
-.settings-pack-thumb img {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  object-fit: cover;
-  display: block;
-  margin: 0 auto 6px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-  border: 2px solid transparent;
-  transition:
-    border-color 0.15s ease,
-    transform 0.15s ease;
-}
-
-.settings-pack-thumb--active img {
-  border-color: var(--ion-color-primary);
-  transform: scale(1.04);
-}
-
-.settings-pack-thumb-name {
-  display: block;
-  font-size: 0.72rem;
-  line-height: 1.2;
-  color: var(--ion-color-medium-shade);
-  max-width: 76px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.support-line {
-  font-size: 0.9rem;
   margin: 0 0 var(--app-space-2);
-
-  a {
-    color: var(--ion-color-primary);
-    text-decoration: none;
-  }
-}
-
-.premium-star-btn {
-  margin-top: var(--app-space-2);
-  margin-bottom: var(--app-space-3);
-  min-height: 48px;
-}
-
-.premium-active-chip {
-  margin-bottom: 0;
-  min-height: 40px;
-}
-
-.label-with-star {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.label-star {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
 }
 
 .small-hint {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   line-height: 1.35;
+  color: var(--app-text-muted, var(--ion-color-medium));
 }
 
-.settings-page h2 {
-  font-size: 1.25rem;
-  font-weight: 400;
-  margin: 0 0 var(--app-space-1);
+.settings-learning-intro {
+  display: block;
+  margin: 0 0 var(--app-space-3);
+  font-size: 0.86rem;
+  line-height: 1.4;
 }
 
-.settings-page ion-label p {
-  font-size: 0.9rem;
-  margin-top: var(--app-space-1);
-}
-
-.settings-list {
-  margin-bottom: var(--app-space-2);
-}
-
-.pack-hint p {
-  font-size: 0.88rem;
-}
-
-.photo-card {
-  margin-bottom: var(--app-space-2);
-}
-
-.photo-count {
-  margin: 0 0 12px;
-  font-size: 0.95rem;
-}
-
-.settings-section-card {
-  margin-bottom: var(--app-space-4);
-}
-
-.settings-list--in-card {
-  margin-bottom: 0;
-}
-
-.photo-card--nested {
-  margin-top: var(--app-space-3);
-  margin-bottom: 0;
-}
-
-.custom-text-block {
-  margin-top: var(--app-space-3);
-}
-
-.custom-text-heading {
-  margin: 0 0 var(--app-space-1);
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-.custom-text-desc {
+.settings-metric-pool-line {
   margin: 0 0 var(--app-space-3);
   font-size: 0.88rem;
-  color: var(--ion-color-medium-shade);
-}
-
-.legal-row--card {
-  margin-top: var(--app-space-3);
-}
-
-.legal-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--app-space-1);
-  margin-top: var(--app-space-4);
+  font-weight: 500;
+  color: var(--ion-color-primary);
+  text-align: center;
 }
 
 .settings-support-list ion-label h3 {
   margin: 0 0 4px;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .settings-support-list ion-label p {
   margin: 0;
-  font-size: 0.86rem;
-  line-height: 1.4;
-  color: var(--ion-color-medium-shade);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--app-text-muted, var(--ion-color-medium));
 }
 
 .settings-support-list__meta {
@@ -452,52 +313,38 @@ html.ion-palette-dark .premium-benefits {
   color: var(--ion-color-warning) !important;
 }
 
-.settings-about-tour {
-  margin-top: var(--app-space-3);
-  padding-top: var(--app-space-3);
-  border-top: 1px solid color-mix(in srgb, var(--ion-color-medium) 22%, transparent);
-}
-
-.settings-about-tour__title {
-  margin: 0 0 var(--app-space-2);
-  font-size: 1.05rem;
-  font-weight: 600;
-  text-align: left;
-}
-
-.settings-about-tour__hint {
-  margin: 0 0 var(--app-space-3);
-  font-size: 0.9rem;
-  line-height: 1.45;
-  color: var(--ion-color-medium);
-  text-align: left;
+.settings-support-list ion-icon[slot='start'] {
+  color: var(--ion-color-primary);
+  font-size: 1.25rem;
+  margin-inline-end: 8px;
 }
 
 .settings-about-product {
-  padding: var(--app-space-2) var(--app-space-1);
+  padding: var(--app-space-2) var(--app-space-1) var(--app-space-3);
   text-align: center;
 }
 
 .settings-about-product__mark {
   display: block;
   margin: 0 auto var(--app-space-3);
+  filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--ion-color-primary) 28%, transparent));
 }
 
 .settings-about-product__lead {
   margin: 0 0 var(--app-space-3);
-  font-size: 0.96rem;
-  line-height: 1.55;
+  font-size: 0.94rem;
+  line-height: 1.5;
   text-align: left;
   color: var(--ion-text-color);
 }
 
 .settings-about-product__list {
   margin: 0 0 var(--app-space-3);
-  padding-left: 1.2rem;
+  padding-left: 1.15rem;
   text-align: left;
-  font-size: 0.92rem;
-  line-height: 1.5;
-  color: var(--ion-color-medium-shade);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--app-text-muted, var(--ion-color-medium));
 }
 
 .settings-about-product__list li {
@@ -506,5 +353,42 @@ html.ion-palette-dark .premium-benefits {
 
 .settings-about-product__version {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
+}
+
+.settings-about-tour {
+  margin-top: var(--app-space-2);
+  padding: var(--app-space-3);
+  border-radius: var(--glass-radius-sm, 16px);
+  background: color-mix(in srgb, var(--app-surface-solid) 72%, transparent);
+  border: 1px solid var(--app-border-subtle, var(--glass-border));
+}
+
+.settings-about-tour__title {
+  margin: 0 0 var(--app-space-2);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: left;
+}
+
+.settings-about-tour__hint {
+  margin: 0 0 var(--app-space-3);
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--app-text-muted, var(--ion-color-medium));
+  text-align: left;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .settings-list--in-card,
+  .settings-about-tour {
+    background: var(--app-surface-solid);
+  }
+
+  .settings-header ion-toolbar {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    --background: var(--app-surface-solid);
+  }
 }

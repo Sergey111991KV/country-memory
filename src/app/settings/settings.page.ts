@@ -53,7 +53,7 @@ import type { PlayModeSlide } from '../play/play-mode.types';
 import { environment } from '../../environments/environment';
 
 export interface SettingsSupportBlock {
-  id: 'privacy' | 'terms' | 'support' | 'donate' | 'logs';
+  id: 'privacy' | 'terms' | 'support' | 'logs';
   icon: string;
   titleKey: string;
   hintKey: string;
@@ -137,20 +137,13 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
       hintKey: 'support.downloadLogsHint',
       actionKey: 'support.downloadLogsAction',
     },
-    {
-      id: 'donate',
-      icon: 'heart-outline',
-      titleKey: 'aboutDeveloper.blockDonateTitle',
-      hintKey: 'aboutDeveloper.blockDonateHint',
-      actionKey: 'aboutDeveloper.openLink',
-    },
   ];
 
   readonly hasPrivacyUrl = this.legal.hasPrivacyUrl();
   readonly hasTermsUrl = this.legal.hasTermsUrl();
   readonly hasSupportEmail = this.legal.hasSupportEmail();
 
-  accordionValue = this.billingEnabled ? 'premium' : 'donate';
+  accordionValue = this.billingEnabled ? 'premium' : 'language';
   freeGamesLeft = environment.freeGamesLimit;
   isDarkTheme = false;
   localeCode: AppLang = 'en';
@@ -201,8 +194,6 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
         return this.hasSupportEmail;
       case 'logs':
         return true;
-      case 'donate':
-        return this.hasDonateUrl;
       default: {
         const _exhaustive: never = block.id;
         return _exhaustive;
@@ -227,9 +218,10 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
       case 'logs':
         await this.downloadAppLogs();
         break;
-      case 'donate':
-        await this.legal.openDonate();
-        break;
+      default: {
+        const _exhaustive: never = block.id;
+        return _exhaustive;
+      }
     }
   }
 

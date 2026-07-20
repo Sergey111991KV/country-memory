@@ -96,6 +96,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
       }
     });
     void this.refresh();
+    void this.refreshFeed();
   }
 
   ionViewWillEnter(): void {
@@ -139,6 +140,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
     this.feedCard = this.homeFeed.currentCard();
     this.resetRoundState();
     this.buildChoicesForCard();
+    this.ensureAnswerableFeedCard();
     this.cdr.markForCheck();
   }
 
@@ -257,6 +259,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
       this.feedCard = this.homeFeed.advance();
       this.resetRoundState();
       this.buildChoicesForCard();
+      this.ensureAnswerableFeedCard();
       this.cdr.markForCheck();
       return;
     }
@@ -266,6 +269,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
       this.feedCard = this.homeFeed.advance();
       this.resetRoundState();
       this.buildChoicesForCard();
+      this.ensureAnswerableFeedCard();
       this.feedCardPhase = 'idle';
       this.cdr.markForCheck();
     }, 220);
@@ -278,21 +282,54 @@ export class PlayPage implements OnInit, ViewWillEnter {
     this.choices = [];
   }
 
+  /**
+   * Hub feed may include countries outside the filtered free pool.
+   * Prefer the filtered pool for distractors; fall back to the full catalog
+   * so the mini-quiz always has answer buttons.
+   */
   private buildChoicesForCard(): void {
-    if (!this.feedCard || this.choicePool.length < 2) {
+    if (!this.feedCard) {
       this.choices = [];
       return;
     }
+    const iso = this.feedCard.iso.toUpperCase();
+    const labelOf = (c: Country) =>
+      this.catalog.localizedName(c, this.locale.language);
+    const all = this.catalog.getAll();
+    const matchIso = (c: Country) => c.iso2.toUpperCase() === iso;
+    const pool = all.length >= 2 ? all : this.choicePool;
     const target =
-      this.choicePool.find((c) => c.iso2.toUpperCase() === this.feedCard!.iso) ??
-      null;
-    if (!target) {
+      this.choicePool.find(matchIso) ??
+      all.find(matchIso) ??
+      pool.find(matchIso);
+
+    if (!target || pool.length < 2) {
       this.choices = [];
+      playDebug('PlayHub', 'buildChoices empty', {
+        iso,
+        pool: pool.length,
+        catalog: all.length,
+        filtered: this.choicePool.length,
+      });
       return;
     }
-    this.choices = buildQuizChoices(target, this.choicePool, (c) =>
-      this.catalog.localizedName(c, this.locale.language),
-    );
+
+    const distractors =
+      this.choicePool.length >= 4 && this.choicePool.some(matchIso)
+        ? this.choicePool
+        : pool;
+    this.choices = buildQuizChoices(target, distractors, labelOf);
+  }
+
+  /** Skip feed cards that still cannot form a 4-choice round. */
+  private ensureAnswerableFeedCard(): void {
+    let guard = 0;
+    while (this.feedCard && this.choices.length === 0 && guard < 24) {
+      guard += 1;
+      this.feedCard = this.homeFeed.advance();
+      this.resetRoundState();
+      this.buildChoicesForCard();
+    }
   }
 
   private refreshSnapshotsEqual(

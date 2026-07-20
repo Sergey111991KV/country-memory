@@ -43,6 +43,8 @@
     0 12px 32px color-mix(in srgb, var(--ion-text-color) 18%, transparent),
     inset 0 0 0 1px color-mix(in srgb, var(--ion-text-color) 8%, transparent);
   background: color-mix(in srgb, var(--ion-color-primary) 6%, var(--ion-background-color));
+  /* Keep 3D sway readable above glass/backdrop parents */
+  transform: translateZ(0);
 }
 
 .flag-display--hero .flag-display__fabric {
@@ -78,7 +80,7 @@
   width: 100%;
   height: 100%;
   transform-origin: left center;
-  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 
 .flag-display--animate .flag-wind__motion {
@@ -115,26 +117,27 @@
   font-size: 3rem;
 }
 
+/* Stronger sway so motion stays visible over Liquid Glass blur */
 @keyframes flagfield-wind-sway {
   0%,
   100% {
-    transform: perspective(480px) rotateY(0deg) rotateZ(0deg) skewY(0deg) scale(1);
+    transform: perspective(520px) rotateY(0deg) rotateZ(0deg) skewY(0deg) scale(1);
   }
 
-  15% {
-    transform: perspective(480px) rotateY(5deg) rotateZ(0.5deg) skewY(1.6deg) scale(1.012);
+  18% {
+    transform: perspective(520px) rotateY(7deg) rotateZ(0.7deg) skewY(2.2deg) scale(1.018);
   }
 
-  35% {
-    transform: perspective(480px) rotateY(10deg) rotateZ(1deg) skewY(3.2deg) scale(1.02);
+  38% {
+    transform: perspective(520px) rotateY(12deg) rotateZ(1.2deg) skewY(4deg) scale(1.028);
   }
 
-  55% {
-    transform: perspective(480px) rotateY(7deg) rotateZ(-0.6deg) skewY(2.4deg) scale(1.016);
+  58% {
+    transform: perspective(520px) rotateY(8deg) rotateZ(-0.8deg) skewY(2.8deg) scale(1.02);
   }
 
-  75% {
-    transform: perspective(480px) rotateY(4deg) rotateZ(0.4deg) skewY(-1.4deg) scale(1.01);
+  78% {
+    transform: perspective(520px) rotateY(5deg) rotateZ(0.5deg) skewY(-1.8deg) scale(1.012);
   }
 }
 

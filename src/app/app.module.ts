@@ -14,7 +14,7 @@ import { I18nModule } from './core/i18n/i18n.module';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    IonicModule.forRoot(),
+    IonicModule.forRoot({ animated: true }),
     I18nModule,
     AppRoutingModule,
   ],

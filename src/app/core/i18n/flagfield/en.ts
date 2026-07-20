@@ -558,10 +558,10 @@ export const FLAGFIELD_EN: Record<string, string> = {
   'settings.sectionSupportSub': 'Privacy, terms, help, and donations',
   'settings.resetAccountTitle': 'Reset progress',
   'settings.resetAccountHint':
-    'Clears game progress, knowledge base, and your name. Does not affect donate links.',
+    'Clears game progress, knowledge marks, streaks, daily goals, and your display name on this device.',
   'settings.resetAccountMessage':
     'This will erase all local progress and knowledge marks. This cannot be undone.',
-  'settings.resetAccountConfirm': 'Reset all data',
+  'settings.resetAccountConfirm': 'Reset progress',
   'support.downloadLogsTitle': 'Application logs',
   'support.downloadLogsHint': 'Diagnostic log for support (includes billing checks)',
   'support.downloadLogsAction': 'Download',

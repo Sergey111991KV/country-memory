@@ -52,6 +52,7 @@ import { refreshGlobePolygonColors } from '../../core/utils/globe-polygon-colors
 import { VisualQualityService } from '../../core/services/visual-quality.service';
 import { GlobeThemeService } from '../../core/services/globe-theme.service';
 import type { GlobeThemeId, GlobeThemePalette } from '../../core/data/globe-theme';
+import { globePreviewPalette } from '../../core/data/globe-theme';
 
 type ThreeNamespace = typeof import('three');
 type ThreeGlobeApi = Object3D & {
@@ -148,9 +149,9 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private themePalette: GlobeThemePalette = this.globeTheme.palette();
   private appliedGlobeTheme: GlobeThemeId | null = null;
   private readonly capColorFn = (f: GlobeCountryFeature): string =>
-    politicalCapColor(f, this.polygonStyleState, this.themePalette);
+    politicalCapColor(f, this.polygonStyleState, this.activePalette());
   private readonly strokeColorFn = (f: GlobeCountryFeature): string =>
-    politicalStrokeColor(f, this.polygonStyleState, this.themePalette);
+    politicalStrokeColor(f, this.polygonStyleState, this.activePalette());
   private readonly onVisibilityChange = (): void => {
     const hidden = document.hidden;
     this.renderLoop?.setPaused(hidden);
@@ -368,7 +369,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       this.refreshPolygonColors();
       this.loading = false;
       this.flyToCountry(country, 0);
-      queueMicrotask(() => this.flyToCountry(country, 1400, { reveal: true }));
+      queueMicrotask(() => this.flyToCountry(country, 550, { reveal: true }));
       totalSpan.end({ iso2 });
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);
@@ -487,7 +488,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     }) as unknown as ThreeGlobeApi;
 
     let globeLayer = globe
-      .globeImageUrl(this.themePalette.globeTexture)
+      .globeImageUrl(this.activePalette().globeTexture)
       .showAtmosphere(false);
     if (globeCfg.useBumpMap) {
       globeLayer = globeLayer.bumpImageUrl(GLOBE_BUMP_TEXTURE);
@@ -495,7 +496,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     globeLayer
       .polygonsData(this.geoFeatures)
       .polygonCapColor(this.capColorFn)
-      .polygonSideColor(() => this.themePalette.polygonSideColor)
+      .polygonSideColor(() => this.activePalette().polygonSideColor)
       .polygonStrokeColor(this.strokeColorFn)
       .polygonAltitude(() => POLYGON_ALTITUDE)
       .polygonCapCurvatureResolution(globeCfg.polygonCurvatureDeg)
@@ -617,7 +618,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     const onlyIsos = this.polygonColorDirtyIsos ?? undefined;
     refreshGlobePolygonColors(this.globe, this.polygonStyleState, {
       onlyIsos,
-      palette: this.themePalette,
+      palette: this.activePalette(),
     });
     this.polygonColorDirtyIsos = null;
   }
@@ -730,7 +731,14 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.flyRafId = this.renderLoop!.scheduleFrame(tick);
   }
 
+  private activePalette(): GlobeThemePalette {
+    return this.previewMode ? globePreviewPalette() : this.themePalette;
+  }
+
   private syncGlobeTheme(): void {
+    if (this.previewMode) {
+      return;
+    }
     const themeId = this.globeTheme.theme();
     if (themeId !== this.appliedGlobeTheme) {
       this.applyGlobeTheme(themeId);
@@ -738,11 +746,14 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   }
 
   private applyGlobeTheme(themeId: GlobeThemeId): void {
-    this.themePalette = this.globeTheme.palette();
+    this.themePalette = this.previewMode
+      ? globePreviewPalette()
+      : this.globeTheme.palette();
     this.appliedGlobeTheme = themeId;
     const g = this.globe as ThreeGlobeApi | null;
     if (g) {
-      g.globeImageUrl(this.themePalette.globeTexture);
+      g.globeImageUrl(this.activePalette().globeTexture);
+      g.polygonSideColor(() => this.activePalette().polygonSideColor);
     }
     this.lastPolygonStyleKey = '';
     this.polygonColorDirtyIsos = null;

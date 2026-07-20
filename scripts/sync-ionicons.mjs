@@ -21,6 +21,7 @@ const EXTRA = [
   'chevron-up',
   'close-circle',
   'ellipse-outline',
+  'heart',
   'lock-closed',
 ];
 

@@ -557,10 +557,10 @@ export const FLAGFIELD_RU: Record<string, string> = {
   'settings.sectionSupportSub': 'Конфиденциальность, условия, помощь и донаты',
   'settings.resetAccountTitle': 'Сбросить прогресс',
   'settings.resetAccountHint':
-    'Удаляет прогресс, базу знаний и имя. На донаты не влияет.',
+    'Удаляет прогресс игр, отметки в базе знаний, серии, дневные цели и имя на этом устройстве.',
   'settings.resetAccountMessage':
     'Будут удалены весь локальный прогресс и отметки в базе знаний. Это нельзя отменить.',
-  'settings.resetAccountConfirm': 'Сбросить все данные',
+  'settings.resetAccountConfirm': 'Сбросить прогресс',
   'support.downloadLogsTitle': 'Логи приложения',
   'support.downloadLogsHint': 'Диагностический журнал для поддержки (включая проверки подписки)',
   'support.downloadLogsAction': 'Скачать',

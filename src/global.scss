@@ -400,11 +400,39 @@ ion-toolbar ion-buttons[slot='end'] ion-note {
   margin-top: var(--app-space-2);
 }
 
-/* Tab bar: safe area + even flex so the last tab is not clipped on notched devices */
+/* Tab bar must stay above tab page content (Play quiz glass can otherwise paint over it). */
+ion-tabs {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Clip quiz glass/shadow so it cannot paint into the tab bar region. */
+ion-tabs .tabs-inner {
+  overflow: hidden !important;
+  z-index: 0;
+}
+
 ion-tab-bar {
+  position: relative;
+  z-index: 1000 !important;
   box-sizing: border-box;
   padding-left: max(10px, env(safe-area-inset-left, 0px));
   padding-right: max(10px, env(safe-area-inset-right, 0px));
+  --background: var(--app-surface-solid, var(--ion-background-color, #fff)) !important;
+  background: var(--app-surface-solid, var(--ion-background-color, #fff)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Play page fills tabs-inner; never let it stack above the tab bar. */
+app-play.ion-page,
+.ion-page app-play {
+  z-index: 0 !important;
+  overflow: hidden;
+}
+
+html.flagfield-active-tab-play ion-tab-bar {
+  z-index: 1000 !important;
 }
 
 ion-tab-bar ion-tab-button {

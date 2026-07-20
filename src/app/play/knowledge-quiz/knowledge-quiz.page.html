@@ -23,8 +23,10 @@
     <div class="challenge-layout">
       <div class="challenge-stage">
         <div class="challenge-prompt">
-          <p class="challenge-prompt__text">{{ promptText }}</p>
-          <app-speak-button [text]="promptText"></app-speak-button>
+          <div class="challenge-prompt__line">
+            <p class="challenge-prompt__text">{{ promptText }}</p>
+            <app-speak-button [text]="promptText"></app-speak-button>
+          </div>
         </div>
 
         <div *ngIf="kind === 'flag'" class="challenge-flag">

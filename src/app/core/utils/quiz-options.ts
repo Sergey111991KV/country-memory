@@ -22,7 +22,8 @@ export function buildQuizChoices(
   pool: Country[],
   labelFor: (c: Country) => string,
 ): QuizChoice[] {
-  const others = pool.filter((c) => c.iso2 !== target.iso2);
+  const targetIso = target.iso2.toUpperCase();
+  const others = pool.filter((c) => c.iso2.toUpperCase() !== targetIso);
   const sameContinent = others.filter((c) => c.continent === target.continent);
   const distractorPool =
     sameContinent.length >= 3 ? sameContinent : others;
@@ -33,7 +34,7 @@ export function buildQuizChoices(
     if (picked.length >= 3) {
       break;
     }
-    if (!picked.some((p) => p.iso2 === c.iso2)) {
+    if (!picked.some((p) => p.iso2.toUpperCase() === c.iso2.toUpperCase())) {
       picked.push(c);
     }
   }
@@ -43,7 +44,7 @@ export function buildQuizChoices(
       if (picked.length >= 3) {
         break;
       }
-      if (!picked.some((p) => p.iso2 === c.iso2)) {
+      if (!picked.some((p) => p.iso2.toUpperCase() === c.iso2.toUpperCase())) {
         picked.push(c);
       }
     }

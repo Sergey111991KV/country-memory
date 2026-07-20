@@ -311,7 +311,8 @@ app-root {
   isolation: isolate;
 }
 
-/* Specular top edge + soft lens wash — Liquid Glass highlight */
+/* Specular top edge + soft lens wash — Liquid Glass highlight.
+ * Keep z-index at 0 so real content (z-index ≥ 1 / in-flow) stays readable. */
 .glass-surface::before,
 .glass-surface--elevated::before,
 .app-metric-card::before {
@@ -322,7 +323,7 @@ app-root {
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--glass-highlight) 55%, transparent) 0%,
+      color-mix(in srgb, var(--glass-highlight) 28%, transparent) 0%,
       transparent 72%
     ),
     linear-gradient(
@@ -336,7 +337,8 @@ app-root {
   background-repeat: no-repeat;
   background-position: top, top;
   pointer-events: none;
-  z-index: 1;
+  /* Must stay behind in-flow content — positive z-index hid quiz answers. */
+  z-index: -1;
 }
 
 .glass-surface::after,

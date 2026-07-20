@@ -281,6 +281,36 @@ describe('PlayPage launchMode', () => {
     expect(component.feedbackCorrect).toBeTrue();
   });
 
+  it('builds feed choices from catalog when ISO is outside filtered pool', async () => {
+    const homeFeed = TestBed.inject(HomeFeedService) as unknown as {
+      ensureDeck: () => Promise<void>;
+      currentCard: () => unknown;
+      advance: () => unknown;
+    };
+    const card = {
+      id: 'ES-flag',
+      kind: 'flag' as const,
+      iso: 'ES',
+      countryName: 'Spain',
+      titleKey: 'home.feed.flagTitle',
+      body: 'Spain',
+      flagUrl: 'flag://ES',
+    };
+    homeFeed.currentCard = () => card;
+    homeFeed.advance = () => card;
+    playPool.getFilteredFreePool.and.returnValue(
+      Promise.resolve(FIXTURE_COUNTRIES.filter((c) => c.iso2 !== 'ES')),
+    );
+
+    await component.refreshFeed();
+
+    expect(component.feedCard?.iso).toBe('ES');
+    expect(component.choices.length).toBeGreaterThanOrEqual(2);
+    expect(
+      component.choices.some((c) => c.country.iso2.toUpperCase() === 'ES'),
+    ).toBeTrue();
+  });
+
   it('navigates every hub mode to its resolved route', async () => {
     const modes = flattenPlayModes(
       buildPlayModesByCategory(true, courseLaunches),

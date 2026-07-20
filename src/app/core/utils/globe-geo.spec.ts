@@ -3,6 +3,7 @@ import {
   iso2FromNaturalEarth,
   politicalCapColor,
 } from './globe-geo';
+import { globePreviewPalette } from '../data/globe-theme';
 
 describe('globe-geo', () => {
   it('resolves ISO_A2_EH when ISO_A2 is -99', () => {
@@ -28,18 +29,39 @@ describe('globe-geo', () => {
     expect(iso2FromNaturalEarth(features[0].properties)).toBe('DE');
   });
 
-  it('highlights selected country', () => {
+  it('preview palette paints only the focused country red', () => {
     const feature = {
       type: 'Feature' as const,
-      properties: { ISO_A2: 'DE', CONTINENT: 'Europe' },
+      properties: { ISO_A2: 'PY', CONTINENT: 'South America' },
       geometry: { type: 'Polygon', coordinates: [] },
     };
-    const selected = politicalCapColor(feature, {
-      selectedIso: 'DE',
-      feedbackCorrectIso: null,
-      feedbackWrongIso: null,
-      phase: 'pick',
-    });
-    expect(selected).toContain('59, 130, 246');
+    const other = {
+      type: 'Feature' as const,
+      properties: { ISO_A2: 'BR', CONTINENT: 'South America' },
+      geometry: { type: 'Polygon', coordinates: [] },
+    };
+    const palette = globePreviewPalette();
+    const focused = politicalCapColor(
+      feature,
+      {
+        selectedIso: 'PY',
+        feedbackCorrectIso: 'PY',
+        feedbackWrongIso: null,
+        phase: 'feedback',
+      },
+      palette,
+    );
+    const neighbor = politicalCapColor(
+      other,
+      {
+        selectedIso: 'PY',
+        feedbackCorrectIso: 'PY',
+        feedbackWrongIso: null,
+        phase: 'feedback',
+      },
+      palette,
+    );
+    expect(focused).toContain('239, 68, 68');
+    expect(neighbor).toBe(palette.defaultFill);
   });
 });
