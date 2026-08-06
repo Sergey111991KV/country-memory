@@ -15,41 +15,6 @@
   class="ion-padding settings-page settings-page--rhythm"
 >
   <div class="settings-shell">
-    <section
-      *ngIf="!billingEnabled"
-      class="settings-donate-card glass-surface"
-      aria-labelledby="settings-donate-heading"
-    >
-      <div class="settings-donate-card__badge" aria-hidden="true">
-        <ion-icon name="heart"></ion-icon>
-      </div>
-      <div class="settings-donate-card__body">
-        <p class="settings-donate-card__kicker">{{ 'donatePrompt.settingsSub' | i18n:null:lang}}</p>
-        <h2 id="settings-donate-heading">{{ 'donatePrompt.title' | i18n:null:lang}}</h2>
-        <p class="settings-donate-card__lead">{{ 'donatePrompt.heroLead' | i18n:null:lang}}</p>
-        <p class="settings-donate-card__hint">{{ 'donatePrompt.hint' | i18n:null:lang}}</p>
-        <ion-button
-          expand="block"
-          color="primary"
-          fill="solid"
-          class="settings-donate-card__cta"
-          [disabled]="!hasDonateUrl"
-          (click)="openDonateLink()"
-        >
-          <ion-icon slot="start" name="heart-outline" aria-hidden="true"></ion-icon>
-          {{ 'donatePrompt.openLink' | i18n:null:lang}}
-        </ion-button>
-        <ion-button
-          expand="block"
-          fill="clear"
-          class="settings-donate-card__more"
-          (click)="openDonatePage()"
-        >
-          {{ 'donatePrompt.learnMore' | i18n:null:lang}}
-        </ion-button>
-      </div>
-    </section>
-
     <ion-accordion-group
       [multiple]="false"
       [value]="accordionValue"
@@ -57,15 +22,68 @@
       class="settings-accordion-group"
     >
       <ion-accordion
+        *ngIf="!billingEnabled"
+        value="donate"
+        class="settings-accordion glass-surface settings-accordion--donate"
+      >
+        <ion-item slot="header" lines="none" detail="false" class="settings-acc-header">
+          <ion-label class="settings-acc-label">
+            <span class="settings-acc-badge settings-acc-badge--heart" aria-hidden="true">
+              <ion-icon name="heart"></ion-icon>
+            </span>
+            <span class="settings-acc-copy">
+              <h2 id="settings-donate-heading">{{ 'donatePrompt.title' | i18n:null:lang}}</h2>
+              <p>{{ 'donatePrompt.settingsSub' | i18n:null:lang}}</p>
+            </span>
+          </ion-label>
+        </ion-item>
+        <div slot="content" class="settings-acc-panel">
+          <div class="settings-donate-flow">
+            <div class="settings-donate-flow__badge" aria-hidden="true">
+              <ion-icon name="heart"></ion-icon>
+            </div>
+            <p class="settings-donate-flow__kicker">{{ 'donatePrompt.settingsSub' | i18n:null:lang}}</p>
+            <p class="settings-donate-flow__lead">{{ 'donatePrompt.heroLead' | i18n:null:lang}}</p>
+            <p class="settings-donate-flow__hint">{{ 'donatePrompt.hint' | i18n:null:lang}}</p>
+            <div class="settings-donate-flow__actions">
+              <ion-button
+                expand="block"
+                color="primary"
+                fill="solid"
+                class="settings-donate-flow__cta"
+                [disabled]="!hasDonateUrl"
+                (click)="openDonateLink()"
+              >
+                <ion-icon slot="start" name="heart-outline" aria-hidden="true"></ion-icon>
+                {{ 'donatePrompt.openLink' | i18n:null:lang}}
+              </ion-button>
+              <ion-button
+                expand="block"
+                fill="clear"
+                class="settings-donate-flow__more"
+                (click)="openDonatePage()"
+              >
+                {{ 'donatePrompt.learnMore' | i18n:null:lang}}
+              </ion-button>
+            </div>
+          </div>
+        </div>
+      </ion-accordion>
+
+      <ion-accordion
         *ngIf="billingEnabled"
         value="premium"
         class="settings-accordion glass-surface"
       >
         <ion-item slot="header" lines="none" detail="false" class="settings-acc-header">
-          <ion-icon class="settings-acc-icon" name="diamond-outline" slot="start" aria-hidden="true"></ion-icon>
-          <ion-label>
-            <h2>{{ 'settings.sectionPremium' | i18n:null:lang}}</h2>
-            <p>{{ 'settings.sectionPremiumSub' | i18n:null:lang}}</p>
+          <ion-label class="settings-acc-label">
+            <span class="settings-acc-badge" aria-hidden="true">
+              <ion-icon name="diamond-outline"></ion-icon>
+            </span>
+            <span class="settings-acc-copy">
+              <h2>{{ 'settings.sectionPremium' | i18n:null:lang}}</h2>
+              <p>{{ 'settings.sectionPremiumSub' | i18n:null:lang}}</p>
+            </span>
           </ion-label>
         </ion-item>
         <div slot="content" class="settings-acc-panel">
@@ -133,10 +151,14 @@
 
       <ion-accordion value="language" class="settings-accordion glass-surface">
         <ion-item slot="header" lines="none" detail="false" class="settings-acc-header">
-          <ion-icon class="settings-acc-icon" name="language-outline" slot="start" aria-hidden="true"></ion-icon>
-          <ion-label>
-            <h2>{{ 'settings.sectionLanguage' | i18n:null:lang}}</h2>
-            <p>{{ 'settings.sectionLanguageSub' | i18n:null:lang}}</p>
+          <ion-label class="settings-acc-label">
+            <span class="settings-acc-badge" aria-hidden="true">
+              <ion-icon name="globe-outline"></ion-icon>
+            </span>
+            <span class="settings-acc-copy">
+              <h2>{{ 'settings.sectionLanguage' | i18n:null:lang}}</h2>
+              <p>{{ 'settings.sectionLanguageSub' | i18n:null:lang}}</p>
+            </span>
           </ion-label>
         </ion-item>
         <div slot="content" class="settings-acc-panel">
@@ -194,10 +216,14 @@
 
       <ion-accordion value="learning" class="settings-accordion glass-surface">
         <ion-item slot="header" lines="none" detail="false" class="settings-acc-header">
-          <ion-icon class="settings-acc-icon" name="game-controller-outline" slot="start" aria-hidden="true"></ion-icon>
-          <ion-label>
-            <h2>{{ 'settings.sectionLearning' | i18n:null:lang}}</h2>
-            <p>{{ 'settings.sectionLearningSub' | i18n:null:lang}}</p>
+          <ion-label class="settings-acc-label">
+            <span class="settings-acc-badge" aria-hidden="true">
+              <ion-icon name="game-controller-outline"></ion-icon>
+            </span>
+            <span class="settings-acc-copy">
+              <h2>{{ 'settings.sectionLearning' | i18n:null:lang}}</h2>
+              <p>{{ 'settings.sectionLearningSub' | i18n:null:lang}}</p>
+            </span>
           </ion-label>
         </ion-item>
         <div slot="content" class="settings-acc-panel">
@@ -308,10 +334,14 @@
 
       <ion-accordion value="display" class="settings-accordion glass-surface">
         <ion-item slot="header" lines="none" detail="false" class="settings-acc-header">
-          <ion-icon class="settings-acc-icon" name="color-palette-outline" slot="start" aria-hidden="true"></ion-icon>
-          <ion-label>
-            <h2>{{ 'settings.sectionDisplay' | i18n:null:lang}}</h2>
-            <p>{{ 'settings.sectionDisplaySub' | i18n:null:lang}}</p>
+          <ion-label class="settings-acc-label">
+            <span class="settings-acc-badge" aria-hidden="true">
+              <ion-icon name="color-palette-outline"></ion-icon>
+            </span>
+            <span class="settings-acc-copy">
+              <h2>{{ 'settings.sectionDisplay' | i18n:null:lang}}</h2>
+              <p>{{ 'settings.sectionDisplaySub' | i18n:null:lang}}</p>
+            </span>
           </ion-label>
         </ion-item>
         <div slot="content" class="settings-acc-panel">
@@ -450,10 +480,14 @@
 
       <ion-accordion value="about" class="settings-accordion glass-surface">
         <ion-item slot="header" lines="none" detail="false" class="settings-acc-header">
-          <ion-icon class="settings-acc-icon" name="information-circle-outline" slot="start" aria-hidden="true"></ion-icon>
-          <ion-label>
-            <h2>{{ 'settings.sectionAbout' | i18n:null:lang}}</h2>
-            <p>{{ 'settings.sectionAboutSub' | i18n:null:lang}}</p>
+          <ion-label class="settings-acc-label">
+            <span class="settings-acc-badge" aria-hidden="true">
+              <ion-icon name="information-circle-outline"></ion-icon>
+            </span>
+            <span class="settings-acc-copy">
+              <h2>{{ 'settings.sectionAbout' | i18n:null:lang}}</h2>
+              <p>{{ 'settings.sectionAboutSub' | i18n:null:lang}}</p>
+            </span>
           </ion-label>
         </ion-item>
         <div slot="content" class="settings-acc-panel">
@@ -494,10 +528,14 @@
 
       <ion-accordion value="support" class="settings-accordion glass-surface">
         <ion-item slot="header" lines="none" detail="false" class="settings-acc-header">
-          <ion-icon class="settings-acc-icon" name="shield-checkmark-outline" slot="start" aria-hidden="true"></ion-icon>
-          <ion-label>
-            <h2>{{ 'settings.sectionSupport' | i18n:null:lang}}</h2>
-            <p>{{ 'settings.sectionSupportSub' | i18n:null:lang}}</p>
+          <ion-label class="settings-acc-label">
+            <span class="settings-acc-badge" aria-hidden="true">
+              <ion-icon name="shield-checkmark-outline"></ion-icon>
+            </span>
+            <span class="settings-acc-copy">
+              <h2>{{ 'settings.sectionSupport' | i18n:null:lang}}</h2>
+              <p>{{ 'settings.sectionSupportSub' | i18n:null:lang}}</p>
+            </span>
           </ion-label>
         </ion-item>
         <div slot="content" class="settings-acc-panel">

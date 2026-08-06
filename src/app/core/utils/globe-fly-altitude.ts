@@ -45,7 +45,8 @@ export function globeFlyAltitude(input: GlobeFlyAltitudeInput): number {
 
 /** Minimum OrbitControls distance that still allows the reveal camera pose. */
 export function globeRevealMinControlDistance(cameraDistance: number): number {
-  return Math.max(82, Math.min(160, cameraDistance * 0.72));
+  // Keep headroom below the reveal pose so pinch / zoom-in still works.
+  return Math.max(70, Math.min(140, cameraDistance * 0.48));
 }
 
 export function globeFeatureBBoxSpanKm(

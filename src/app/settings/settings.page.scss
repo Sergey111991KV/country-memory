@@ -7,6 +7,10 @@
   --padding-bottom: calc(var(--app-tab-bar-height, 74px) + var(--app-space-5));
 }
 
+.settings-page--rhythm::part(scroll) {
+  padding-bottom: calc(var(--app-tab-bar-height, 74px) + var(--app-space-6));
+}
+
 .settings-header ion-toolbar {
   --background: color-mix(in srgb, var(--glass-bg) 55%, transparent);
   --border-width: 0;
@@ -21,99 +25,6 @@
   box-sizing: border-box;
 }
 
-/* Featured donate block — separate from accordion list */
-.settings-donate-card {
-  display: flex;
-  gap: var(--app-space-3);
-  align-items: flex-start;
-  margin: 0 0 var(--app-space-4);
-  padding: var(--app-space-4);
-  border-radius: var(--glass-radius, 24px);
-  border: 1px solid color-mix(in srgb, #f472b6 32%, var(--glass-border));
-  box-shadow:
-    0 1px 0 color-mix(in srgb, #ffffff 55%, transparent) inset,
-    0 12px 32px color-mix(in srgb, #ec4899 14%, transparent);
-  background:
-    radial-gradient(
-      ellipse 90% 70% at 8% 0%,
-      color-mix(in srgb, #f9a8d4 28%, transparent),
-      transparent 55%
-    ),
-    var(--glass-bg);
-}
-
-.settings-donate-card__badge {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 16px;
-  background: color-mix(in srgb, #ec4899 22%, transparent);
-  border: 1px solid color-mix(in srgb, #f472b6 40%, transparent);
-  color: #ec4899;
-  font-size: 1.45rem;
-}
-
-html.ion-palette-dark .settings-donate-card__badge {
-  color: #f9a8d4;
-}
-
-.settings-donate-card__body {
-  flex: 1;
-  min-width: 0;
-}
-
-.settings-donate-card__kicker {
-  margin: 0 0 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, #ec4899 75%, var(--app-text-muted));
-}
-
-.settings-donate-card__body h2 {
-  margin: 0 0 var(--app-space-2);
-  font-family: var(--app-font-ui);
-  font-size: 1.2rem;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  color: var(--ion-text-color);
-}
-
-.settings-donate-card__lead {
-  margin: 0 0 var(--app-space-2);
-  font-size: 0.92rem;
-  line-height: 1.45;
-  color: var(--ion-text-color);
-}
-
-.settings-donate-card__hint {
-  margin: 0 0 var(--app-space-3);
-  font-size: 0.8rem;
-  line-height: 1.4;
-  color: var(--app-text-muted);
-}
-
-.settings-donate-card__cta {
-  margin: 0 0 var(--app-space-1);
-  min-height: 48px;
-  --background: linear-gradient(135deg, #ec4899 0%, #db2777 55%, #be185d 100%);
-  --background-activated: #be185d;
-  --box-shadow: 0 8px 20px color-mix(in srgb, #ec4899 35%, transparent);
-  font-weight: 600;
-}
-
-.settings-donate-card__more {
-  margin: 0;
-  --color: color-mix(in srgb, #ec4899 80%, var(--ion-text-color));
-}
-
-.settings-reset-block {
-  margin-top: var(--app-space-4);
-}
-
 .settings-accordion-group {
   background: transparent;
   margin: 0;
@@ -123,13 +34,18 @@ html.ion-palette-dark .settings-donate-card__badge {
   margin: 0 0 var(--app-space-3);
   border-radius: var(--glass-radius, 24px);
   overflow: hidden;
-  /* One glass layer — no nested frosted headers */
   isolation: isolate;
 }
 
 .settings-accordion.glass-surface::after {
-  /* Softer caustic so dense settings text stays readable */
   opacity: 0.35;
+}
+
+.settings-accordion--donate.glass-surface {
+  border-color: color-mix(in srgb, #f472b6 28%, var(--glass-border));
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #ffffff 55%, transparent) inset,
+    0 10px 28px color-mix(in srgb, #ec4899 12%, transparent);
 }
 
 .settings-acc-header {
@@ -139,19 +55,53 @@ html.ion-palette-dark .settings-donate-card__badge {
   --color: var(--ion-text-color);
   --min-height: 58px;
   --inner-padding-end: 8px;
-  --padding-start: 14px;
+  --padding-start: 12px;
   --border-width: 0;
   font-family: var(--app-font-ui);
 }
 
-.settings-acc-header ion-icon[slot='start'],
-.settings-acc-icon {
-  margin-inline-end: 10px;
-  font-size: 1.35rem;
-  color: var(--ion-color-primary);
+/* Badge + copy inside label — reliable icons (slot="start" was flaky in accordion) */
+.settings-acc-label {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
 }
 
-.settings-acc-header ion-label h2 {
+.settings-acc-badge {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ion-color-primary) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ion-color-primary) 22%, transparent);
+  color: var(--ion-color-primary);
+  font-size: 1.2rem;
+}
+
+.settings-acc-badge ion-icon {
+  pointer-events: none;
+}
+
+.settings-acc-badge--heart {
+  background: color-mix(in srgb, #ec4899 18%, transparent);
+  border-color: color-mix(in srgb, #f472b6 40%, transparent);
+  color: #ec4899;
+}
+
+html.ion-palette-dark .settings-acc-badge--heart {
+  color: #f9a8d4;
+}
+
+.settings-acc-copy {
+  flex: 1;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.settings-acc-copy h2 {
   margin: 0 0 2px;
   font-family: var(--app-font-ui);
   font-size: 1.02rem;
@@ -160,7 +110,7 @@ html.ion-palette-dark .settings-donate-card__badge {
   color: var(--ion-text-color);
 }
 
-.settings-acc-header ion-label p {
+.settings-acc-copy p {
   margin: 0;
   font-size: 0.8rem;
   line-height: 1.3;
@@ -169,6 +119,74 @@ html.ion-palette-dark .settings-donate-card__badge {
 
 .settings-acc-panel {
   padding: 0 var(--app-space-3) var(--app-space-4);
+}
+
+/* Donate expanded: icon floated so copy wraps around it */
+.settings-donate-flow {
+  overflow: hidden;
+}
+
+.settings-donate-flow__badge {
+  float: left;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: 0 12px 10px 0;
+  border-radius: 16px;
+  background: color-mix(in srgb, #ec4899 22%, transparent);
+  border: 1px solid color-mix(in srgb, #f472b6 40%, transparent);
+  color: #ec4899;
+  font-size: 1.45rem;
+}
+
+html.ion-palette-dark .settings-donate-flow__badge {
+  color: #f9a8d4;
+}
+
+.settings-donate-flow__kicker {
+  margin: 0 0 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, #ec4899 75%, var(--app-text-muted));
+}
+
+.settings-donate-flow__lead {
+  margin: 0 0 var(--app-space-2);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--ion-text-color);
+}
+
+.settings-donate-flow__hint {
+  margin: 0 0 var(--app-space-3);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--app-text-muted);
+}
+
+.settings-donate-flow__actions {
+  clear: both;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-donate-flow__cta {
+  margin: 0;
+  min-height: 48px;
+  font-weight: 600;
+}
+
+.settings-donate-flow__more {
+  margin: 0;
+  --color: color-mix(in srgb, #ec4899 80%, var(--ion-text-color));
+}
+
+.settings-reset-block {
+  margin-top: var(--app-space-4);
 }
 
 /* Soft inset groups inside a section — solid-ish, not second glass */
@@ -211,11 +229,6 @@ html.ion-palette-dark .settings-donate-card__badge {
   color: var(--ion-text-color);
   background: color-mix(in srgb, var(--ion-color-primary) 10%, var(--glass-bg-tint));
   border: 1px solid color-mix(in srgb, var(--ion-color-primary) 22%, transparent);
-}
-
-.settings-callout--donate {
-  background: color-mix(in srgb, var(--ion-color-tertiary) 12%, var(--glass-bg-tint));
-  border-color: color-mix(in srgb, var(--ion-color-tertiary) 28%, transparent);
 }
 
 .settings-callout--premium {

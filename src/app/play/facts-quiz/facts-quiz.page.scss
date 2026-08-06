@@ -13,8 +13,10 @@
 
 .facts-quiz-statement {
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: var(--app-space-2);
-  align-items: flex-start;
+  align-items: center;
   padding: var(--app-space-4);
   margin-bottom: var(--app-space-4);
   border-radius: 16px;
@@ -27,6 +29,11 @@
     font-size: 1.05rem;
     line-height: 1.5;
     font-weight: 500;
+    min-width: 0;
+  }
+
+  app-speak-button {
+    flex: 0 0 auto;
   }
 }
 

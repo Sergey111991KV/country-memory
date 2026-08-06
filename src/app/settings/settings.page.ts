@@ -143,7 +143,7 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   readonly hasTermsUrl = this.legal.hasTermsUrl();
   readonly hasSupportEmail = this.legal.hasSupportEmail();
 
-  accordionValue = this.billingEnabled ? 'premium' : 'language';
+  accordionValue: string | undefined = undefined;
   freeGamesLeft = environment.freeGamesLimit;
   isDarkTheme = false;
   localeCode: AppLang = 'en';
@@ -237,10 +237,12 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
       return;
     }
     const v = ev.detail.value;
-    if (typeof v === 'string') {
+    if (typeof v === 'string' && v.length > 0) {
       this.accordionValue = v;
-    } else if (Array.isArray(v)) {
-      this.accordionValue = v[0] ?? 'language';
+    } else if (Array.isArray(v) && typeof v[0] === 'string' && v[0].length > 0) {
+      this.accordionValue = v[0];
+    } else {
+      this.accordionValue = undefined;
     }
   }
 
@@ -543,12 +545,20 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
 
   private applyPanelFromRoute(): void {
     const panel = this.route.snapshot.queryParamMap.get('panel');
-    if (panel === 'support') {
+    if (panel === 'donate') {
+      this.accordionValue = 'donate';
+    } else if (panel === 'support') {
       this.accordionValue = 'support';
     } else if (panel === 'learning' || panel === 'game') {
       this.accordionValue = 'learning';
     } else if (panel === 'how-it-works' || panel === 'tour' || panel === 'about') {
       this.accordionValue = 'about';
+    } else if (panel === 'premium') {
+      this.accordionValue = 'premium';
+    } else if (panel === 'display') {
+      this.accordionValue = 'display';
+    } else if (panel === 'language') {
+      this.accordionValue = 'language';
     }
   }
 

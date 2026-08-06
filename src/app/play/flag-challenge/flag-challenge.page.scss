@@ -157,8 +157,8 @@
 
   &__globe {
     position: absolute;
-    top: -0.35rem;
-    right: -0.35rem;
+    top: -0.9rem;
+    right: -0.9rem;
     z-index: 2;
     display: inline-flex;
     align-items: center;
@@ -243,7 +243,8 @@
 
   &__line {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
     gap: var(--app-space-2);

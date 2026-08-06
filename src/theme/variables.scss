@@ -21,8 +21,8 @@
   --app-space-5: 24px;
   --app-space-6: 32px;
 
-  /* Tab bar: ~49pt content + home indicator (see tabs.page.scss) */
-  --app-tab-bar-height: calc(52px + env(safe-area-inset-bottom, 0px));
+  /* Tab bar: Ionic 50px content + home indicator (see tabs.page.scss) */
+  --app-tab-bar-height: calc(50px + var(--ion-safe-area-bottom, env(safe-area-inset-bottom, 0px)));
 
   /* Motion */
   --app-ease-spring: cubic-bezier(0.34, 1.08, 0.44, 1);

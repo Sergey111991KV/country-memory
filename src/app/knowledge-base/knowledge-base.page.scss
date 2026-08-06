@@ -14,7 +14,7 @@
   max-width: min(100%, 80rem);
   margin-inline: auto;
   padding: clamp(1rem, 2.5vw, 1.75rem) clamp(1rem, 4vw, 2.5rem)
-    calc(clamp(1.5rem, 4vw, 2.5rem) + 72px);
+    calc(clamp(1.5rem, 4vw, 2.5rem) + var(--app-tab-bar-height));
   box-sizing: border-box;
 }
 

@@ -45,7 +45,7 @@ export const environment = {
   supportEmail: 'supp0rt.serg@yandex.com',
 
   /** Shown on About — sync with package.json for store builds */
-  appVersion: '1.0.3',
+  appVersion: '1.0.4',
 
   /**
    * Optional HTTPS tip link (Ko-fi, PayPal.me, etc.). Empty or placeholder host

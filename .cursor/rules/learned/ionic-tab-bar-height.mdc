@@ -1,0 +1,23 @@
+---
+description: Keep Flagfield tab bar uncovered — fixed bar + inset page pane
+globs: ["src/app/tabs/**", "src/global.scss", "src/app/play/play.page.scss"]
+---
+
+# Tab bar must stay uncovered by page content
+
+**Goal:** Knowledge / Play / Progress fully visible; Play glass never covers them.
+
+## Layout contract
+1. `.tabs-inner`: `position: absolute; top/left/right: 0; bottom: var(--app-tab-bar-height); overflow: hidden`.
+2. `ion-tab-bar`: `position: fixed; bottom: 0; z-index: 10000`; opaque `--ion-background-color`.
+3. `--app-tab-bar-height: calc(50px + safe-area)`.
+4. Play panel: `max-height: 100%` of shell — not `100dvh`.
+
+## Why
+`ion-page` is `position: absolute; inset: 0`. If `.tabs-inner` is full-height, pages paint over the tab bar even with high z-index on the bar in some WebKit cases. Insetting `.tabs-inner` bottom leaves a hard gap the glass cannot enter.
+
+## What didn't work
+- Flex column + z-index alone.
+- Growing bar to 56px.
+- Translucent glass tab bar.
+- `max-height: calc(100dvh - tab-bar)` on the card while page still stacked over the bar.

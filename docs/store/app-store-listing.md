@@ -47,9 +47,19 @@ Auto-renewing subscription and/or lifetime option when offered. Payment charged 
 
 Privacy Policy and Terms: see URLs in App Store Connect (must match `environment.prod.local.ts`).
 
-## Keywords
+## Keywords (100 chars max; do not repeat Subtitle: globe / map / flag / quiz)
 
-geography,flags,countries,globe,map,quiz,learn,world,capitals,education,trivia,atlas
+**EN (97/100):**
+```
+geography,countries,capitals,world,atlas,trivia,education,continents,political,earth,nation,learn
+```
+
+**RU locale (77/100):**
+```
+география,страны,столицы,мир,атлас,викторина,обучение,континенты,флаги,глобус
+```
+
+**ASA seeds:** flag quiz · learn countries · world capitals · geography quiz · 3d globe countries · flag quiz game · world map quiz · atlas learning · country flags trivia · political world map
 
 ## Category
 
@@ -62,13 +72,13 @@ geography,flags,countries,globe,map,quiz,learn,world,capitals,education,trivia,a
 
 ## Screenshots (suggested captions)
 
-1. Home — daily goal & Play  
-2. Play hub — three modes  
+1. Play hub — flag quiz & start  
+2. Knowledge — collections & countries  
 3. Globe Quest — 3D globe  
 4. Map Quest — flat map  
-5. Flag Quiz — choices  
-6. Country Portrait — long-press flag  
-7. Progress — stats  
+5. Flag Quiz — four choices  
+6. Country Portrait — cultural scene  
+7. Progress — daily goal & stats  
 
 ## Privacy nutrition labels (guide)
 

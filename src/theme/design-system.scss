@@ -603,10 +603,12 @@ ion-content.app-game-shell {
 /* Ionic primitives                                                           */
 /* -------------------------------------------------------------------------- */
 
+/* Opaque bar — never let Play glass composite over tab icons. */
 ion-tab-bar {
-  --background: transparent;
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  --background: var(--ion-background-color, #fff);
+  background: var(--ion-background-color, #fff);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border-top: 1px solid var(--glass-border);
 }
 

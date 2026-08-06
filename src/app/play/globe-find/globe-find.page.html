@@ -1,7 +1,7 @@
 @let lang = locale.langSig();
-<ion-header class="ion-no-border">
+<ion-header class="ion-no-border" [class.globe-header--preview]="previewMode">
   <ion-toolbar>
-    <ion-buttons slot="start">
+    <ion-buttons *ngIf="!previewMode" slot="start">
       <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
@@ -15,7 +15,12 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="globe-find-content app-game-shell">
+<ion-content
+  class="globe-find-content app-game-shell"
+  [class.globe-find-content--preview]="previewMode"
+>
+  <div *ngIf="previewMode" class="globe-preview-bg" aria-hidden="true"></div>
+
   <div *ngIf="loading" class="globe-find-loading">
     <ion-spinner name="crescent"></ion-spinner>
     <p>{{ 'globe.loading' | i18n:null:lang}}</p>
@@ -36,20 +41,54 @@
   </ng-container>
 
   <ng-container *ngIf="!loading && !loadError && target && previewMode">
-    <section class="globe-prompt mem-surface">
+    <section class="globe-prompt mem-surface globe-prompt--preview">
       <p class="globe-prompt__kicker">{{ 'globe.previewKicker' | i18n:null:lang}}</p>
-      <h1 class="globe-prompt__country">{{ targetLabel }}</h1>
+      <button
+        type="button"
+        class="globe-prompt__country globe-prompt__country--action"
+        (click)="recenterOnTarget()"
+      >
+        {{ targetLabel }}
+      </button>
       <p class="globe-prompt__hint">{{ explainLine(target) }}</p>
+      <p class="globe-prompt__tap-hint">{{ 'globe.recenterHint' | i18n:null:lang}}</p>
     </section>
   </ng-container>
 
-  <!-- Always in DOM so Three.js can mount while data loads -->
-  <div
-    #globeHost
-    class="globe-host"
-    [class.globe-host--hidden]="loading || loadError"
-    aria-label="Interactive world globe"
-  ></div>
+  <div class="globe-stage" [class.globe-stage--preview]="previewMode">
+    <!-- Always in DOM so Three.js can mount while data loads -->
+    <div
+      #globeHost
+      class="globe-host"
+      [class.globe-host--hidden]="loading || loadError"
+      [class.globe-host--preview]="previewMode"
+      aria-label="Interactive world globe"
+    ></div>
+
+    <div
+      *ngIf="!loading && !loadError && previewMode && target"
+      class="globe-zoom"
+    >
+      <ion-button
+        class="globe-zoom__btn"
+        fill="solid"
+        color="dark"
+        (click)="zoomIn()"
+        [attr.aria-label]="'globe.zoomIn' | i18n:null:lang"
+      >
+        <ion-icon name="add" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button
+        class="globe-zoom__btn"
+        fill="solid"
+        color="dark"
+        (click)="zoomOut()"
+        [attr.aria-label]="'globe.zoomOut' | i18n:null:lang"
+      >
+        <ion-icon name="remove" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
 
   <ng-container *ngIf="!loading && !loadError && target && !previewMode">
     <section *ngIf="showFeedback" class="globe-feedback mem-surface">
@@ -83,7 +122,10 @@
     </div>
   </ng-container>
 
-  <div *ngIf="!loading && !loadError && previewMode && target" class="globe-actions">
+  <div
+    *ngIf="!loading && !loadError && previewMode && target"
+    class="globe-actions globe-actions--preview"
+  >
     <ion-button expand="block" color="primary" (click)="goBack()">
       {{ 'common.back' | i18n:null:lang}}
     </ion-button>

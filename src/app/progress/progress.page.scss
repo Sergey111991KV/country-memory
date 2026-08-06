@@ -13,7 +13,8 @@
 .progress-shell {
   max-width: 28rem;
   margin: 0 auto;
-  padding: var(--app-space-4) var(--app-space-4) calc(var(--app-space-6) + 72px);
+  padding: var(--app-space-4) var(--app-space-4)
+    calc(var(--app-space-6) + var(--app-tab-bar-height));
 }
 
 .progress-header {

@@ -22,8 +22,10 @@
         <div class="challenge-prompt">
           <p class="challenge-prompt__kicker">{{ 'factsDrill.kicker' | i18n:null:lang}}</p>
           <p *ngIf="roundKind !== 'flag'" class="facts-drill-value">{{ promptValue }}</p>
-          <p class="challenge-prompt__text">{{ promptText }}</p>
-          <app-speak-button [text]="promptText"></app-speak-button>
+          <div class="challenge-prompt__line">
+            <p class="challenge-prompt__text">{{ promptText }}</p>
+            <app-speak-button [text]="promptText"></app-speak-button>
+          </div>
         </div>
 
         <div *ngIf="showFlag" class="challenge-flag">

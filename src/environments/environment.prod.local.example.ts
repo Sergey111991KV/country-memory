@@ -33,7 +33,7 @@ export const environment = {
     'https://play.google.com/store/account/subscriptions?package=com.flagfield.learn',
 
   supportEmail: 'supp0rt.serg@yandex.com',
-  appVersion: '1.0.3',
+  appVersion: '1.0.4',
   donateUrl: 'https://destream.net/live/SergeyKosilov/donate',
   developerWebsiteUrl: PUBLIC_SITE,
 };

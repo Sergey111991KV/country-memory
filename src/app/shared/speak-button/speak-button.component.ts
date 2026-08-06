@@ -17,6 +17,11 @@ import { SpeechService } from '../../core/services/speech.service';
   `,
   styles: [
     `
+      :host {
+        display: inline-flex;
+        flex: 0 0 auto;
+        vertical-align: middle;
+      }
       .speak-button {
         display: inline-flex;
         align-items: center;
@@ -32,7 +37,6 @@ import { SpeechService } from '../../core/services/speech.service';
         -webkit-backdrop-filter: blur(12px) saturate(1.3);
         box-shadow: var(--glass-shadow, none);
         color: var(--ion-color-primary);
-        vertical-align: middle;
         cursor: pointer;
         transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
       }

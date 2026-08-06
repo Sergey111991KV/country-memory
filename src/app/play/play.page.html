@@ -13,75 +13,77 @@
       </ion-button>
     </header>
 
-    <section
+    <div
       *ngIf="feedCard as c"
-      class="play-quiz glass-surface"
-      [class.play-quiz--fade]="feedCardPhase === 'fade'"
+      class="play-panel glass-surface"
+      [class.play-panel--fade]="feedCardPhase === 'fade'"
       aria-live="polite"
     >
-      <p class="play-quiz__kicker">{{ c.titleKey | i18n:null:lang}}</p>
-      <p class="play-quiz__prompt">{{ promptText }}</p>
+      <section class="play-quiz">
+        <p class="play-quiz__kicker">{{ c.titleKey | i18n:null:lang}}</p>
+        <p class="play-quiz__prompt">{{ promptText }}</p>
 
-      <div *ngIf="c.kind === 'flag'" class="play-quiz__flag">
-        <button
-          type="button"
-          class="play-quiz__globe"
-          (click)="openFeedCountryOnGlobe()"
-          [attr.aria-label]="'globe.openPreview' | i18n:null:lang"
-        >
-          <ion-icon name="earth-outline" aria-hidden="true"></ion-icon>
-        </button>
-        <img [src]="c.flagUrl" [alt]="promptText" width="220" height="147" />
-      </div>
+        <div *ngIf="c.kind === 'flag'" class="play-quiz__flag">
+          <button
+            type="button"
+            class="play-quiz__globe"
+            (click)="openFeedCountryOnGlobe()"
+            [attr.aria-label]="'globe.openPreview' | i18n:null:lang"
+          >
+            <ion-icon name="earth-outline" aria-hidden="true"></ion-icon>
+          </button>
+          <img [src]="c.flagUrl" [alt]="promptText" width="220" height="147" />
+        </div>
 
-      <p *ngIf="c.kind !== 'flag'" class="play-quiz__clue">{{ c.body }}</p>
+        <p *ngIf="c.kind !== 'flag'" class="play-quiz__clue">{{ c.body }}</p>
 
-      <div class="play-quiz__choices" *ngIf="choices.length">
-        <button
-          type="button"
-          class="play-quiz__choice"
-          *ngFor="let choice of choices; trackBy: trackChoice"
-          [class.play-quiz__choice--correct]="choiceState(choice) === 'correct'"
-          [class.play-quiz__choice--wrong]="choiceState(choice) === 'wrong'"
-          [disabled]="feedPhase !== 'pick'"
-          (click)="answerChoice(choice)"
-        >
-          {{ choice.label }}
-        </button>
-      </div>
+        <div class="play-quiz__choices" *ngIf="choices.length">
+          <button
+            type="button"
+            class="play-quiz__choice"
+            *ngFor="let choice of choices; trackBy: trackChoice"
+            [class.play-quiz__choice--correct]="choiceState(choice) === 'correct'"
+            [class.play-quiz__choice--wrong]="choiceState(choice) === 'wrong'"
+            [disabled]="feedPhase !== 'pick'"
+            (click)="answerChoice(choice)"
+          >
+            {{ choice.label }}
+          </button>
+        </div>
 
-      <p *ngIf="feedPhase === 'pick' && !choices.length" class="play-quiz__empty" role="status">
-        {{ 'knowledge.emptyResults' | i18n:null:lang}}
-      </p>
-
-      <div *ngIf="feedPhase === 'feedback'" class="play-quiz__feedback">
-        <p [class.play-quiz__feedback--ok]="feedbackCorrect" [class.play-quiz__feedback--bad]="!feedbackCorrect">
-          {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}
+        <p *ngIf="feedPhase === 'pick' && !choices.length" class="play-quiz__empty" role="status">
+          {{ 'knowledge.emptyResults' | i18n:null:lang}}
         </p>
-        <p class="play-quiz__answer">{{ c.countryName }}</p>
-        <ion-button expand="block" color="primary" (click)="nextFeedCard()">
+
+        <div *ngIf="feedPhase === 'feedback'" class="play-quiz__feedback">
+          <p [class.play-quiz__feedback--ok]="feedbackCorrect" [class.play-quiz__feedback--bad]="!feedbackCorrect">
+            {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}
+          </p>
+          <p class="play-quiz__answer">{{ c.countryName }}</p>
+          <ion-button expand="block" color="primary" (click)="nextFeedCard()">
+            {{ 'home.feed.next' | i18n:null:lang}}
+          </ion-button>
+        </div>
+      </section>
+
+      <div class="play-hub-actions">
+        <ion-button
+          expand="block"
+          color="primary"
+          class="play-hub-actions__start"
+          (click)="playQuick()"
+        >
+          {{ 'home.playCta' | i18n:null:lang}}
+        </ion-button>
+        <ion-button
+          *ngIf="!choices.length"
+          expand="block"
+          fill="outline"
+          (click)="nextFeedCard()"
+        >
           {{ 'home.feed.next' | i18n:null:lang}}
         </ion-button>
       </div>
-    </section>
-
-    <div class="play-hub-actions" *ngIf="feedCard && feedPhase === 'pick'">
-      <ion-button
-        expand="block"
-        color="primary"
-        class="play-hub-actions__start"
-        (click)="playQuick()"
-      >
-        {{ 'home.playCta' | i18n:null:lang}}
-      </ion-button>
-      <ion-button
-        *ngIf="!choices.length"
-        expand="block"
-        fill="outline"
-        (click)="nextFeedCard()"
-      >
-        {{ 'home.feed.next' | i18n:null:lang}}
-      </ion-button>
     </div>
   </div>
 </ion-content>

@@ -76,7 +76,9 @@ type PickPhase = 'pick' | 'feedback';
 const ROUNDS_PER_SESSION = 10;
 const POLYGON_ALTITUDE = 0.022;
 const ORBIT_MIN_DISTANCE_PLAY = 180;
+const ORBIT_MIN_DISTANCE_PREVIEW = 78;
 const ORBIT_MAX_DISTANCE = 480;
+const ZOOM_STEP = 0.82;
 
 interface GlobeFlyOptions {
   reveal?: boolean;
@@ -318,6 +320,23 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.flyToCountry(this.target, 1600, { reveal: true });
   }
 
+  /** Preview: tap country name to fly back to the first reveal pose. */
+  recenterOnTarget(): void {
+    if (!this.previewMode || !this.target) {
+      return;
+    }
+    this.globeHost?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    this.flyToCountry(this.target, 700, { reveal: true });
+  }
+
+  zoomIn(): void {
+    this.nudgeCameraDistance(ZOOM_STEP);
+  }
+
+  zoomOut(): void {
+    this.nudgeCameraDistance(1 / ZOOM_STEP);
+  }
+
   goBack(): void {
     if (this.previewMode) {
       this.location.back();
@@ -516,7 +535,10 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.controls = new OrbitControlsCtor(this.camera, this.renderer.domElement);
     this.controls.enablePan = false;
     this.controls.enableDamping = false;
-    this.controls.minDistance = ORBIT_MIN_DISTANCE_PLAY;
+    this.controls.enableZoom = true;
+    this.controls.minDistance = this.previewMode
+      ? ORBIT_MIN_DISTANCE_PREVIEW
+      : ORBIT_MIN_DISTANCE_PLAY;
     this.controls.maxDistance = ORBIT_MAX_DISTANCE;
     this.controls.addEventListener('change', () => {
       const g = this.globe as ThreeGlobeApi | null;
@@ -694,7 +716,10 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
     const apply = (): void => {
       if (options?.reveal) {
-        this.controls!.minDistance = globeRevealMinControlDistance(endPos.length());
+        const revealMin = globeRevealMinControlDistance(endPos.length());
+        this.controls!.minDistance = this.previewMode
+          ? Math.min(ORBIT_MIN_DISTANCE_PREVIEW, revealMin)
+          : revealMin;
       }
       this.controls!.target.set(0, 0, 0);
       this.controls!.update();
@@ -764,6 +789,28 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private featureForCountry(country: Country): GlobeCountryFeature | undefined {
     const iso = country.iso2.toUpperCase();
     return this.geoFeatures.find((f) => iso2FromNaturalEarth(f.properties) === iso);
+  }
+
+  private nudgeCameraDistance(factor: number): void {
+    if (!this.camera || !this.controls) {
+      return;
+    }
+    this.cancelFlyAnimation();
+    const distance = this.camera.position.length();
+    if (distance <= 0) {
+      return;
+    }
+    const next = Math.min(
+      this.controls.maxDistance,
+      Math.max(this.controls.minDistance, distance * factor),
+    );
+    this.camera.position.setLength(next);
+    this.controls.update();
+    const g = this.globe as ThreeGlobeApi | null;
+    if (g) {
+      g.setPointOfView(this.camera);
+    }
+    this.renderLoop?.requestRender();
   }
 
   private cancelFlyAnimation(): void {

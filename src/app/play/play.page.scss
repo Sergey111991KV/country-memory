@@ -1,20 +1,19 @@
 .play-hub {
-  --play-tab-bar-offset: var(--app-tab-bar-height);
   --background: transparent;
-  /* Keep quiz/actions clear of the bottom tab bar. */
-  --padding-bottom: calc(var(--play-tab-bar-offset) + var(--app-space-5));
+  /* Page already sits above the tab bar (.tabs-inner); only keep a small inset. */
+  --padding-bottom: var(--app-space-3);
   font-family: var(--app-font-ui);
 }
 
 .play-hub::part(scroll) {
-  padding-bottom: calc(var(--play-tab-bar-offset) + var(--app-space-5));
+  padding-bottom: var(--app-space-2);
 }
 
 .play-shell {
   width: 100%;
   max-width: min(100%, 48rem);
   margin-inline: auto;
-  padding: var(--app-space-4) var(--app-space-4) var(--app-space-2);
+  padding: var(--app-space-4) var(--app-space-4) var(--app-space-3);
   box-sizing: border-box;
 }
 
@@ -48,15 +47,16 @@
 .play-shell--game {
   display: flex;
   flex-direction: column;
-  /* Stay within the tab content area — never cover the bottom tab bar. */
+  /* Stay inside ion-content — do not size against full viewport (that overlaps tabs). */
   min-height: 0;
-  max-height: none;
-  padding-bottom: calc(var(--play-tab-bar-offset) + var(--app-space-3));
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .play-topbar--cta {
   justify-content: flex-end;
   margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .play-cta {
@@ -67,21 +67,17 @@
   padding: var(--app-space-4) 0 var(--app-space-6);
 }
 
-.play-shell--game .play-feed-card,
-.play-shell--game .play-quiz {
-  flex: 0 1 auto;
+/* Glass quiz + Play CTA — must not grow into the tab bar. */
+.play-panel {
+  flex: 1 1 auto;
   align-self: stretch;
-  margin-top: var(--app-space-2);
-  min-height: 0;
-  overflow: hidden;
-}
-
-.play-quiz {
   display: flex;
   flex-direction: column;
   gap: var(--app-space-3);
-  padding: var(--app-space-4);
+  margin-top: var(--app-space-2);
   margin-bottom: 0;
+  min-height: 0;
+  max-height: 100%;
   overflow: hidden;
   transition: opacity var(--app-duration-base, 0.28s) var(--app-ease-out, ease);
 
@@ -94,6 +90,18 @@
   &--fade {
     opacity: 0.28;
   }
+}
+
+.play-quiz {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-3);
+  padding: var(--app-space-4) var(--app-space-4) 0;
+  margin: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .play-quiz__start {
@@ -112,9 +120,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--app-space-2);
-  margin-top: var(--app-space-3);
-  margin-bottom: var(--app-space-2);
-  padding-bottom: 0;
+  margin: 0;
+  padding: 0 var(--app-space-4) var(--app-space-4);
 }
 
 .play-hub-actions__start {
@@ -163,8 +170,8 @@
 
 .play-quiz__globe {
   position: absolute;
-  top: -0.35rem;
-  right: -0.35rem;
+  top: -0.9rem;
+  right: -0.9rem;
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -486,12 +493,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .play-panel,
   .play-feed-card,
   .play-mode-card {
     transition: none;
   }
 
+  .play-panel--fade,
   .play-feed-card--fade {
+    opacity: 1;
     transform: none;
   }
 

@@ -1,5 +1,43 @@
 .globe-find-content {
   --background: var(--ion-background-color);
+  position: relative;
+}
+
+.globe-find-content--preview {
+  --background: transparent;
+}
+
+.globe-header--preview ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+}
+
+.globe-preview-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.globe-preview-bg::before {
+  content: '';
+  position: absolute;
+  inset: -12%;
+  background:
+    radial-gradient(
+      ellipse 70% 55% at 50% 42%,
+      color-mix(in srgb, var(--ion-color-primary) 22%, transparent),
+      transparent 70%
+    ),
+    url('/assets/globe/earth-dark.jpg') center / cover no-repeat;
+  filter: blur(42px) saturate(1.15) brightness(0.72);
+  transform: scale(1.12);
+}
+
+.globe-find-content--preview > *:not(.globe-preview-bg) {
+  position: relative;
+  z-index: 1;
 }
 
 .globe-round-note {
@@ -23,6 +61,11 @@
   border: 1px solid color-mix(in srgb, var(--ion-color-primary) 28%, transparent);
 }
 
+.globe-prompt--preview {
+  backdrop-filter: blur(16px) saturate(var(--glass-saturate, 1.3));
+  -webkit-backdrop-filter: blur(16px) saturate(var(--glass-saturate, 1.3));
+}
+
 .globe-prompt__kicker {
   margin: 0;
   font-size: 0.85rem;
@@ -37,10 +80,46 @@
   line-height: 1.15;
 }
 
+.globe-prompt__country--action {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1.65rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: start;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ion-color-primary) 55%, transparent);
+  text-underline-offset: 0.18em;
+}
+
+.globe-prompt__country--action:active {
+  opacity: 0.85;
+}
+
 .globe-prompt__hint {
   margin: 8px 0 0;
   color: var(--ion-color-primary);
   font-size: 0.9rem;
+}
+
+.globe-prompt__tap-hint {
+  margin: 6px 0 0;
+  color: var(--ion-color-medium);
+  font-size: 0.78rem;
+}
+
+.globe-stage {
+  position: relative;
+}
+
+.globe-stage--preview {
+  margin: 4px 0 8px;
 }
 
 .globe-host {
@@ -51,14 +130,44 @@
   touch-action: none;
 }
 
+.globe-host--preview {
+  height: min(58vh, 520px);
+  margin: 4px 0 8px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
 .globe-host--hidden {
   visibility: hidden;
   pointer-events: none;
 }
 
+.globe-zoom {
+  position: absolute;
+  right: 16px;
+  bottom: 20px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.globe-zoom__btn {
+  margin: 0;
+  width: 44px;
+  height: 44px;
+  --border-radius: 14px;
+  --box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+}
+
 .globe-actions,
 .globe-feedback {
   padding: 0 16px 20px;
+}
+
+.globe-actions--preview {
+  padding: 28px 16px calc(28px + env(safe-area-inset-bottom, 0px));
+  margin-top: 8px;
 }
 
 .globe-feedback {

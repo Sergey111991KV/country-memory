@@ -57,6 +57,8 @@ describe('globeFeatureBBoxSpanKm', () => {
 describe('globeRevealMinControlDistance', () => {
   it('allows closer orbit than the default play distance', () => {
     expect(globeRevealMinControlDistance(108)).toBeLessThan(180);
-    expect(globeRevealMinControlDistance(108)).toBeGreaterThanOrEqual(82);
+    expect(globeRevealMinControlDistance(108)).toBeGreaterThanOrEqual(70);
+    // Headroom below reveal pose so zoom-in still works after fly-to.
+    expect(globeRevealMinControlDistance(108)).toBeLessThan(108 * 0.72);
   });
 });

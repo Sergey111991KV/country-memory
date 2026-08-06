@@ -400,39 +400,63 @@ ion-toolbar ion-buttons[slot='end'] ion-note {
   margin-top: var(--app-space-2);
 }
 
-/* Tab bar must stay above tab page content (Play quiz glass can otherwise paint over it). */
+/*
+ * Tabs layout: page stack ends ABOVE the tab bar.
+ * ion-page is position:absolute;inset:0 — so .tabs-inner must not share
+ * the full ion-tabs height or Play glass covers the bar.
+ */
 ion-tabs {
   position: relative;
+  display: block !important;
+  height: 100%;
   overflow: hidden;
 }
 
-/* Clip quiz glass/shadow so it cannot paint into the tab bar region. */
 ion-tabs .tabs-inner {
-  overflow: hidden !important;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--app-tab-bar-height);
   z-index: 0;
+  flex: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  isolation: isolate;
 }
 
 ion-tab-bar {
-  position: relative;
-  z-index: 1000 !important;
-  box-sizing: border-box;
-  padding-left: max(10px, env(safe-area-inset-left, 0px));
-  padding-right: max(10px, env(safe-area-inset-right, 0px));
-  --background: var(--app-surface-solid, var(--ion-background-color, #fff)) !important;
-  background: var(--app-surface-solid, var(--ion-background-color, #fff)) !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 10000 !important;
+  flex: none !important;
+  isolation: isolate;
+  width: 100%;
+  height: 50px !important;
+  min-height: 50px !important;
+  box-sizing: content-box !important;
+  contain: none !important;
+  overflow: visible !important;
+  padding-bottom: var(--ion-safe-area-bottom, env(safe-area-inset-bottom, 0px));
+  padding-left: max(8px, env(safe-area-inset-left, 0px));
+  padding-right: max(8px, env(safe-area-inset-right, 0px));
+  --background: var(--ion-background-color, #fff) !important;
+  background: var(--ion-background-color, #fff) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-/* Play page fills tabs-inner; never let it stack above the tab bar. */
-app-play.ion-page,
-.ion-page app-play {
+/* Pages fill .tabs-inner only (already inset above the bar). */
+ion-tabs .tabs-inner > .ion-page,
+ion-tabs .tabs-inner app-play,
+app-play.ion-page {
   z-index: 0 !important;
-  overflow: hidden;
-}
-
-html.flagfield-active-tab-play ion-tab-bar {
-  z-index: 1000 !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  transform: none !important;
 }
 
 ion-tab-bar ion-tab-button {
@@ -441,14 +465,13 @@ ion-tab-bar ion-tab-button {
   max-width: none;
 }
 
-/* Tab bar: keep selected icons visible (Ionic slotted icon uses height:1em + overflow:hidden) */
 ion-tab-bar ion-tab-button ion-icon {
-  height: auto !important;
-  min-height: 1.375rem;
+  height: 22px !important;
+  width: 22px;
+  min-height: 0;
+  font-size: 22px !important;
   overflow: visible !important;
   background: none !important;
-  -webkit-background-clip: border-box !important;
-  background-clip: border-box !important;
   color: inherit;
 }
 
@@ -458,18 +481,23 @@ ion-tab-bar ion-tab-button.tab-selected ion-icon {
   filter: none !important;
 }
 
+ion-tab-bar ion-tab-button::part(native) {
+  overflow: visible !important;
+}
+
 ion-tab-bar ion-tab-button ion-label {
   font-family: var(--app-font-ui) !important;
   font-style: normal !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
-  line-height: 1.2;
+  line-height: 1.1;
   height: auto !important;
   max-width: 100%;
-  min-height: 0;
-  margin-bottom: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-height: 11px;
+  margin-top: 0;
+  margin-bottom: 1px;
+  overflow: visible !important;
+  text-overflow: clip;
 }
 
 /*
