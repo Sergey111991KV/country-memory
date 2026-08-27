@@ -51,6 +51,13 @@ export const PLAY_CHILD_ROUTES: Routes = [
       import('./map-find/map-find.module').then((m) => m.MapFindPageModule),
   },
   {
+    path: 'explore-atlas',
+    loadChildren: () =>
+      import('./explore-atlas/explore-atlas.module').then(
+        (m) => m.ExploreAtlasPageModule,
+      ),
+  },
+  {
     path: 'map-mark/:filterId',
     loadChildren: () =>
       import('./map-mark/map-mark.module').then((m) => m.MapMarkPageModule),

@@ -20,6 +20,7 @@ export type PlayModeAction =
   | { type: 'facts_drill'; levelId?: string; mixFlags?: boolean }
   | { type: 'globe' }
   | { type: 'map' }
+  | { type: 'explore_atlas' }
   | { type: 'explore_mark'; filterId: ExploreFilterId };
 
 export type PlayCategoryId =

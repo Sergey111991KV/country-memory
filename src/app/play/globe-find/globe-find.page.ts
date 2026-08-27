@@ -116,8 +116,11 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
   loading = true;
   loadError = false;
-  /** Lookup mode from quiz (query ?focus=ISO) — no scoring session. */
+  /** Lookup / browse mode (query ?focus=ISO or ?browse=1) — no scoring session. */
   previewMode = false;
+  /** Preview without a pre-selected country (Knowledge → Open globe). */
+  browseMode = false;
+  backToKnowledge = false;
   target: Country | null = null;
   selectedIso: string | null = null;
   phase: PickPhase = 'pick';
@@ -194,11 +197,18 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       this.renderLoop?.requestRender();
       return;
     }
-    const focusIso = (this.route.snapshot.queryParamMap.get('focus') ?? '')
-      .trim()
-      .toUpperCase();
+    const params = this.route.snapshot.queryParamMap;
+    this.backToKnowledge = (params.get('from') ?? '').toLowerCase() === 'knowledge';
+    const focusIso = (params.get('focus') ?? '').trim().toUpperCase();
+    const browse =
+      params.get('browse') === '1' ||
+      (this.backToKnowledge && focusIso.length !== 2);
     if (focusIso.length === 2) {
       void this.startPreview(focusIso);
+      return;
+    }
+    if (browse) {
+      void this.startBrowse();
       return;
     }
     void this.startSession();
@@ -210,7 +220,18 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     }
     this.bootStarted = true;
     this.previewMode = true;
+    this.browseMode = false;
     await this.bootPreview(iso2);
+  }
+
+  private async startBrowse(): Promise<void> {
+    if (this.bootStarted) {
+      return;
+    }
+    this.bootStarted = true;
+    this.previewMode = true;
+    this.browseMode = true;
+    await this.bootBrowse();
   }
 
   private async startSession(): Promise<void> {
@@ -338,7 +359,16 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   }
 
   goBack(): void {
+    if (this.backToKnowledge) {
+      void this.router.navigate(['/tabs/knowledge']);
+      return;
+    }
     if (this.previewMode) {
+      const from = (this.route.snapshot.queryParamMap.get('from') ?? '').toLowerCase();
+      if (from === 'atlas') {
+        void this.router.navigate(['/tabs/play/explore-atlas']);
+        return;
+      }
       this.location.back();
       return;
     }
@@ -354,6 +384,42 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       capital: this.catalog.localizedCapital(country, this.locale.language),
       continent: this.continentLabel(country),
     });
+  }
+
+  private async bootBrowse(): Promise<void> {
+    const totalSpan = this.perf.span('GlobeQuest', 'bootBrowse');
+    try {
+      await this.catalog.ensureLoaded();
+      await this.knowledge.ensureLoaded();
+      const allFeatures = await this.geoCache.getPoliticalFeatures();
+      const mapIso = new Set(
+        allFeatures
+          .map((f) => iso2FromNaturalEarth(f.properties))
+          .filter((x): x is string => Boolean(x)),
+      );
+      this.playable = this.catalog.filterPlayable(mapIso);
+      const playableIso = new Set(this.playable.map((c) => c.iso2.toUpperCase()));
+      this.geoFeatures = allFeatures.filter((f) =>
+        playableIso.has(iso2FromNaturalEarth(f.properties) ?? ''),
+      );
+      await this.waitForGlobeHost();
+      await this.initGlobe();
+      this.target = null;
+      this.selectedIso = null;
+      this.feedbackCorrectIso = null;
+      this.feedbackWrongIso = null;
+      this.feedbackCorrect = false;
+      this.phase = 'pick';
+      this.refreshPolygonColors();
+      this.loading = false;
+      totalSpan.end({ playable: this.playable.length });
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      console.error('Globe browse boot failed:', detail, err);
+      this.loadError = true;
+      this.loading = false;
+      totalSpan.end({ error: detail });
+    }
   }
 
   private async bootPreview(iso2: string): Promise<void> {
@@ -647,7 +713,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
   private pickCountryAtPointer(clientX: number, clientY: number): void {
     if (
-      this.phase !== 'pick' ||
+      (!this.previewMode && this.phase !== 'pick') ||
       !this.globe ||
       !this.camera ||
       !this.renderer ||
@@ -667,13 +733,35 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
         const iso = iso2FromNaturalEarth(feature.properties);
         if (iso) {
           this.ngZone.run(() => {
-            this.selectedIso = iso;
-            this.refreshPolygonColors();
+            if (this.previewMode) {
+              this.focusPreviewCountry(iso);
+            } else {
+              this.selectedIso = iso;
+              this.refreshPolygonColors();
+            }
           });
         }
         return;
       }
     }
+  }
+
+  /** Preview / browse: highlight a country and animate the camera to it. */
+  private focusPreviewCountry(iso: string): void {
+    const country =
+      this.playable.find((c) => c.iso2.toUpperCase() === iso.toUpperCase()) ?? null;
+    if (!country) {
+      return;
+    }
+    this.browseMode = false;
+    this.target = country;
+    this.selectedIso = country.iso2;
+    this.feedbackCorrectIso = country.iso2;
+    this.feedbackWrongIso = null;
+    this.feedbackCorrect = true;
+    this.phase = 'feedback';
+    this.refreshPolygonColors();
+    this.flyToCountry(country, 900, { reveal: true });
   }
 
   private pickNewTarget(): void {

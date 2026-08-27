@@ -316,7 +316,7 @@ describe('PlayPage launchMode', () => {
       buildPlayModesByCategory(true, courseLaunches),
     );
 
-    expect(modes.length).toBe(28);
+    expect(modes.length).toBe(29);
 
     for (const slide of modes) {
       router.navigate.calls.reset();

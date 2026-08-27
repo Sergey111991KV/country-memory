@@ -116,8 +116,19 @@ export function buildPlayModesByCategory(
     needsPlayGuard: true,
   }));
 
+  const exploreAtlas: PlayModeSlide = {
+    id: 'explore_atlas',
+    icon: 'explore-population',
+    titleKey: 'play.exploreAtlasTitle',
+    subKey: 'play.exploreAtlasSub',
+    categoryId: 'explore',
+    action: { type: 'explore_atlas' },
+    needsPlayGuard: false,
+  };
+
   const explore: PlayModeSlide[] = isSubscribed
     ? [
+        exploreAtlas,
         {
           id: 'globe_find',
           icon: 'mode-globe-find',
@@ -137,6 +148,7 @@ export function buildPlayModesByCategory(
         ...exploreMarkModes,
       ]
     : [
+        exploreAtlas,
         {
           id: 'globe_find_locked',
           icon: 'mode-globe-find',

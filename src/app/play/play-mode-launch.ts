@@ -106,6 +106,13 @@ export function resolvePlayModeLaunch(
         setsPool: false,
         premiumOnly: true,
       };
+    case 'explore_atlas':
+      return {
+        kind: 'route',
+        commands: ['/tabs/play/explore-atlas'],
+        setsPool: false,
+        premiumOnly: false,
+      };
     case 'explore_mark':
       return {
         kind: 'route',

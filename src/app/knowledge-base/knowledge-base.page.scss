@@ -49,6 +49,22 @@
   color: var(--app-text-muted);
 }
 
+.knowledge-header__atlas {
+  margin: 10px 0 0;
+  --border-radius: 12px;
+}
+
+.knowledge-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+
+  .knowledge-header__atlas {
+    margin: 0;
+  }
+}
+
 .knowledge-header__settings {
   margin: 0;
   flex-shrink: 0;
@@ -374,6 +390,9 @@
 
   &__actions {
     margin-bottom: var(--app-space-3);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 }
 
@@ -388,11 +407,18 @@
   font-weight: 600;
   cursor: pointer;
   transition: transform var(--app-duration-fast, 0.18s) var(--app-ease-out, ease);
+  text-align: center;
+  text-decoration: none;
+  box-sizing: border-box;
 
   &--secondary {
     background: transparent;
     border-color: var(--glass-border);
     color: var(--app-text-muted);
+  }
+
+  &--link {
+    display: block;
   }
 
   &:active {

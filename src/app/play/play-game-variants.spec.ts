@@ -156,6 +156,7 @@ describe('all play game variants', () => {
       learning_path: ['/tabs/play/learn'],
       globe_find: ['/tabs/play/globe-find'],
       map_find: ['/tabs/play/map-find'],
+      explore_atlas: ['/tabs/play/explore-atlas'],
       pass_play_flags: ['/tabs/play/pass-play', 'flag_pick_country'],
       pass_play_capitals: ['/tabs/play/pass-play', 'capital_pick_country'],
       pass_play_mixed: ['/tabs/play/pass-play', 'country_pick_capital'],
@@ -238,6 +239,16 @@ describe('all play game variants', () => {
           .withContext(JSON.stringify(action))
           .toBe('paywall');
       }
+    });
+
+    it('keeps world atlas free without subscription', () => {
+      const launch = launchFor({ type: 'explore_atlas' }, false);
+      expect(launch).toEqual({
+        kind: 'route',
+        commands: ['/tabs/play/explore-atlas'],
+        setsPool: false,
+        premiumOnly: false,
+      });
     });
 
     it('keeps non-explore modes playable without subscription', () => {

@@ -44,9 +44,9 @@ describe('play mode catalog', () => {
     expect(modes.recognition.length).toBe(4);
     expect(modes.recall.length).toBe(6);
     expect(modes.course.length).toBe(8);
-    expect(modes.explore.length).toBe(2 + EXPLORE_FILTER_DEFS.length);
+    expect(modes.explore.length).toBe(3 + EXPLORE_FILTER_DEFS.length);
     expect(modes.together.length).toBe(3);
-    expect(flattenPlayModes(modes).length).toBe(28);
+    expect(flattenPlayModes(modes).length).toBe(29);
   });
 
   it('keeps recall off the wheel but available as side category', () => {

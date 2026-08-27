@@ -40,6 +40,14 @@
     </section>
   </ng-container>
 
+  <ng-container *ngIf="!loading && !loadError && previewMode && browseMode && !target">
+    <section class="globe-prompt mem-surface globe-prompt--preview">
+      <p class="globe-prompt__kicker">{{ 'globe.browseKicker' | i18n:null:lang}}</p>
+      <h1 class="globe-prompt__country">{{ 'globe.browseTitle' | i18n:null:lang}}</h1>
+      <p class="globe-prompt__hint">{{ 'globe.browseHint' | i18n:null:lang}}</p>
+    </section>
+  </ng-container>
+
   <ng-container *ngIf="!loading && !loadError && target && previewMode">
     <section class="globe-prompt mem-surface globe-prompt--preview">
       <p class="globe-prompt__kicker">{{ 'globe.previewKicker' | i18n:null:lang}}</p>
@@ -66,7 +74,7 @@
     ></div>
 
     <div
-      *ngIf="!loading && !loadError && previewMode && target"
+      *ngIf="!loading && !loadError && previewMode"
       class="globe-zoom"
     >
       <ion-button
@@ -123,7 +131,7 @@
   </ng-container>
 
   <div
-    *ngIf="!loading && !loadError && previewMode && target"
+    *ngIf="!loading && !loadError && previewMode"
     class="globe-actions globe-actions--preview"
   >
     <ion-button expand="block" color="primary" (click)="goBack()">

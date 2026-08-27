@@ -1,11 +1,11 @@
 {
-  "measuredAt": "2026-06-02T08:41:11.359Z",
+  "measuredAt": "2026-08-06T19:31:54.952Z",
   "configuration": "production-local",
   "bundle": {
-    "initialRaw": "2.00 MB",
-    "initialTransfer": "369.18 kB",
-    "mainRaw": "1.89 MB",
-    "mainTransfer": "346.12 kB",
+    "initialRaw": "2.21 MB",
+    "initialTransfer": "396.31 kB",
+    "mainRaw": "2.09 MB",
+    "mainTransfer": "370.76 kB",
     "lazyGlobe": {
       "file": "7496.070deafcdfe98f5b.js",
       "name": "three-globe",
@@ -13,28 +13,28 @@
       "transfer": "273.92 kB"
     },
     "lazyMap": {
-      "file": "8215.6b5952e0b22bca2a.js",
+      "file": "8215.e039d5a4432b3b3a.js",
       "name": "map-find-map-find-module",
-      "raw": "155.39 kB",
-      "transfer": "39.47 kB"
+      "raw": "154.80 kB",
+      "transfer": "39.24 kB"
     },
     "lazyKnowledge": {
-      "file": "1782.ee209dfda4031515.js",
+      "file": "1782.bcf1eeb6028e81e5.js",
       "name": "knowledge-base-knowledge-base-module",
-      "raw": "43.97 kB",
-      "transfer": "9.18 kB"
+      "raw": "40.70 kB",
+      "transfer": "8.93 kB"
     },
     "lazyPlay": {
-      "file": "9304.781ba3f35945a639.js",
+      "file": "4302.0edf20ca5a8a156b.js",
       "name": "play-play-module",
-      "raw": "44.59 kB",
-      "transfer": "10.23 kB"
+      "raw": "34.80 kB",
+      "transfer": "8.13 kB"
     },
     "lazySettings": {
-      "file": "5501.1b8a91d2be2bc631.js",
+      "file": "5501.4905a4fdd008810e.js",
       "name": "settings-settings-module",
-      "raw": "65.91 kB",
-      "transfer": "12.53 kB"
+      "raw": "71.97 kB",
+      "transfer": "13.46 kB"
     },
     "chunkCount": 86,
     "warnings": []

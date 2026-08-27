@@ -1,0 +1,196 @@
+@let lang = locale.langSig();
+<ion-header class="ion-no-border atlas-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'play.exploreAtlasTitle' | i18n:null:lang }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button
+        fill="outline"
+        size="small"
+        class="atlas-header__globe"
+        (click)="openGlobe()"
+      >
+        {{ 'atlas.openGlobe' | i18n:null:lang }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="atlas-content app-game-shell" [fullscreen]="true" [scrollY]="false">
+  <div *ngIf="loading" class="atlas-loading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>{{ 'atlas.loading' | i18n:null:lang }}</p>
+  </div>
+
+  <div *ngIf="loadError" class="atlas-loading">
+    <ion-text color="danger">{{ 'atlas.loadError' | i18n:null:lang }}</ion-text>
+  </div>
+
+  <div
+    #mapHost
+    class="atlas-map"
+    [class.atlas-map--hidden]="loading || loadError"
+    [attr.aria-label]="'atlas.mapAria' | i18n:null:lang"
+  ></div>
+
+  <div class="atlas-zoom" *ngIf="!loading && !loadError">
+    <button
+      type="button"
+      class="atlas-zoom__btn"
+      (click)="zoomIn()"
+      [attr.aria-label]="'atlas.zoomIn' | i18n:null:lang"
+    >
+      <ion-icon name="add" aria-hidden="true"></ion-icon>
+    </button>
+    <button
+      type="button"
+      class="atlas-zoom__btn"
+      (click)="zoomOut()"
+      [attr.aria-label]="'atlas.zoomOut' | i18n:null:lang"
+    >
+      <ion-icon name="remove" aria-hidden="true"></ion-icon>
+    </button>
+  </div>
+
+  <aside
+    *ngIf="!loading && !loadError"
+    class="atlas-panel"
+    [class.atlas-panel--collapsed]="panelCollapsed"
+    [attr.aria-label]="'atlas.panelAria' | i18n:null:lang"
+  >
+    <div class="atlas-panel__chrome">
+      <button
+        type="button"
+        class="atlas-panel__handle"
+        (click)="togglePanel()"
+        [attr.aria-expanded]="!panelCollapsed"
+        [attr.aria-label]="'atlas.togglePanel' | i18n:null:lang"
+      >
+        <span class="atlas-panel__grip" aria-hidden="true"></span>
+      </button>
+      <div class="atlas-panel__head">
+        <div class="atlas-panel__titles">
+          <p class="atlas-panel__kicker">{{ 'atlas.panelKicker' | i18n:null:lang }}</p>
+          <h2 class="atlas-panel__title">{{ 'atlas.panelTitle' | i18n:null:lang }}</h2>
+        </div>
+        <ion-button
+          fill="clear"
+          size="small"
+          class="atlas-panel__collapse"
+          (click)="togglePanel()"
+          [attr.aria-label]="'atlas.togglePanel' | i18n:null:lang"
+        >
+          <ion-icon
+            [name]="panelCollapsed ? 'chevron-up' : 'chevron-down'"
+            slot="icon-only"
+            aria-hidden="true"
+          ></ion-icon>
+        </ion-button>
+      </div>
+
+      <ng-container *ngIf="!panelCollapsed">
+        <ion-searchbar
+          class="atlas-search"
+          [placeholder]="'atlas.searchPlaceholder' | i18n:null:lang"
+          [debounce]="150"
+          [value]="searchQuery"
+          (ionInput)="onSearchInput($event)"
+        ></ion-searchbar>
+
+        <div class="atlas-chips" role="listbox" [attr.aria-label]="'atlas.continentFilter' | i18n:null:lang">
+          <button
+            type="button"
+            class="atlas-chip"
+            [class.atlas-chip--active]="continentFilter === null"
+            (click)="setContinentFilter(null)"
+            role="option"
+            [attr.aria-selected]="continentFilter === null"
+          >
+            {{ 'atlas.continentAll' | i18n:null:lang }}
+          </button>
+          <button
+            type="button"
+            class="atlas-chip"
+            *ngFor="let c of continentFilters"
+            [class.atlas-chip--active]="isContinentActive(c)"
+            [style.--chip-dot]="atlasDot(c)"
+            (click)="setContinentFilter(c)"
+            role="option"
+            [attr.aria-selected]="isContinentActive(c)"
+          >
+            <span class="atlas-chip__dot" aria-hidden="true"></span>
+            {{ continentLabel(c) }}
+          </button>
+        </div>
+      </ng-container>
+    </div>
+
+    <div #panelList class="atlas-panel__list" *ngIf="!panelCollapsed">
+      <p *ngIf="filteredRows.length === 0" class="atlas-empty">
+        {{ 'atlas.empty' | i18n:null:lang }}
+      </p>
+      <article
+        *ngFor="let row of filteredRows; trackBy: trackByIso"
+        class="atlas-row"
+        [id]="'atlas-row-' + row.country.iso2"
+        [class.atlas-row--selected]="selectedIso === row.country.iso2"
+        [class.atlas-row--open]="isExpanded(row.country.iso2)"
+      >
+        <button type="button" class="atlas-row__main" (click)="selectRow(row)">
+          <span
+            class="atlas-row__dot"
+            [style.background]="row.dotColor"
+            aria-hidden="true"
+          ></span>
+          <span class="atlas-row__name">{{ row.name }}</span>
+          <span class="atlas-row__pct">{{ row.shareLabel }}%</span>
+          <ion-icon
+            class="atlas-row__chevron"
+            [name]="isExpanded(row.country.iso2) ? 'chevron-up' : 'chevron-down'"
+            aria-hidden="true"
+          ></ion-icon>
+        </button>
+
+        <div class="atlas-row__body" *ngIf="isExpanded(row.country.iso2)">
+          <div class="atlas-row__flag">
+            <app-flag-display
+              [iso2]="row.country.iso2"
+              size="card"
+              [animate]="false"
+              [countryLabel]="row.name"
+              [enableCultureHold]="false"
+            ></app-flag-display>
+          </div>
+          <dl class="atlas-facts">
+            <div *ngFor="let field of row.fields" class="atlas-facts__item">
+              <dt>{{ field.labelKey | i18n:null:lang }}</dt>
+              <dd>{{ field.value }}</dd>
+            </div>
+          </dl>
+          <ion-button
+            expand="block"
+            fill="outline"
+            size="small"
+            class="atlas-row__more"
+            (click)="openCulture(row); $event.stopPropagation()"
+          >
+            {{ 'atlas.more' | i18n:null:lang }}
+          </ion-button>
+          <ion-button
+            expand="block"
+            fill="solid"
+            size="small"
+            class="atlas-row__more"
+            (click)="openGlobe(row); $event.stopPropagation()"
+          >
+            {{ 'atlas.openGlobe' | i18n:null:lang }}
+          </ion-button>
+        </div>
+      </article>
+    </div>
+  </aside>
+</ion-content>
