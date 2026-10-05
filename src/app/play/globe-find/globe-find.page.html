@@ -1,7 +1,7 @@
 @let lang = locale.langSig();
 <ion-header class="ion-no-border" [class.globe-header--preview]="previewMode">
   <ion-toolbar>
-    <ion-buttons *ngIf="!previewMode" slot="start">
+    <ion-buttons slot="start">
       <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
@@ -129,6 +129,36 @@
       </ion-button>
     </div>
   </ng-container>
+
+  <section
+    *ngIf="!loading && !loadError && previewMode && target"
+    class="globe-info mem-surface"
+    [attr.aria-label]="targetLabel"
+  >
+    <div class="globe-info__flag">
+      <app-flag-display
+        [iso2]="target.iso2"
+        size="card"
+        [animate]="false"
+        [countryLabel]="targetLabel"
+        [enableCultureHold]="false"
+      ></app-flag-display>
+    </div>
+    <dl class="globe-info__facts">
+      <div *ngFor="let field of previewFields(target)" class="globe-info__item">
+        <dt>{{ field.labelKey | i18n:null:lang }}</dt>
+        <dd>{{ field.value }}</dd>
+      </div>
+    </dl>
+    <ion-button
+      class="globe-info__more"
+      expand="block"
+      fill="outline"
+      (click)="openCulture()"
+    >
+      {{ 'atlas.more' | i18n:null:lang }}
+    </ion-button>
+  </section>
 
   <div
     *ngIf="!loading && !loadError && previewMode"

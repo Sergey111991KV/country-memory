@@ -18,7 +18,7 @@ import {
 import type { Object3D } from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-import type { Country } from '../../core/data/country.types';
+import type { Country, CountryProfileField } from '../../core/data/country.types';
 import { CountriesCatalogService } from '../../core/services/countries-catalog.service';
 import { DailyGoalService } from '../../core/services/daily-goal.service';
 import { LocaleService } from '../../core/services/locale.service';
@@ -37,6 +37,7 @@ import { PlaySessionCompleteService } from '../../core/services/play-session-com
 import { PlaySessionService } from '../../core/services/play-session.service';
 import { SessionAccessService } from '../../core/services/session-access.service';
 import { CountryKnowledgeService } from '../../core/services/country-knowledge.service';
+import { CountryCultureModalService } from '../../core/services/country-culture-modal.service';
 import { GeoJsonCacheService } from '../../core/services/geo-json-cache.service';
 import { PerfLogService } from '../../core/services/perf-log.service';
 import {
@@ -111,6 +112,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private readonly perf = inject(PerfLogService);
   private readonly geoCache = inject(GeoJsonCacheService);
   private readonly knowledge = inject(CountryKnowledgeService);
+  private readonly cultureModal = inject(CountryCultureModalService);
   private readonly visualQuality = inject(VisualQualityService);
   private readonly globeTheme = inject(GlobeThemeService);
 
@@ -377,6 +379,26 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
   continentLabel(country: Country): string {
     return this.locale.translate(`continent.${country.continent}`);
+  }
+
+  /** Preview: key facts (capital, language, currency, population) for the focused country. */
+  previewFields(country: Country): CountryProfileField[] {
+    return this.knowledge.getProfileFields(country, this.locale.language);
+  }
+
+  async openCulture(): Promise<void> {
+    const c = this.target;
+    if (!c) {
+      return;
+    }
+    const lang = this.locale.language;
+    await this.cultureModal.open({
+      iso2: c.iso2,
+      countryName: this.catalog.localizedName(c, lang),
+      capital: this.catalog.localizedCapital(c, lang),
+      continentLabel: this.continentLabel(c),
+      continentId: c.continent,
+    });
   }
 
   explainLine(country: Country): string {
