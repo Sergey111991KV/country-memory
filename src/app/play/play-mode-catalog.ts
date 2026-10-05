@@ -138,6 +138,15 @@ export function buildPlayModesByCategory(
           needsPlayGuard: true,
         },
         {
+          id: 'globe_identify',
+          icon: 'mode-globe-find',
+          titleKey: 'play.globeIdentifyTitle',
+          subKey: 'play.globeIdentifySub',
+          categoryId: 'explore',
+          action: { type: 'globe', variant: 'identify' },
+          needsPlayGuard: true,
+        },
+        {
           id: 'map_find',
           icon: 'mode-map-find',
           titleKey: 'play.mapFindTitle',
@@ -155,6 +164,15 @@ export function buildPlayModesByCategory(
           titleKey: 'play.globeFindTitle',
           categoryId: 'explore',
           action: { type: 'globe' },
+          needsPlayGuard: false,
+        },
+        {
+          id: 'globe_identify_locked',
+          icon: 'mode-globe-find',
+          titleKey: 'play.globeIdentifyTitle',
+          subKey: 'play.globeIdentifySub',
+          categoryId: 'explore',
+          action: { type: 'globe', variant: 'identify' },
           needsPlayGuard: false,
         },
         {
@@ -266,7 +284,7 @@ export function flattenPlayModes(
 export function listSettingsPlayModes(isSubscribed: boolean): PlayModeSlide[] {
   const byCategory = buildPlayModesByCategory(isSubscribed, []);
   const exploreCore = byCategory.explore.filter(
-    (m) => m.action.type === 'globe' || m.action.type === 'map',
+    (m) => (m.action.type === 'globe' && !m.action.variant) || m.action.type === 'map',
   );
   return [...byCategory.recognition, ...exploreCore, ...byCategory.together];
 }

@@ -7,7 +7,7 @@
       </ion-button>
     </ion-buttons>
     <ion-title>
-      {{ (previewMode ? 'globe.previewTitle' : 'play.globeFindTitle') | i18n:null:lang}}
+      {{ globeTitleKey | i18n:null:lang}}
     </ion-title>
     <ion-note *ngIf="!previewMode" slot="end" class="globe-round-note">
       {{ 'globe.round' | i18n:{ current: round, total: roundsTotal }:lang}}
@@ -32,9 +32,14 @@
 
   <ng-container *ngIf="!loading && !loadError && target && !previewMode">
     <section class="globe-prompt mem-surface">
-      <p class="globe-prompt__kicker">{{ 'globe.findTitle' | i18n:null:lang}}</p>
-      <h1 class="globe-prompt__country">{{ targetLabel }}</h1>
-      <p *ngIf="phase === 'pick' && selectedIso" class="globe-prompt__hint">
+      <p class="globe-prompt__kicker">
+        {{ (identifyMode ? 'globe.identifyTitle' : 'globe.findTitle') | i18n:null:lang}}
+      </p>
+      <h1 *ngIf="!identifyMode" class="globe-prompt__country">{{ targetLabel }}</h1>
+      <p *ngIf="identifyMode && phase === 'pick'" class="globe-prompt__hint">
+        {{ 'globe.identifyHint' | i18n:null:lang}}
+      </p>
+      <p *ngIf="!identifyMode && phase === 'pick' && selectedIso" class="globe-prompt__hint">
         {{ 'globe.hintSelected' | i18n:null:lang}}
       </p>
     </section>
@@ -123,7 +128,18 @@
       </ion-button>
     </section>
 
-    <div *ngIf="phase === 'pick'" class="globe-actions">
+    <div *ngIf="phase === 'pick' && identifyMode" class="globe-actions globe-choices">
+      <ion-button
+        *ngFor="let choice of identifyChoices"
+        expand="block"
+        fill="outline"
+        (click)="answerIdentify(choice.iso2)"
+      >
+        {{ choice.label }}
+      </ion-button>
+    </div>
+
+    <div *ngIf="phase === 'pick' && !identifyMode" class="globe-actions">
       <ion-button expand="block" color="primary" [disabled]="!canVerify" (click)="verify()">
         {{ 'globe.verify' | i18n:null:lang}}
       </ion-button>

@@ -95,7 +95,9 @@ export function resolvePlayModeLaunch(
     case 'globe':
       return {
         kind: 'route',
-        commands: ['/tabs/play/globe-find'],
+        commands: action.variant
+          ? ['/tabs/play/globe-find', { variant: action.variant }]
+          : ['/tabs/play/globe-find'],
         setsPool: false,
         premiumOnly: true,
       };

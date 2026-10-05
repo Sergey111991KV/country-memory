@@ -83,6 +83,8 @@ const ZOOM_STEP = 0.82;
 
 interface GlobeFlyOptions {
   reveal?: boolean;
+  /** Look at these coordinates instead of the country (keeps the answer off-centre). */
+  viewFrom?: { lat: number; lng: number };
 }
 
 @Component({
@@ -122,6 +124,9 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   previewMode = false;
   /** Preview without a pre-selected country (Knowledge → Open globe). */
   browseMode = false;
+  /** Reverse game: the country is highlighted, the player picks its name. */
+  identifyMode = false;
+  identifyChoices: { iso2: string; label: string }[] = [];
   backToKnowledge = false;
   target: Country | null = null;
   selectedIso: string | null = null;
@@ -199,6 +204,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       this.renderLoop?.requestRender();
       return;
     }
+    this.identifyMode = this.route.snapshot.paramMap.get('variant') === 'identify';
     const params = this.route.snapshot.queryParamMap;
     this.backToKnowledge = (params.get('from') ?? '').toLowerCase() === 'knowledge';
     const focusIso = (params.get('focus') ?? '').trim().toUpperCase();
@@ -258,9 +264,9 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   }
 
   ionViewWillLeave(): void {
+    // Pause (don't destroy) so the globe renders again when Ionic re-enters the cached page.
     this.cancelFlyAnimation();
-    this.renderLoop?.stop();
-    this.renderLoop = null;
+    this.renderLoop?.setPaused(true);
   }
 
   ngOnDestroy(): void {
@@ -310,12 +316,55 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.feedbackWrongIso = correct ? null : this.selectedIso;
     this.phase = 'feedback';
     this.refreshPolygonColors();
+    this.flyToCountry(this.target, 1100, { reveal: true });
 
     await this.learning.recordAttempt('globe_find', this.target.iso2, correct, false);
     this.playSession.recordAnswer(correct);
     if (correct) {
       await this.dailyGoal.bumpProgress();
     }
+  }
+
+  get globeTitleKey(): string {
+    if (this.previewMode) {
+      return 'globe.previewTitle';
+    }
+    return this.identifyMode ? 'play.globeIdentifyTitle' : 'play.globeFindTitle';
+  }
+
+  async answerIdentify(iso2: string): Promise<void> {
+    if (!this.target || this.phase !== 'pick') {
+      return;
+    }
+    this.selectedIso = iso2;
+    const correct = iso2 === this.target.iso2;
+    this.feedbackCorrect = correct;
+    this.feedbackCorrectIso = this.target.iso2;
+    this.feedbackWrongIso = null;
+    this.phase = 'feedback';
+    this.refreshPolygonColors();
+
+    await this.learning.recordAttempt('globe_find', this.target.iso2, correct, false);
+    this.playSession.recordAnswer(correct);
+    if (correct) {
+      await this.dailyGoal.bumpProgress();
+    }
+  }
+
+  private buildIdentifyChoices(target: Country): void {
+    const lang = this.locale.language;
+    const sameContinent = this.playable.filter(
+      (c) => c.iso2 !== target.iso2 && c.continent === target.continent,
+    );
+    const others = this.playable.filter(
+      (c) => c.iso2 !== target.iso2 && c.continent !== target.continent,
+    );
+    const shuffle = <T>(a: T[]): T[] => [...a].sort(() => Math.random() - 0.5);
+    const distractors = [...shuffle(sameContinent), ...shuffle(others)].slice(0, 3);
+    this.identifyChoices = shuffle([target, ...distractors]).map((c) => ({
+      iso2: c.iso2,
+      label: this.catalog.localizedName(c, lang),
+    }));
   }
 
   async nextRound(): Promise<void> {
@@ -798,12 +847,27 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.feedbackCorrectIso = null;
     this.feedbackWrongIso = null;
     this.refreshPolygonColors();
-    if (this.target) {
-      this.flyToCountry(this.target, 800);
+    if (this.target && this.identifyMode) {
+      this.selectedIso = this.target.iso2;
+      this.buildIdentifyChoices(this.target);
+      this.refreshPolygonColors();
+      this.flyToCountry(this.target, 900, { reveal: true });
+    } else if (this.target) {
+      // Never centre on the answer: start from a random neutral viewpoint.
+      this.flyToCountry(this.target, 800, { viewFrom: this.neutralViewpoint(this.target) });
     }
     if (this.controls) {
       this.controls.minDistance = ORBIT_MIN_DISTANCE_PLAY;
     }
+  }
+
+  /** Random camera target at least ~70° of longitude away from the answer. */
+  private neutralViewpoint(country: Country): { lat: number; lng: number } {
+    const sign = Math.random() < 0.5 ? -1 : 1;
+    let lng = country.lng + sign * (70 + Math.random() * 90);
+    lng = ((((lng + 180) % 360) + 360) % 360) - 180;
+    const lat = -20 + Math.random() * 60;
+    return { lat, lng };
   }
 
   private flyToCountry(country: Country, ms = 1200, options?: GlobeFlyOptions): void {
@@ -820,7 +884,11 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       spanKm,
       reveal: options?.reveal,
     });
-    const end = g.getCoords(country.lat, country.lng, relAltitude);
+    const end = g.getCoords(
+      options?.viewFrom?.lat ?? country.lat,
+      options?.viewFrom?.lng ?? country.lng,
+      relAltitude,
+    );
     const endPos = new THREE.Vector3(end.x, end.y, end.z);
     const start = this.camera.position.clone();
 

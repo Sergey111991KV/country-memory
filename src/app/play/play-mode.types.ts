@@ -18,7 +18,7 @@ export type PlayModeAction =
   | { type: 'course_challenge'; launchId: CourseLaunchId }
   | { type: 'learning_level'; levelId: string }
   | { type: 'facts_drill'; levelId?: string; mixFlags?: boolean }
-  | { type: 'globe' }
+  | { type: 'globe'; variant?: 'identify' }
   | { type: 'map' }
   | { type: 'explore_atlas' }
   | { type: 'explore_mark'; filterId: ExploreFilterId };

@@ -55,7 +55,7 @@ describe('resolvePlayModeLaunch', () => {
   }
 
   it('defines a subscribed route for every hub mode', () => {
-    expect(subscribedModes.length).toBe(29);
+    expect(subscribedModes.length).toBe(30);
     for (const slide of subscribedModes) {
       const launch = launchForSlide(slide);
       expect(launch.kind)

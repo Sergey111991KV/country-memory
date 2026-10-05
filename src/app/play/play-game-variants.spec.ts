@@ -155,6 +155,7 @@ describe('all play game variants', () => {
       facts_quiz: ['/tabs/play/facts-quiz'],
       learning_path: ['/tabs/play/learn'],
       globe_find: ['/tabs/play/globe-find'],
+      globe_identify: ['/tabs/play/globe-find', { variant: 'identify' }],
       map_find: ['/tabs/play/map-find'],
       explore_atlas: ['/tabs/play/explore-atlas'],
       pass_play_flags: ['/tabs/play/pass-play', 'flag_pick_country'],
