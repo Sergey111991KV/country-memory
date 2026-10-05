@@ -64,4 +64,23 @@ describe('globe-geo', () => {
     expect(focused).toContain('239, 68, 68');
     expect(neighbor).toBe(palette.defaultFill);
   });
+
+  it('custom fills win and base fill mutes the rest (game board)', () => {
+    const fr = {
+      type: 'Feature' as const,
+      properties: { ISO_A2: 'FR', CONTINENT: 'Europe' },
+      geometry: { type: 'Polygon', coordinates: [] },
+    };
+    const de = { ...fr, properties: { ISO_A2: 'DE', CONTINENT: 'Europe' } };
+    const state = {
+      selectedIso: null,
+      feedbackCorrectIso: null,
+      feedbackWrongIso: null,
+      phase: 'pick' as const,
+      customFills: new Map([['FR', 'rgba(1, 2, 3, 1)']]),
+      baseFill: 'rgba(9, 9, 9, 1)',
+    };
+    expect(politicalCapColor(fr, state)).toBe('rgba(1, 2, 3, 1)');
+    expect(politicalCapColor(de, state)).toBe('rgba(9, 9, 9, 1)');
+  });
 });

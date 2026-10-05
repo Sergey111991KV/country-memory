@@ -54,6 +54,24 @@ import { VisualQualityService } from '../../core/services/visual-quality.service
 import { GlobeThemeService } from '../../core/services/globe-theme.service';
 import type { GlobeThemeId, GlobeThemePalette } from '../../core/data/globe-theme';
 import { globePreviewPalette } from '../../core/data/globe-theme';
+import {
+  DailyCountryService,
+  type DailyCountryState,
+  type DailyStreak,
+} from '../../core/services/daily-country.service';
+import { NeighborsService } from '../../core/services/neighbors.service';
+import { pickDaily } from '../../core/utils/daily-seed';
+import {
+  type LngLat,
+  bearingDeg,
+  compassArrow,
+  heatColor,
+  heatEmoji,
+  minPointSetDistanceKm,
+  proximityPercent,
+  sampleGeometryPoints,
+} from '../../core/utils/geo-distance';
+import type { GlobeGameVariant } from '../play-mode.types';
 
 type ThreeNamespace = typeof import('three');
 type ThreeGlobeApi = Object3D & {
@@ -85,7 +103,28 @@ interface GlobeFlyOptions {
   reveal?: boolean;
   /** Look at these coordinates instead of the country (keeps the answer off-centre). */
   viewFrom?: { lat: number; lng: number };
+  /** Explicit relative altitude (overrides the round / reveal presets). */
+  altitude?: number;
 }
+
+/** One hot/cold guess as shown in the list. */
+export interface HotColdGuessView {
+  iso2: string;
+  label: string;
+  km: number;
+  arrow: string;
+  percent: number;
+  color: string;
+  correct: boolean;
+}
+
+/** Countries smaller than this are skipped as hot/cold & daily answers (too hard to see). */
+const MYSTERY_MIN_AREA_KM2 = 20_000;
+const MAX_SUGGESTIONS = 6;
+/** Neutral "game board" land colour for hot/cold and neighbours. */
+const GAME_BOARD_FILL = 'rgba(203, 213, 225, 0.94)';
+/** Target highlight in the neighbours game (distinct from every continent colour). */
+const NEIGHBOR_TARGET_FILL = 'rgba(245, 158, 11, 0.96)';
 
 @Component({
   selector: 'app-globe-find',
@@ -117,6 +156,22 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private readonly cultureModal = inject(CountryCultureModalService);
   private readonly visualQuality = inject(VisualQualityService);
   private readonly globeTheme = inject(GlobeThemeService);
+  private readonly dailyCountry = inject(DailyCountryService);
+  private readonly neighbors = inject(NeighborsService);
+
+  /** Hot/cold: guesses sorted closest-first, plus the chronological log. */
+  hotGuesses: HotColdGuessView[] = [];
+  private guessLog: HotColdGuessView[] = [];
+  lastGuessIso: string | null = null;
+  guessQuery = '';
+  guessSuggestions: { iso2: string; label: string }[] = [];
+  dailyState: DailyCountryState | null = null;
+  dailyStreak: DailyStreak | null = null;
+  /** Neighbours game: land borders of the highlighted target. */
+  neighborIsos: string[] = [];
+  private readonly customFills = new Map<string, string>();
+  private forceFullColorRefresh = false;
+  private readonly borderPoints = new Map<string, LngLat[]>();
 
   loading = true;
   loadError = false;
@@ -124,8 +179,8 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   previewMode = false;
   /** Preview without a pre-selected country (Knowledge → Open globe). */
   browseMode = false;
-  /** Reverse game: the country is highlighted, the player picks its name. */
-  identifyMode = false;
+  /** Game variant from the `;variant=` matrix param ('find' = classic Globe Quest). */
+  variant: GlobeGameVariant | 'find' = 'find';
   identifyChoices: { iso2: string; label: string }[] = [];
   backToKnowledge = false;
   target: Country | null = null;
@@ -204,7 +259,14 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       this.renderLoop?.requestRender();
       return;
     }
-    this.identifyMode = this.route.snapshot.paramMap.get('variant') === 'identify';
+    const variant = this.route.snapshot.paramMap.get('variant');
+    this.variant =
+      variant === 'identify' ||
+      variant === 'hotcold' ||
+      variant === 'neighbors' ||
+      variant === 'daily'
+        ? variant
+        : 'find';
     const params = this.route.snapshot.queryParamMap;
     this.backToKnowledge = (params.get('from') ?? '').toLowerCase() === 'knowledge';
     const focusIso = (params.get('focus') ?? '').trim().toUpperCase();
@@ -243,6 +305,15 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   }
 
   private async startSession(): Promise<void> {
+    if (this.variant === 'daily') {
+      // The daily country is free for everyone and does not use a game slot.
+      if (this.bootStarted) {
+        return;
+      }
+      this.bootStarted = true;
+      await this.boot();
+      return;
+    }
     if (!(await ensurePremiumPlayAccess(this.subscription, this.router))) {
       this.loading = false;
       return;
@@ -325,11 +396,370 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     }
   }
 
+  get identifyMode(): boolean {
+    return this.variant === 'identify';
+  }
+
+  get hotColdMode(): boolean {
+    return this.variant === 'hotcold' || this.variant === 'daily';
+  }
+
+  get dailyMode(): boolean {
+    return this.variant === 'daily';
+  }
+
+  get neighborsMode(): boolean {
+    return this.variant === 'neighbors';
+  }
+
+  /** Round-based variants (classic, identify, neighbours) show "Round x / 10". */
+  get showRoundNote(): boolean {
+    return !this.previewMode && !this.hotColdMode;
+  }
+
+  get dailyNumber(): number {
+    return this.dailyCountry.puzzleNumber();
+  }
+
   get globeTitleKey(): string {
     if (this.previewMode) {
       return 'globe.previewTitle';
     }
-    return this.identifyMode ? 'play.globeIdentifyTitle' : 'play.globeFindTitle';
+    switch (this.variant) {
+      case 'identify':
+        return 'play.globeIdentifyTitle';
+      case 'hotcold':
+        return 'play.hotColdTitle';
+      case 'daily':
+        return 'play.dailyTitle';
+      case 'neighbors':
+        return 'play.neighborsTitle';
+      default:
+        return 'play.globeFindTitle';
+    }
+  }
+
+  neighborNames(): string {
+    const lang = this.locale.language;
+    return this.neighborIsos
+      .map((iso) => this.playable.find((c) => c.iso2 === iso))
+      .filter((c): c is Country => Boolean(c))
+      .map((c) => this.catalog.localizedName(c, lang))
+      .join(', ');
+  }
+
+  trackGuess(_index: number, guess: HotColdGuessView): string {
+    return guess.iso2;
+  }
+
+  formatKm(km: number): string {
+    return Math.round(km).toLocaleString(this.locale.language);
+  }
+
+  // ── Hot / cold & daily ────────────────────────────────────────────
+
+  onGuessInput(ev: CustomEvent): void {
+    this.guessQuery = String(ev.detail?.value ?? '');
+    const q = this.guessQuery.trim().toLowerCase();
+    if (!q) {
+      this.guessSuggestions = [];
+      return;
+    }
+    const lang = this.locale.language;
+    const guessed = new Set(this.guessLog.map((g) => g.iso2));
+    const scored: { iso2: string; label: string; rank: number }[] = [];
+    for (const c of this.playable) {
+      if (guessed.has(c.iso2)) {
+        continue;
+      }
+      const label = this.catalog.localizedName(c, lang);
+      const local = label.toLowerCase();
+      const en = c.names.en.toLowerCase();
+      const rank = local.startsWith(q) || en.startsWith(q)
+        ? 0
+        : local.includes(q) || en.includes(q)
+          ? 1
+          : -1;
+      if (rank >= 0) {
+        scored.push({ iso2: c.iso2, label, rank });
+      }
+    }
+    scored.sort((a, b) => a.rank - b.rank || a.label.localeCompare(b.label, lang));
+    this.guessSuggestions = scored
+      .slice(0, MAX_SUGGESTIONS)
+      .map(({ iso2, label }) => ({ iso2, label }));
+  }
+
+  submitFirstSuggestion(): void {
+    const first = this.guessSuggestions[0];
+    if (first) {
+      void this.submitGuess(first.iso2);
+    }
+  }
+
+  async submitGuess(iso2: string): Promise<void> {
+    if (!this.hotColdMode || this.phase !== 'pick' || !this.target) {
+      return;
+    }
+    this.guessQuery = '';
+    this.guessSuggestions = [];
+    if (this.guessLog.some((g) => g.iso2 === iso2)) {
+      await this.toast('hotcold.already');
+      return;
+    }
+    const view = this.buildGuessView(iso2);
+    if (!view) {
+      return;
+    }
+    this.pushGuess(view);
+    if (view.correct) {
+      await this.finishHotCold(true);
+      return;
+    }
+    if (this.dailyState) {
+      this.dailyState.guesses.push({ iso2, km: view.km });
+      await this.dailyCountry.saveState(this.dailyState);
+    }
+    const guessed = this.playable.find((c) => c.iso2 === iso2);
+    if (guessed) {
+      this.flyToCountry(guessed, 700, { altitude: 1.7 });
+    }
+  }
+
+  async giveUp(): Promise<void> {
+    if (!this.hotColdMode || this.phase !== 'pick') {
+      return;
+    }
+    await this.finishHotCold(false);
+  }
+
+  /** Hot/cold: another random mystery country (not daily). */
+  nextMystery(): void {
+    if (this.variant !== 'hotcold') {
+      return;
+    }
+    this.round += 1;
+    this.pickNewTarget();
+  }
+
+  async shareResult(): Promise<void> {
+    const text = this.buildShareText();
+    const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
+    if (typeof nav.share === 'function') {
+      try {
+        await nav.share({ text });
+        return;
+      } catch (err) {
+        if ((err as DOMException)?.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      await this.toast('daily.copied');
+    } catch {
+      await this.toast('daily.shareFailed');
+    }
+  }
+
+  private buildShareText(): string {
+    const title = this.dailyMode
+      ? this.locale.translate('daily.kicker', { n: this.dailyNumber })
+      : this.locale.translate('play.hotColdTitle');
+    const solved = this.feedbackCorrect;
+    const result = solved
+      ? this.locale.translate('hotcold.solved', { count: this.guessLog.length })
+      : this.locale.translate('hotcold.notSolved');
+    const squares = this.guessLog.map((g) => heatEmoji(g.km, g.correct)).join('');
+    return `Flagfield 🌍 ${title}\n${result}\n${squares}`;
+  }
+
+  private buildGuessView(iso2: string): HotColdGuessView | null {
+    const target = this.target;
+    const country = this.playable.find((c) => c.iso2 === iso2);
+    if (!target || !country) {
+      return null;
+    }
+    const correct = iso2 === target.iso2;
+    const km = correct || this.neighbors.areNeighbors(iso2, target.iso2)
+      ? 0
+      : Math.max(0, minPointSetDistanceKm(this.pointsFor(iso2), this.pointsFor(target.iso2)));
+    return {
+      iso2,
+      label: this.catalog.localizedName(country, this.locale.language),
+      km,
+      arrow: correct ? '🎯' : compassArrow(bearingDeg(country.lat, country.lng, target.lat, target.lng)),
+      percent: correct ? 100 : proximityPercent(km),
+      color: correct ? this.activePalette().correctFill : heatColor(km),
+      correct,
+    };
+  }
+
+  private pushGuess(view: HotColdGuessView): void {
+    this.guessLog = [...this.guessLog, view];
+    this.hotGuesses = [...this.guessLog].sort((a, b) => a.km - b.km);
+    this.lastGuessIso = view.iso2;
+    this.customFills.set(view.iso2, view.color);
+    this.applyCustomFills();
+  }
+
+  private pointsFor(iso2: string): LngLat[] {
+    let pts = this.borderPoints.get(iso2);
+    if (!pts) {
+      const feature = this.geoFeatures.find((f) => iso2FromNaturalEarth(f.properties) === iso2);
+      pts = sampleGeometryPoints(feature?.geometry);
+      this.borderPoints.set(iso2, pts);
+    }
+    return pts;
+  }
+
+  private async finishHotCold(solved: boolean, options?: { restoring?: boolean }): Promise<void> {
+    const target = this.target;
+    if (!target) {
+      return;
+    }
+    this.phase = 'feedback';
+    this.feedbackCorrect = solved;
+    this.customFills.set(target.iso2, this.activePalette().correctFill);
+    this.applyCustomFills();
+    this.flyToCountry(target, 1100, { reveal: true });
+    if (options?.restoring) {
+      return;
+    }
+    await this.learning.recordAttempt('globe_find', target.iso2, solved, false);
+    if (solved) {
+      await this.dailyGoal.bumpProgress();
+    }
+    if (!this.dailyMode) {
+      await this.sessionAccess.recordCompletedGame();
+    }
+    if (this.dailyState) {
+      if (solved) {
+        this.dailyState.guesses.push({ iso2: target.iso2, km: 0 });
+      }
+      this.dailyStreak = await this.dailyCountry.finish(this.dailyState, solved);
+    }
+  }
+
+  /** Stable list of reasonably sized countries for mystery answers. */
+  private mysteryPool(): Country[] {
+    const big = this.playable.filter(
+      (c) => (this.knowledge.getEntry(c.iso2)?.areaKm2 ?? 0) >= MYSTERY_MIN_AREA_KM2,
+    );
+    const pool = big.length >= 20 ? big : this.playable;
+    return [...pool].sort((a, b) => a.iso2.localeCompare(b.iso2));
+  }
+
+  private async startDaily(): Promise<void> {
+    const target = pickDaily(this.mysteryPool(), this.dailyCountry.todayKey());
+    if (!target) {
+      throw new Error('No daily country');
+    }
+    this.resetRoundVisuals();
+    this.target = target;
+    this.dailyState = await this.dailyCountry.loadToday(target.iso2);
+    await this.dailyCountry.refresh();
+    this.dailyStreak = this.dailyCountry.streak();
+    for (const g of this.dailyState.guesses) {
+      const view = this.buildGuessView(g.iso2);
+      if (view) {
+        this.pushGuess(view);
+      }
+    }
+    if (this.dailyState.status !== 'playing') {
+      await this.finishHotCold(this.dailyState.status === 'solved', { restoring: true });
+      return;
+    }
+    this.flyToCountry(target, 0, { viewFrom: this.neutralViewpoint(target) });
+  }
+
+  // ── Neighbours ─────────────────────────────────────────────────────
+
+  async answerNeighbor(iso2: string): Promise<void> {
+    const target = this.target;
+    if (!this.neighborsMode || this.phase !== 'pick' || !target || iso2 === target.iso2) {
+      return;
+    }
+    const correct = this.neighborIsos.includes(iso2);
+    const palette = this.activePalette();
+    this.selectedIso = iso2;
+    this.feedbackCorrect = correct;
+    this.phase = 'feedback';
+    for (const n of this.neighborIsos) {
+      this.customFills.set(n, palette.correctFill);
+    }
+    if (!correct) {
+      this.customFills.set(iso2, palette.wrongFill);
+    }
+    this.applyCustomFills();
+
+    await this.learning.recordAttempt('globe_find', target.iso2, correct, false);
+    this.playSession.recordAnswer(correct);
+    if (correct) {
+      await this.dailyGoal.bumpProgress();
+    }
+  }
+
+  private pickNeighborsTarget(): void {
+    const playableIso = new Set(this.playable.map((c) => c.iso2));
+    const candidates = this.playable.filter(
+      (c) => this.neighbors.neighborsOf(c.iso2).some((n) => playableIso.has(n)),
+    );
+    const target = candidates[Math.floor(Math.random() * candidates.length)] ?? null;
+    this.target = target;
+    if (!target) {
+      return;
+    }
+    this.neighborIsos = this.neighbors.neighborsOf(target.iso2).filter((n) => playableIso.has(n));
+    this.customFills.set(target.iso2, NEIGHBOR_TARGET_FILL);
+    this.applyCustomFills();
+    const reveal = globeFlyAltitude({
+      areaKm2: this.knowledge.getEntry(target.iso2)?.areaKm2,
+      spanKm: globeFeatureBBoxSpanKm(this.featureForCountry(target), target.lat),
+      reveal: true,
+    });
+    if (this.controls) {
+      this.controls.minDistance = 120;
+    }
+    this.flyToCountry(target, 900, { altitude: Math.min(1.6, Math.max(0.4, reveal * 1.5)) });
+  }
+
+  // ── Shared helpers ─────────────────────────────────────────────────
+
+  private resetRoundVisuals(): void {
+    this.selectedIso = null;
+    this.phase = 'pick';
+    this.feedbackCorrect = false;
+    this.feedbackCorrectIso = null;
+    this.feedbackWrongIso = null;
+    this.guessLog = [];
+    this.hotGuesses = [];
+    this.lastGuessIso = null;
+    this.guessQuery = '';
+    this.guessSuggestions = [];
+    this.neighborIsos = [];
+    this.customFills.clear();
+    this.applyCustomFills();
+    this.refreshPolygonColors();
+  }
+
+  private applyCustomFills(): void {
+    this.polygonStyleState.customFills = this.customFills;
+    this.polygonStyleState.baseFill =
+      this.hotColdMode || this.neighborsMode ? GAME_BOARD_FILL : undefined;
+    this.forceFullColorRefresh = true;
+    this.polygonColorsDirty = true;
+    this.renderLoop?.requestRender();
+  }
+
+  private async toast(key: string): Promise<void> {
+    const t = await this.toastCtrl.create({
+      message: this.locale.translate(key),
+      duration: 1600,
+      position: 'top',
+    });
+    await t.present();
   }
 
   async answerIdentify(iso2: string): Promise<void> {
@@ -551,11 +981,15 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
           .map((f) => iso2FromNaturalEarth(f.properties))
           .filter((x): x is string => Boolean(x)),
       );
-      const pool = await this.playSession.resolvePool();
+      const usesSessionPool = this.variant === 'find' || this.variant === 'identify';
+      const pool = usesSessionPool ? await this.playSession.resolvePool() : [];
       const poolIso = new Set(pool.map((c) => c.iso2.toUpperCase()));
       this.playable = this.catalog
         .filterPlayable(mapIso)
-        .filter((c) => poolIso.has(c.iso2.toUpperCase()));
+        .filter((c) => !usesSessionPool || poolIso.has(c.iso2.toUpperCase()));
+      if (this.neighborsMode || this.hotColdMode) {
+        await this.neighbors.ensureLoaded();
+      }
       const playableIso = new Set(this.playable.map((c) => c.iso2.toUpperCase()));
       this.geoFeatures = allFeatures.filter((f) =>
         playableIso.has(iso2FromNaturalEarth(f.properties)),
@@ -567,7 +1001,11 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       const globeSpan = this.perf.span('GlobeQuest', 'initGlobe');
       await this.initGlobe();
       globeSpan.end({ playable: this.playable.length });
-      this.pickNewTarget();
+      if (this.dailyMode) {
+        await this.startDaily();
+      } else {
+        this.pickNewTarget();
+      }
       this.loading = false;
       totalSpan.end({
         playable: this.playable.length,
@@ -774,7 +1212,10 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       return;
     }
     this.polygonColorsDirty = false;
-    const onlyIsos = this.polygonColorDirtyIsos ?? undefined;
+    const onlyIsos = this.forceFullColorRefresh
+      ? undefined
+      : (this.polygonColorDirtyIsos ?? undefined);
+    this.forceFullColorRefresh = false;
     refreshGlobePolygonColors(this.globe, this.polygonStyleState, {
       onlyIsos,
       palette: this.activePalette(),
@@ -806,7 +1247,11 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
           this.ngZone.run(() => {
             if (this.previewMode) {
               this.focusPreviewCountry(iso);
-            } else {
+            } else if (this.hotColdMode) {
+              void this.submitGuess(iso);
+            } else if (this.neighborsMode) {
+              void this.answerNeighbor(iso);
+            } else if (!this.identifyMode) {
               this.selectedIso = iso;
               this.refreshPolygonColors();
             }
@@ -839,14 +1284,17 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     if (this.playable.length === 0) {
       return;
     }
-    const idx = Math.floor(Math.random() * this.playable.length);
-    this.target = this.playable[idx] ?? null;
-    this.selectedIso = null;
-    this.phase = 'pick';
-    this.feedbackCorrect = false;
-    this.feedbackCorrectIso = null;
-    this.feedbackWrongIso = null;
-    this.refreshPolygonColors();
+    this.resetRoundVisuals();
+    if (this.controls) {
+      this.controls.minDistance = ORBIT_MIN_DISTANCE_PLAY;
+    }
+    if (this.neighborsMode) {
+      this.pickNeighborsTarget();
+      return;
+    }
+    const source = this.hotColdMode ? this.mysteryPool() : this.playable;
+    const idx = Math.floor(Math.random() * source.length);
+    this.target = source[idx] ?? null;
     if (this.target && this.identifyMode) {
       this.selectedIso = this.target.iso2;
       this.buildIdentifyChoices(this.target);
@@ -879,11 +1327,13 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     const feature = this.featureForCountry(country);
     const areaKm2 = this.knowledge.getEntry(country.iso2)?.areaKm2;
     const spanKm = globeFeatureBBoxSpanKm(feature, country.lat);
-    const relAltitude = globeFlyAltitude({
-      areaKm2,
-      spanKm,
-      reveal: options?.reveal,
-    });
+    const relAltitude =
+      options?.altitude ??
+      globeFlyAltitude({
+        areaKm2,
+        spanKm,
+        reveal: options?.reveal,
+      });
     const end = g.getCoords(
       options?.viewFrom?.lat ?? country.lat,
       options?.viewFrom?.lng ?? country.lng,

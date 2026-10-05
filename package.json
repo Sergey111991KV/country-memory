@@ -40,7 +40,8 @@
     "i18n:flagfield:build": "node scripts/build-flagfield-locales.mjs",
     "i18n:flagfield:complete": "bash scripts/i18n-flagfield-complete.sh",
     "i18n:flagfield:continue": "bash scripts/i18n-flagfield-continue.sh",
-    "i18n:flagfield:fix-placeholders": "node scripts/fix-flagfield-placeholders.mjs es de fr"
+    "i18n:flagfield:fix-placeholders": "node scripts/fix-flagfield-placeholders.mjs es de fr",
+    "data:neighbors": "node scripts/build-neighbors.mjs"
   },
   "private": true,
   "dependencies": {

@@ -4,6 +4,9 @@ import type { AppIconId } from '../core/icons/app-icons.registry';
 import type { CourseLaunchId } from '../core/services/course-launch.service';
 import type { PassPlayScoringStyle } from '../core/services/pass-play-session';
 
+export type GlobeGameVariant = 'identify' | 'hotcold' | 'neighbors' | 'daily';
+export type BlitzMode = 'flags' | 'capitals';
+
 export type PlayModeAction =
   | { type: 'free'; mode: FreeChallengeMode }
   | { type: 'recall_challenge'; mode: FreeChallengeMode }
@@ -18,7 +21,9 @@ export type PlayModeAction =
   | { type: 'course_challenge'; launchId: CourseLaunchId }
   | { type: 'learning_level'; levelId: string }
   | { type: 'facts_drill'; levelId?: string; mixFlags?: boolean }
-  | { type: 'globe'; variant?: 'identify' }
+  | { type: 'globe'; variant?: GlobeGameVariant }
+  | { type: 'blitz'; mode: BlitzMode }
+  | { type: 'silhouette' }
   | { type: 'map' }
   | { type: 'explore_atlas' }
   | { type: 'explore_mark'; filterId: ExploreFilterId };

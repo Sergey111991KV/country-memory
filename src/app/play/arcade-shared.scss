@@ -1,0 +1,120 @@
+/* Shared look for arcade pages (blitz, silhouette). */
+
+.arcade-page {
+  font-family: var(--app-font-ui);
+
+  &::part(scroll) {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.arcade-card {
+  padding: 24px 20px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--ion-text-color, #0f172a) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ion-color-primary) 22%, transparent);
+}
+
+.arcade-intro {
+  margin: auto 0;
+  text-align: center;
+
+  h1 {
+    margin: 8px 0;
+    font-size: 1.5rem;
+  }
+
+  ion-button {
+    margin-top: 12px;
+  }
+}
+
+.arcade-intro__clock {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  border: 4px solid var(--ion-color-primary);
+  font-size: 2.2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ion-color-primary);
+}
+
+.arcade-intro__clock--score {
+  width: 120px;
+  height: 120px;
+  font-size: 2.8rem;
+  border-color: var(--ion-color-warning, #f59e0b);
+  color: var(--ion-text-color);
+}
+
+.arcade-muted {
+  margin: 4px 0;
+  color: var(--ion-color-medium);
+  line-height: 1.45;
+}
+
+.arcade-best {
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.arcade-record {
+  margin: 8px 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ion-color-warning-shade, #d97706);
+}
+
+.arcade-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: auto;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.arcade-choice {
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--ion-color-primary) 24%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ion-background-color, #fff) 86%, var(--ion-color-primary) 14%);
+  color: var(--ion-text-color, #0f172a);
+  font: inherit;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.arcade-choice--correct {
+  border-color: var(--ion-color-success);
+  background: color-mix(in srgb, var(--ion-color-success) 22%, transparent);
+}
+
+.arcade-choice--wrong {
+  border-color: var(--ion-color-danger);
+  background: color-mix(in srgb, var(--ion-color-danger) 20%, transparent);
+  animation: arcade-shake 0.28s ease;
+}
+
+@keyframes arcade-shake {
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade-choice--wrong {
+    animation: none;
+  }
+}

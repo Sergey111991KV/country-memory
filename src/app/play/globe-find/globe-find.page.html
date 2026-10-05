@@ -9,7 +9,7 @@
     <ion-title>
       {{ globeTitleKey | i18n:null:lang}}
     </ion-title>
-    <ion-note *ngIf="!previewMode" slot="end" class="globe-round-note">
+    <ion-note *ngIf="showRoundNote" slot="end" class="globe-round-note">
       {{ 'globe.round' | i18n:{ current: round, total: roundsTotal }:lang}}
     </ion-note>
   </ion-toolbar>
@@ -30,7 +30,50 @@
     <ion-text color="danger">{{ 'globe.loadError' | i18n:null:lang}}</ion-text>
   </div>
 
-  <ng-container *ngIf="!loading && !loadError && target && !previewMode">
+  <ng-container *ngIf="!loading && !loadError && target && !previewMode && hotColdMode">
+    <section class="globe-prompt mem-surface hotcold-prompt">
+      <p class="globe-prompt__kicker">
+        {{ dailyMode
+          ? ('daily.kicker' | i18n:{ n: dailyNumber }:lang)
+          : ('hotcold.kicker' | i18n:null:lang) }}
+      </p>
+      <h1 class="globe-prompt__country">
+        {{ phase === 'pick' ? ('hotcold.prompt' | i18n:null:lang) : targetLabel }}
+      </h1>
+      <p *ngIf="phase === 'pick' && !hotGuesses.length" class="globe-prompt__tap-hint">
+        {{ 'hotcold.hint' | i18n:null:lang}}
+      </p>
+      <div *ngIf="phase === 'pick'" class="hotcold-search">
+        <ion-searchbar
+          class="hotcold-search__bar"
+          [value]="guessQuery"
+          [debounce]="60"
+          [placeholder]="'hotcold.searchPlaceholder' | i18n:null:lang"
+          (ionInput)="onGuessInput($event)"
+          (keyup.enter)="submitFirstSuggestion()"
+        ></ion-searchbar>
+        <ul *ngIf="guessSuggestions.length" class="hotcold-suggest" role="listbox">
+          <li *ngFor="let s of guessSuggestions">
+            <button type="button" class="hotcold-suggest__item" role="option" (click)="submitGuess(s.iso2)">
+              {{ s.label }}
+            </button>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="!loading && !loadError && target && !previewMode && neighborsMode">
+    <section class="globe-prompt mem-surface">
+      <p class="globe-prompt__kicker">{{ 'neighbors.prompt' | i18n:null:lang}}</p>
+      <h1 class="globe-prompt__country">{{ targetLabel }}</h1>
+      <p *ngIf="phase === 'pick'" class="globe-prompt__tap-hint">
+        {{ 'neighbors.hint' | i18n:null:lang}}
+      </p>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="!loading && !loadError && target && !previewMode && !hotColdMode && !neighborsMode">
     <section class="globe-prompt mem-surface">
       <p class="globe-prompt__kicker">
         {{ (identifyMode ? 'globe.identifyTitle' : 'globe.findTitle') | i18n:null:lang}}
@@ -103,7 +146,84 @@
     </div>
   </div>
 
-  <ng-container *ngIf="!loading && !loadError && target && !previewMode">
+  <ng-container *ngIf="!loading && !loadError && target && !previewMode && hotColdMode">
+    <section *ngIf="hotGuesses.length" class="hotcold-guesses" aria-live="polite">
+      <div class="hotcold-guesses__head">
+        <span>{{ 'hotcold.guesses' | i18n:{ count: hotGuesses.length }:lang }}</span>
+        <ion-button
+          *ngIf="phase === 'pick'"
+          size="small"
+          fill="clear"
+          color="medium"
+          (click)="giveUp()"
+        >
+          {{ 'hotcold.giveUp' | i18n:null:lang}}
+        </ion-button>
+      </div>
+      <ol class="hotcold-guesses__list">
+        <li
+          *ngFor="let g of hotGuesses; trackBy: trackGuess"
+          class="hotcold-guess"
+          [class.hotcold-guess--last]="g.iso2 === lastGuessIso"
+          [class.hotcold-guess--correct]="g.correct"
+        >
+          <span class="hotcold-guess__swatch" [style.background]="g.color" aria-hidden="true"></span>
+          <span class="hotcold-guess__name">{{ g.label }}</span>
+          <span class="hotcold-guess__km">
+            <ng-container *ngIf="g.correct">✓</ng-container>
+            <ng-container *ngIf="!g.correct && g.km === 0">{{ 'hotcold.adjacent' | i18n:null:lang}}</ng-container>
+            <ng-container *ngIf="!g.correct && g.km > 0">{{ 'hotcold.km' | i18n:{ km: formatKm(g.km) }:lang }}</ng-container>
+          </span>
+          <span class="hotcold-guess__arrow" aria-hidden="true">{{ g.arrow }}</span>
+        </li>
+      </ol>
+    </section>
+
+    <div *ngIf="phase === 'pick' && !hotGuesses.length" class="globe-actions globe-actions--quiet">
+      <ion-button expand="block" fill="clear" color="medium" (click)="giveUp()">
+        {{ 'hotcold.giveUp' | i18n:null:lang}}
+      </ion-button>
+    </div>
+
+    <section *ngIf="showFeedback" class="globe-feedback mem-surface">
+      <h2 [class.globe-feedback--ok]="feedbackCorrect" [class.globe-feedback--bad]="!feedbackCorrect">
+        {{ feedbackCorrect
+          ? ('hotcold.solved' | i18n:{ count: hotGuesses.length }:lang)
+          : ('hotcold.notSolved' | i18n:null:lang) }}
+      </h2>
+      <div class="globe-feedback__row">
+        <app-flag-display
+          [iso2]="target.iso2"
+          size="card"
+          [animate]="true"
+          [countryLabel]="targetLabel"
+        ></app-flag-display>
+        <div>
+          <p class="globe-feedback__answer">{{ targetLabel }}</p>
+          <p class="globe-feedback__explain">{{ explainLine(target) }}</p>
+        </div>
+      </div>
+      <p *ngIf="dailyMode && dailyStreak && (dailyStreak.current > 0 || dailyStreak.best > 0)" class="globe-feedback__streak">
+        {{ 'daily.streak' | i18n:{ n: dailyStreak.current }:lang }}
+        · {{ 'daily.best' | i18n:{ n: dailyStreak.best }:lang }}
+      </p>
+      <div class="globe-feedback__actions">
+        <ion-button expand="block" fill="outline" (click)="shareResult()">
+          <ion-icon name="share-social-outline" slot="start" aria-hidden="true"></ion-icon>
+          {{ 'daily.share' | i18n:null:lang}}
+        </ion-button>
+        <ion-button *ngIf="!dailyMode" expand="block" color="primary" (click)="nextMystery()">
+          {{ 'hotcold.next' | i18n:null:lang}}
+        </ion-button>
+        <ion-button *ngIf="dailyMode" expand="block" color="primary" (click)="goBack()">
+          {{ 'common.back' | i18n:null:lang}}
+        </ion-button>
+      </div>
+      <p *ngIf="dailyMode" class="globe-feedback__note">{{ 'daily.comeBack' | i18n:null:lang}}</p>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="!loading && !loadError && target && !previewMode && !hotColdMode">
     <section *ngIf="showFeedback" class="globe-feedback mem-surface">
       <h2 [class.globe-feedback--ok]="feedbackCorrect" [class.globe-feedback--bad]="!feedbackCorrect">
         {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang}}
@@ -115,8 +235,11 @@
         [countryLabel]="targetLabel"
       ></app-flag-display>
       <p class="globe-feedback__explain">{{ explainLine(target) }}</p>
+      <p *ngIf="neighborsMode" class="globe-feedback__explain">
+        {{ 'neighbors.all' | i18n:{ list: neighborNames() }:lang }}
+      </p>
       <ion-button
-        *ngIf="!feedbackCorrect"
+        *ngIf="!feedbackCorrect && !neighborsMode && !identifyMode"
         expand="block"
         fill="outline"
         (click)="showCorrectOnGlobe()"
@@ -139,7 +262,7 @@
       </ion-button>
     </div>
 
-    <div *ngIf="phase === 'pick' && !identifyMode" class="globe-actions">
+    <div *ngIf="phase === 'pick' && variant === 'find'" class="globe-actions">
       <ion-button expand="block" color="primary" [disabled]="!canVerify" (click)="verify()">
         {{ 'globe.verify' | i18n:null:lang}}
       </ion-button>

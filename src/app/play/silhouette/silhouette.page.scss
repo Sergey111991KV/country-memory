@@ -1,0 +1,112 @@
+@use '../arcade-shared';
+
+.silhouette-round {
+  margin-inline-end: 12px;
+  font-size: 0.8rem;
+}
+
+.silhouette-loading {
+  display: grid;
+  place-items: center;
+  min-height: 50vh;
+}
+
+.silhouette-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.silhouette-streak {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ion-color-warning, #f59e0b) 22%, transparent);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.silhouette-stage {
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  margin: 12px 0;
+  padding: 20px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--ion-color-primary) 14%, transparent), transparent 70%),
+    color-mix(in srgb, var(--ion-text-color, #0f172a) 4%, transparent);
+  transition: background 0.2s ease;
+}
+
+.silhouette-svg {
+  width: min(100%, 300px);
+  max-height: 42vh;
+  aspect-ratio: 1;
+
+  path {
+    fill: var(--ion-color-primary);
+    stroke: color-mix(in srgb, var(--ion-color-primary) 60%, #000);
+    stroke-width: 0.4;
+    stroke-linejoin: round;
+    transition: fill 0.2s ease;
+  }
+}
+
+.silhouette-stage--ok .silhouette-svg path {
+  fill: var(--ion-color-success);
+}
+
+.silhouette-stage--bad .silhouette-svg path {
+  fill: var(--ion-color-danger);
+}
+
+.silhouette-feedback {
+  margin-bottom: 12px;
+  text-align: center;
+
+  p {
+    margin: 0 0 8px;
+    font-weight: 700;
+  }
+}
+
+.silhouette-feedback--ok {
+  color: var(--ion-color-success);
+}
+
+.silhouette-feedback--bad {
+  color: var(--ion-color-danger);
+}
+
+.silhouette-feedback__answer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+
+  app-flag-display {
+    display: block;
+    width: 56px;
+  }
+}
+
+.silhouette-globe {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ion-color-primary) 14%, transparent);
+  color: var(--ion-color-primary);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.silhouette-choices--done {
+  opacity: 0.9;
+}

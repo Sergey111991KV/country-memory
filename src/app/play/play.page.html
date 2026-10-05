@@ -13,6 +13,51 @@
       </ion-button>
     </header>
 
+    @let daily = dailyCountry.todayStatus();
+    @let streak = dailyCountry.streak().current;
+    <button
+      type="button"
+      class="play-daily glass-surface"
+      [class.play-daily--done]="daily === 'solved' || daily === 'gave_up'"
+      (click)="openDaily()"
+    >
+      <span class="play-daily__globe" aria-hidden="true">🌍</span>
+      <span class="play-daily__text">
+        <span class="play-daily__kicker">{{ 'daily.kicker' | i18n:{ n: dailyNumber }:lang }}</span>
+        <span class="play-daily__status">
+          @switch (daily) {
+            @case ('solved') { {{ 'daily.bannerSolved' | i18n:null:lang }} }
+            @case ('gave_up') { {{ 'daily.bannerGaveUp' | i18n:null:lang }} }
+            @case ('playing') { {{ 'daily.bannerPlaying' | i18n:null:lang }} }
+            @default { {{ 'daily.bannerNew' | i18n:null:lang }} }
+          }
+        </span>
+      </span>
+      <span *ngIf="streak > 0" class="play-daily__streak">🔥 {{ streak }}</span>
+      <span class="play-daily__cta">
+        {{ (daily === 'solved' || daily === 'gave_up' ? 'daily.view' : 'daily.play') | i18n:null:lang }}
+      </span>
+    </button>
+
+    <section class="play-arcade" [attr.aria-label]="'play.arcadeTitle' | i18n:null:lang">
+      <h2 class="play-arcade__title">{{ 'play.arcadeTitle' | i18n:null:lang }}</h2>
+      <div class="play-arcade__row">
+        <button
+          type="button"
+          *ngFor="let m of arcadeModes; trackBy: trackArcade"
+          class="play-arcade__card glass-surface"
+          (click)="launchMode(m)"
+        >
+          <app-icon [icon]="m.icon" size="md"></app-icon>
+          <span class="play-arcade__name">{{ m.titleKey | i18n:null:lang }}</span>
+          <span *ngIf="m.subKey" class="play-arcade__sub">{{ m.subKey | i18n:null:lang }}</span>
+          <span *ngIf="m.id.endsWith('_locked')" class="play-arcade__lock">
+            {{ 'play.premium' | i18n:null:lang }}
+          </span>
+        </button>
+      </div>
+    </section>
+
     <div
       *ngIf="feedCard as c"
       class="play-panel glass-surface"

@@ -23,7 +23,9 @@ export function resolvePlayModeLaunch(
   },
 ): PlayLaunchRoute | PlayLaunchPaywall {
   const premiumExplore = (a: PlayModeAction): boolean =>
-    a.type === 'globe' || a.type === 'map' || a.type === 'explore_mark';
+    (a.type === 'globe' && a.variant !== 'daily') ||
+    a.type === 'map' ||
+    a.type === 'explore_mark';
 
   if (premiumExplore(action) && !options.isSubscribed) {
     return { kind: 'paywall' };
@@ -99,7 +101,21 @@ export function resolvePlayModeLaunch(
           ? ['/tabs/play/globe-find', { variant: action.variant }]
           : ['/tabs/play/globe-find'],
         setsPool: false,
-        premiumOnly: true,
+        premiumOnly: action.variant !== 'daily',
+      };
+    case 'blitz':
+      return {
+        kind: 'route',
+        commands: ['/tabs/play/blitz', action.mode],
+        setsPool: false,
+        premiumOnly: false,
+      };
+    case 'silhouette':
+      return {
+        kind: 'route',
+        commands: ['/tabs/play/silhouette'],
+        setsPool: false,
+        premiumOnly: false,
       };
     case 'map':
       return {

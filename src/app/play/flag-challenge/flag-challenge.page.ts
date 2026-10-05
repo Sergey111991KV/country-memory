@@ -69,6 +69,8 @@ export class FlagChallengePage implements ViewDidEnter {
   selectedCapital = '';
   typedName = '';
   round = 1;
+  /** Correct answers in a row (solo sessions). */
+  streak = 0;
 
   private bootStarted = false;
 
@@ -452,6 +454,7 @@ export class FlagChallengePage implements ViewDidEnter {
       playDebug('PassPlay', 'round answer', { correct, round: this.round });
     } else {
       this.playSession.recordAnswer(correct);
+      this.streak = correct ? this.streak + 1 : 0;
     }
     if (correct && !this.passPlay) {
       await this.dailyGoal.bumpProgress();

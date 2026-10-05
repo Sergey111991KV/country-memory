@@ -14,6 +14,7 @@ import type { HomeFeedCard } from '../core/services/home-feed.service';
 import { HomeFeedService } from '../core/services/home-feed.service';
 import { CountriesCatalogService } from '../core/services/countries-catalog.service';
 import { CourseLaunchService } from '../core/services/course-launch.service';
+import { DailyCountryService } from '../core/services/daily-country.service';
 import { DailyGoalService } from '../core/services/daily-goal.service';
 import { DonatePromptService } from '../core/services/donate-prompt.service';
 import { LearningPathService } from '../core/services/learning-path.service';
@@ -31,7 +32,11 @@ import { playDebug } from '../core/utils/play-debug';
 import { buildQuizChoices, type QuizChoice } from '../core/utils/quiz-options';
 import { feedPromptKey, resolveFeedCardLaunch } from './play-feed-launch';
 import { resolveLevelLaunchPlan } from './play-level-route';
-import { resolveSettingsPlayMode } from './play-mode-catalog';
+import {
+  DAILY_COUNTRY_SLIDE,
+  buildArcadeModes,
+  resolveSettingsPlayMode,
+} from './play-mode-catalog';
 import { resolvePlayModeLaunch } from './play-mode-launch';
 import type { PlayModeSlide } from './play-mode.types';
 export type {
@@ -76,6 +81,10 @@ export class PlayPage implements OnInit, ViewWillEnter {
   readonly sub = inject(SubscriptionService);
   private readonly donatePrompt = inject(DonatePromptService);
   private readonly perf = inject(PerfLogService);
+  readonly dailyCountry = inject(DailyCountryService);
+
+  /** Arcade games row (hot/cold, blitz, silhouette, neighbours …). */
+  arcadeModes: PlayModeSlide[] = buildArcadeModes(false);
 
   atGameLimit = false;
   feedCard: HomeFeedCard | null = null;
@@ -100,6 +109,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
   }
 
   ionViewWillEnter(): void {
+    void this.dailyCountry.refresh().then(() => this.cdr.markForCheck());
     void this.refresh({ fromViewEnter: true });
     void this.refreshFeed();
     void this.donatePrompt.maybeNavigateToDonate();
@@ -110,6 +120,18 @@ export class PlayPage implements OnInit, ViewWillEnter {
       return '';
     }
     return this.locale.translate(feedPromptKey(this.feedCard.kind));
+  }
+
+  get dailyNumber(): number {
+    return this.dailyCountry.puzzleNumber();
+  }
+
+  trackArcade(_index: number, slide: PlayModeSlide): string {
+    return slide.id;
+  }
+
+  openDaily(): Promise<void> {
+    return this.launchMode(DAILY_COUNTRY_SLIDE);
   }
 
   hasPlayPremium(): boolean {
@@ -235,6 +257,7 @@ export class PlayPage implements OnInit, ViewWillEnter {
       !this.sessionAccess.canStartGame(false);
 
     const subscribed = this.hasPlayPremium();
+    this.arcadeModes = buildArcadeModes(subscribed);
     const snapshot: PlayRefreshSnapshot = {
       subscribed,
       atGameLimit: this.atGameLimit,

@@ -25,6 +25,9 @@
   </p>
 
   <ng-container *ngIf="!loading && target">
+    <p *ngIf="!passPlay && streak >= 2" class="challenge-streak" aria-live="polite">
+      {{ 'challenge.streak' | i18n:{ n: streak }:lang }}
+    </p>
     <div class="challenge-layout">
       <div class="challenge-stage">
         <div class="challenge-prompt">

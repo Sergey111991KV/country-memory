@@ -1,0 +1,90 @@
+@let lang = locale.langSig();
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
+        <ion-icon slot="icon-only" name="arrow-back" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'play.silhouetteTitle' | i18n:null:lang }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-note class="silhouette-round">
+        {{ 'globe.round' | i18n:{ current: round, total: roundsTotal }:lang }}
+      </ion-note>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding arcade-page app-game-shell">
+  <div *ngIf="loading" class="silhouette-loading">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+  <ion-text *ngIf="loadError" color="danger">{{ 'globe.loadError' | i18n:null:lang }}</ion-text>
+
+  <ng-container *ngIf="!loading && !loadError && target">
+    <div class="silhouette-top">
+      <p class="arcade-muted">{{ 'silhouette.prompt' | i18n:null:lang }}</p>
+      <span *ngIf="streak >= 2" class="silhouette-streak">{{ 'challenge.streak' | i18n:{ n: streak }:lang }}</span>
+    </div>
+
+    <div class="silhouette-stage" [class.silhouette-stage--ok]="phase === 'feedback' && feedbackCorrect"
+      [class.silhouette-stage--bad]="phase === 'feedback' && !feedbackCorrect">
+      <svg
+        *ngIf="shape"
+        class="silhouette-svg"
+        [attr.viewBox]="shape.viewBox"
+        role="img"
+        [attr.aria-label]="'silhouette.prompt' | i18n:null:lang"
+      >
+        <path [attr.d]="shape.path" fill-rule="evenodd"></path>
+      </svg>
+    </div>
+
+    <div *ngIf="phase === 'feedback'" class="silhouette-feedback">
+      <p [class.silhouette-feedback--ok]="feedbackCorrect" [class.silhouette-feedback--bad]="!feedbackCorrect">
+        {{ (feedbackCorrect ? 'globe.correct' : 'globe.wrong') | i18n:null:lang }}
+      </p>
+      <div class="silhouette-feedback__answer">
+        <app-flag-display
+          [iso2]="target.iso2"
+          size="card"
+          [animate]="false"
+          [enableCultureHold]="false"
+        ></app-flag-display>
+        <strong>{{ targetLabel }}</strong>
+        <button
+          type="button"
+          class="silhouette-globe"
+          (click)="openOnGlobe()"
+          [attr.aria-label]="'globe.openPreview' | i18n:null:lang"
+        >
+          <ion-icon name="earth-outline" aria-hidden="true"></ion-icon>
+        </button>
+      </div>
+      <ion-button expand="block" (click)="next()">{{ 'globe.next' | i18n:null:lang }}</ion-button>
+    </div>
+
+    <div *ngIf="phase === 'pick'" class="arcade-choices">
+      <button
+        type="button"
+        *ngFor="let c of choices"
+        class="arcade-choice"
+        (click)="pick(c)"
+      >
+        {{ c.label }}
+      </button>
+    </div>
+    <div *ngIf="phase === 'feedback'" class="arcade-choices silhouette-choices--done">
+      <button
+        type="button"
+        *ngFor="let c of choices"
+        class="arcade-choice"
+        disabled
+        [class.arcade-choice--correct]="choiceState(c.country.iso2) === 'correct'"
+        [class.arcade-choice--wrong]="choiceState(c.country.iso2) === 'wrong'"
+      >
+        {{ c.label }}
+      </button>
+    </div>
+  </ng-container>
+</ion-content>

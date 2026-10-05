@@ -13,6 +13,7 @@ import { SessionAccessService } from './session-access.service';
 import { StorageService } from './storage.service';
 import { UserLearnedService } from './user-learned.service';
 import { UserLearningService } from './user-learning.service';
+import { DailyCountryService } from './daily-country.service';
 
 /** Local progress keys cleared on account reset. Subscription state is not touched. */
 export const PROGRESS_STORAGE_KEYS = [
@@ -22,6 +23,9 @@ export const PROGRESS_STORAGE_KEYS = [
   'flagfield_mastery_v1',
   'flagfield_learning_path_v1',
   'flagfield_daily_goal_v1',
+  'flagfield_daily_country_v1',
+  'flagfield_daily_streak_v1',
+  'flagfield_arcade_records_v1',
   'display_text_overrides_v1',
   'flagfield_local_auth_v1',
   'flagfield_auth_session_v1',
@@ -37,6 +41,7 @@ export class AccountResetService {
   private readonly userLearning = inject(UserLearningService);
   private readonly learningPath = inject(LearningPathService);
   private readonly dailyGoal = inject(DailyGoalService);
+  private readonly dailyCountry = inject(DailyCountryService);
   private readonly displayText = inject(DisplayTextService);
   private readonly appLog = inject(AppLogService);
 
@@ -63,6 +68,7 @@ export class AccountResetService {
     await this.sessionAccess.reset();
     await this.learningPath.resetProgress();
     await this.dailyGoal.reset();
+    await this.dailyCountry.reset();
     await this.displayText.clearAll();
     await this.auth.clearProfile();
 

@@ -1,0 +1,92 @@
+@let lang = locale.langSig();
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
+        <ion-icon slot="icon-only" name="arrow-back" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ title | i18n:null:lang }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding arcade-page app-game-shell">
+  <p *ngIf="loading">{{ 'knowledge.loading' | i18n:null:lang }}</p>
+
+  <section *ngIf="!loading && phase === 'ready'" class="arcade-card arcade-intro">
+    <div class="arcade-intro__clock" aria-hidden="true">60</div>
+    <h1>{{ title | i18n:null:lang }}</h1>
+    <p class="arcade-muted">{{ 'blitz.rules' | i18n:null:lang }}</p>
+    <p *ngIf="best > 0" class="arcade-best">{{ 'blitz.best' | i18n:{ n: best }:lang }}</p>
+    <ion-button expand="block" size="large" (click)="start()">
+      {{ 'blitz.start' | i18n:null:lang }}
+    </ion-button>
+  </section>
+
+  <ng-container *ngIf="phase === 'playing' && target">
+    <div class="blitz-hud">
+      <div class="blitz-hud__score">
+        <span class="arcade-muted">{{ 'blitz.score' | i18n:null:lang }}</span>
+        <strong>{{ score }}</strong>
+      </div>
+      <span *ngIf="streak >= 2" class="blitz-hud__streak">{{ 'blitz.streak' | i18n:{ n: streak }:lang }}</span>
+      <div
+        class="blitz-hud__time"
+        [class.blitz-hud__time--low]="secondsLeft <= 10"
+        [class.blitz-hud__time--penalty]="penaltyPulse"
+      >
+        {{ secondsLeft }}
+      </div>
+    </div>
+    <div class="blitz-bar" role="progressbar" [attr.aria-valuenow]="secondsLeft" aria-valuemin="0" aria-valuemax="60">
+      <div class="blitz-bar__fill" [style.width.%]="timePercent" [class.blitz-bar__fill--low]="secondsLeft <= 10"></div>
+    </div>
+
+    <div class="blitz-stage">
+      <div *ngIf="mode === 'flags'" class="blitz-flag">
+        <app-flag-display
+          [iso2]="target.iso2"
+          size="hero"
+          [animate]="false"
+          [enableCultureHold]="false"
+        ></app-flag-display>
+      </div>
+      <div *ngIf="mode === 'capitals'" class="blitz-country">
+        <app-flag-display
+          [iso2]="target.iso2"
+          size="card"
+          [animate]="false"
+          [enableCultureHold]="false"
+        ></app-flag-display>
+        <h2>{{ countryName }}</h2>
+      </div>
+    </div>
+
+    <div class="arcade-choices">
+      <button
+        type="button"
+        *ngFor="let c of choices"
+        class="arcade-choice"
+        [class.arcade-choice--correct]="choiceState(c) === 'correct'"
+        [class.arcade-choice--wrong]="choiceState(c) === 'wrong'"
+        (click)="answer(c)"
+      >
+        {{ c.label }}
+      </button>
+    </div>
+  </ng-container>
+
+  <section *ngIf="phase === 'done'" class="arcade-card arcade-intro">
+    <p class="arcade-muted">{{ 'blitz.timeUp' | i18n:null:lang }}</p>
+    <div class="arcade-intro__clock arcade-intro__clock--score">{{ score }}</div>
+    <p *ngIf="newRecord" class="arcade-record">🏆 {{ 'blitz.newRecord' | i18n:null:lang }}</p>
+    <p *ngIf="!newRecord && best > 0" class="arcade-best">{{ 'blitz.best' | i18n:{ n: best }:lang }}</p>
+    <p class="arcade-muted">{{ 'blitz.answered' | i18n:{ correct: correctCount, total: answered }:lang }}</p>
+    <ion-button expand="block" size="large" (click)="start()">
+      {{ 'blitz.again' | i18n:null:lang }}
+    </ion-button>
+    <ion-button expand="block" fill="clear" (click)="goBack()">
+      {{ 'common.back' | i18n:null:lang }}
+    </ion-button>
+  </section>
+</ion-content>

@@ -34,6 +34,10 @@ export interface GlobePolygonColorState {
   multiSelected?: Set<string>;
   /** Expected matches shown after submit. */
   expectedIsos?: Set<string>;
+  /** Per-country fill overrides (hot/cold heat map, neighbour games). Wins over everything. */
+  customFills?: Map<string, string>;
+  /** Neutral fill for every other country (game-board look instead of continent colours). */
+  baseFill?: string;
 }
 
 /** ISO-3166 alpha-2 from Natural Earth (handles -99 sentinels). */
@@ -58,6 +62,10 @@ export function politicalCapColor(
   palette: GlobeThemePalette = globeThemePalette('classic'),
 ): string {
   const iso = iso2FromNaturalEarth(feature.properties);
+  const custom = iso ? state.customFills?.get(iso) : undefined;
+  if (custom) {
+    return custom;
+  }
   if (state.phase === 'feedback' && iso && state.expectedIsos) {
     const picked = state.multiSelected?.has(iso) ?? false;
     const expected = state.expectedIsos.has(iso);
@@ -85,6 +93,9 @@ export function politicalCapColor(
   if (iso && iso === state.selectedIso) {
     return palette.selectedFill;
   }
+  if (state.baseFill) {
+    return state.baseFill;
+  }
   const continent = feature.properties?.CONTINENT ?? '';
   return palette.continentFill[continent] ?? palette.defaultFill;
 }
@@ -99,7 +110,8 @@ export function politicalStrokeColor(
     iso &&
     (iso === state.selectedIso ||
       iso === state.feedbackCorrectIso ||
-      state.multiSelected?.has(iso))
+      state.multiSelected?.has(iso) ||
+      state.customFills?.has(iso))
   ) {
     return palette.strokeSelected;
   }

@@ -68,6 +68,15 @@ export const PLAY_CHILD_ROUTES: Routes = [
       import('./facts-drill/facts-drill.module').then((m) => m.FactsDrillPageModule),
   },
   {
+    path: 'blitz/:mode',
+    loadChildren: () => import('./blitz/blitz.module').then((m) => m.BlitzPageModule),
+  },
+  {
+    path: 'silhouette',
+    loadChildren: () =>
+      import('./silhouette/silhouette.module').then((m) => m.SilhouettePageModule),
+  },
+  {
     path: 'session-result',
     loadChildren: () =>
       import('./session-result/session-result.module').then(

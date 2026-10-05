@@ -138,15 +138,6 @@ export function buildPlayModesByCategory(
           needsPlayGuard: true,
         },
         {
-          id: 'globe_identify',
-          icon: 'mode-globe-find',
-          titleKey: 'play.globeIdentifyTitle',
-          subKey: 'play.globeIdentifySub',
-          categoryId: 'explore',
-          action: { type: 'globe', variant: 'identify' },
-          needsPlayGuard: true,
-        },
-        {
           id: 'map_find',
           icon: 'mode-map-find',
           titleKey: 'play.mapFindTitle',
@@ -164,15 +155,6 @@ export function buildPlayModesByCategory(
           titleKey: 'play.globeFindTitle',
           categoryId: 'explore',
           action: { type: 'globe' },
-          needsPlayGuard: false,
-        },
-        {
-          id: 'globe_identify_locked',
-          icon: 'mode-globe-find',
-          titleKey: 'play.globeIdentifyTitle',
-          subKey: 'play.globeIdentifySub',
-          categoryId: 'explore',
-          action: { type: 'globe', variant: 'identify' },
           needsPlayGuard: false,
         },
         {
@@ -284,7 +266,7 @@ export function flattenPlayModes(
 export function listSettingsPlayModes(isSubscribed: boolean): PlayModeSlide[] {
   const byCategory = buildPlayModesByCategory(isSubscribed, []);
   const exploreCore = byCategory.explore.filter(
-    (m) => (m.action.type === 'globe' && !m.action.variant) || m.action.type === 'map',
+    (m) => m.action.type === 'globe' || m.action.type === 'map',
   );
   return [...byCategory.recognition, ...exploreCore, ...byCategory.together];
 }
@@ -307,3 +289,67 @@ export function resolveSettingsPlayMode(
     options[0]!
   );
 }
+
+/**
+ * Arcade games shown on the Play hub ("Games"): daily puzzle, globe games,
+ * blitz and silhouette. Globe games stay Premium except the daily country.
+ */
+export function buildArcadeModes(isSubscribed: boolean): PlayModeSlide[] {
+  const globe = (
+    id: string,
+    variant: 'hotcold' | 'neighbors' | 'identify',
+    titleKey: string,
+    subKey: string,
+  ): PlayModeSlide => ({
+    id: isSubscribed ? id : `${id}_locked`,
+    icon: 'mode-globe-find',
+    titleKey,
+    subKey,
+    categoryId: 'explore',
+    action: { type: 'globe', variant },
+    needsPlayGuard: isSubscribed,
+  });
+  return [
+    globe('globe_hotcold', 'hotcold', 'play.hotColdTitle', 'play.hotColdSub'),
+    {
+      id: 'blitz_flags',
+      icon: 'mode-pass-speed',
+      titleKey: 'play.blitzFlagsTitle',
+      subKey: 'play.blitzSub',
+      categoryId: 'recognition',
+      action: { type: 'blitz', mode: 'flags' },
+      needsPlayGuard: true,
+    },
+    {
+      id: 'blitz_capitals',
+      icon: 'mode-pass-capitals',
+      titleKey: 'play.blitzCapitalsTitle',
+      subKey: 'play.blitzSub',
+      categoryId: 'recognition',
+      action: { type: 'blitz', mode: 'capitals' },
+      needsPlayGuard: true,
+    },
+    {
+      id: 'silhouette',
+      icon: 'mode-flag-map',
+      titleKey: 'play.silhouetteTitle',
+      subKey: 'play.silhouetteSub',
+      categoryId: 'recognition',
+      action: { type: 'silhouette' },
+      needsPlayGuard: true,
+    },
+    globe('globe_neighbors', 'neighbors', 'play.neighborsTitle', 'play.neighborsSub'),
+    globe('globe_identify', 'identify', 'play.globeIdentifyTitle', 'play.globeIdentifySub'),
+  ];
+}
+
+/** Daily mystery country — free for everyone (retention hook). */
+export const DAILY_COUNTRY_SLIDE: PlayModeSlide = {
+  id: 'daily_country',
+  icon: 'ui-daily-goal',
+  titleKey: 'play.dailyTitle',
+  subKey: 'play.dailySub',
+  categoryId: 'explore',
+  action: { type: 'globe', variant: 'daily' },
+  needsPlayGuard: false,
+};
