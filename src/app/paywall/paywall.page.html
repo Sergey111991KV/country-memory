@@ -4,7 +4,7 @@
     <ion-buttons slot="start">
       <ion-button
         (click)="goBack()"
-        [attr.aria-label]="(billingEnabled ? 'paywall.back' : 'donatePrompt.back') | i18n:null:lang"
+        [appAriaLabel]="(billingEnabled ? 'paywall.back' : 'donatePrompt.back') | i18n:null:lang"
       >
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>

@@ -57,8 +57,10 @@
 
 .home-feed-card__flag {
   display: block;
-  width: min(100%, 200px);
+  width: auto;
   height: auto;
+  max-width: min(100%, 300px);
+  max-height: 200px;
   margin: 0 auto var(--app-space-3);
   border-radius: var(--glass-radius-sm, 14px);
   box-shadow:

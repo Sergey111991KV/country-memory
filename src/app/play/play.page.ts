@@ -28,6 +28,7 @@ import { UserLearningService } from '../core/services/user-learning.service';
 import { PerfLogService } from '../core/services/perf-log.service';
 import { isBillingEnabled } from '../core/utils/billing-mode';
 import { ensurePlaySessionAccess } from '../core/utils/play-access';
+import { onFlagImgError } from '../core/utils/flag-img-fallback';
 import { playDebug } from '../core/utils/play-debug';
 import { buildQuizChoices, type QuizChoice } from '../core/utils/quiz-options';
 import { feedPromptKey, resolveFeedCardLaunch } from './play-feed-launch';
@@ -133,6 +134,8 @@ export class PlayPage implements OnInit, ViewWillEnter {
   openDaily(): Promise<void> {
     return this.launchMode(DAILY_COUNTRY_SLIDE);
   }
+
+  readonly onFlagError = onFlagImgError;
 
   hasPlayPremium(): boolean {
     return !isBillingEnabled() || this.sub.isSubscribed();

@@ -40,7 +40,7 @@
       <div class="pass-play-page__row">
         <ion-input
           [(ngModel)]="playerNames[i]"
-          [attr.aria-label]="'passPlay.playerLabel' | i18n:{ n: i + 1 }:lang"
+          [appAriaLabel]="'passPlay.playerLabel' | i18n:{ n: i + 1 }:lang"
         ></ion-input>
         <ion-button
           *ngIf="playerNames.length > 2"

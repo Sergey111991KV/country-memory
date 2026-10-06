@@ -1,7 +1,7 @@
 @let lang = locale.langSig();
 <ion-content class="ion-padding product-info-content settings-page page-safe-top">
   <div class="app-page-toolbar">
-    <ion-button fill="clear" size="small" (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
+    <ion-button fill="clear" size="small" (click)="goBack()" [appAriaLabel]="'common.back' | i18n:null:lang">
       <ion-icon slot="icon-only" name="chevron-back" aria-hidden="true"></ion-icon>
     </ion-button>
     <h1 class="app-page-toolbar__title">{{ 'aboutProduct.title' | i18n:null:lang}}</h1>

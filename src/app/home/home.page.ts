@@ -16,6 +16,7 @@ import { LocaleService } from '../core/services/locale.service';
 import { PlayPoolService } from '../core/services/play-pool.service';
 import { PlaySessionService } from '../core/services/play-session.service';
 import { PerfLogService } from '../core/services/perf-log.service';
+import { onFlagImgError } from '../core/utils/flag-img-fallback';
 
 const ROTATE_MS = 10_000;
 
@@ -27,6 +28,8 @@ const ROTATE_MS = 10_000;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage implements OnInit, ViewWillEnter {
+  readonly onFlagError = onFlagImgError;
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly feed = inject(HomeFeedService);
   private readonly playPool = inject(PlayPoolService);

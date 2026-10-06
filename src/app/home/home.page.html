@@ -19,7 +19,7 @@
       [class.home-feed-card--fade]="cardPhase === 'fade'"
       aria-live="polite"
     >
-      <img class="home-feed-card__flag" [src]="c.flagUrl" [alt]="c.countryName" width="200" height="133" />
+      <img class="home-feed-card__flag" [src]="c.flagUrl" [alt]="c.countryName" (error)="onFlagError($event, c.iso)" />
       <p class="home-feed-card__kicker">{{ c.titleKey | i18n:null:lang}}</p>
       <h2 class="home-feed-card__country">{{ c.countryName }}</h2>
       <p class="home-feed-card__body">{{ c.body }}</p>

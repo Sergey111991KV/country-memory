@@ -60,8 +60,11 @@ export class FlagDisplayComponent implements OnInit, AfterViewInit, OnChanges, O
   private pressTimer: ReturnType<typeof setTimeout> | null = null;
   private pressStartX = 0;
   private pressStartY = 0;
+  /** CORS only matters for CDN rasters under the SVG wind filter; bundled flags are same-origin. */
   get imgCrossOrigin(): 'anonymous' | null {
-    return this.flagWindDisplacement && !this.windFilterOff && this.displaySrc
+    return this.flagWindDisplacement &&
+      !this.windFilterOff &&
+      this.displaySrc.startsWith('http')
       ? 'anonymous'
       : null;
   }
@@ -123,14 +126,15 @@ export class FlagDisplayComponent implements OnInit, AfterViewInit, OnChanges, O
   }
 
   onImageError(): void {
-    if (this.flagWindDisplacement && !this.windFilterOff) {
+    if (this.imgCrossOrigin) {
+      // CDN without CORS headers (or a cached non-CORS copy): retry without the filter.
       this.windFilterOff = true;
       this.scheduleWindSync();
       return;
     }
-    if (this.loadRetryIndex < 1) {
-      this.loadRetryIndex += 1;
-      this.displaySrc = this.buildDisplaySrc();
+    this.loadRetryIndex += 1;
+    this.displaySrc = this.buildDisplaySrc();
+    if (this.displaySrc) {
       return;
     }
     this.imageError = true;
@@ -144,11 +148,9 @@ export class FlagDisplayComponent implements OnInit, AfterViewInit, OnChanges, O
     this.displaySrc = this.buildDisplaySrc();
   }
 
+  /** Bundled SVG first, then FlagCDN rasters (see FlagAssetsService). */
   private buildDisplaySrc(): string {
-    const widths: readonly (160 | 320 | 640)[] =
-      this.size === 'card' ? [320, 160] : [640, 320];
-    const width = widths[Math.min(this.loadRetryIndex, widths.length - 1)];
-    return this.flags.url(this.iso2, width);
+    return this.flags.sourceForAttempt(this.iso2, this.loadRetryIndex, this.size === 'hero');
   }
 
   onPointerDown(ev: PointerEvent): void {

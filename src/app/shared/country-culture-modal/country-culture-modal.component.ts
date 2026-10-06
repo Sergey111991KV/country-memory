@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
@@ -16,7 +16,7 @@ type SceneMode = 'loading' | 'video' | 'poster' | 'illustrated';
   styleUrls: ['./country-culture-modal.component.scss'],
   standalone: false,
 })
-export class CountryCultureModalComponent implements OnInit, OnDestroy {
+export class CountryCultureModalComponent implements OnInit {
   @Input({ required: true }) iso2!: string;
   @Input({ required: true }) countryName!: string;
   @Input({ required: true }) capital!: string;
@@ -37,10 +37,6 @@ export class CountryCultureModalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     void this.bootScene();
-  }
-
-  ngOnDestroy(): void {
-    /* video element destroyed with modal */
   }
 
   get posterBackground(): string {

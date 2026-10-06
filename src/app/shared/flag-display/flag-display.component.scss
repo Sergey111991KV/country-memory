@@ -7,12 +7,16 @@
 }
 
 .flag-display--hero {
-  max-width: min(100%, 420px);
+  --flag-max-w: min(100%, 480px);
+  --flag-max-h: min(40vh, 300px);
+  max-width: min(100%, 480px);
   margin: 0 auto;
 }
 
 .flag-display--card {
-  max-width: 200px;
+  --flag-max-w: 100%;
+  --flag-max-h: 180px;
+  max-width: 280px;
   margin: 0 auto;
 }
 
@@ -35,8 +39,10 @@
 
 .flag-display__fabric {
   position: relative;
-  flex: 1;
-  min-height: 120px;
+  /* Shrink-wrap the flag so every country keeps its real proportions (no cropping). */
+  flex: 0 1 auto;
+  min-width: 0;
+  line-height: 0;
   overflow: hidden;
   border-radius: 0 12px 12px 0;
   box-shadow:
@@ -47,22 +53,17 @@
   transform: translateZ(0);
 }
 
-.flag-display--hero .flag-display__fabric {
-  min-height: 200px;
-  aspect-ratio: 3 / 2;
-}
-
-.flag-display--card .flag-display__fabric {
-  min-height: 100px;
+.flag-display__fabric--error {
+  width: min(100%, 240px);
   aspect-ratio: 3 / 2;
 }
 
 .flag-display__fabric img {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: var(--flag-max-h, 240px);
 }
 
 .flag-wind-svg {
@@ -77,8 +78,7 @@
 }
 
 .flag-wind__motion {
-  width: 100%;
-  height: 100%;
+  display: block;
   transform-origin: left center;
   backface-visibility: hidden;
 }

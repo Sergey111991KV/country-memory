@@ -2,7 +2,7 @@
 <ion-header class="ion-no-border" [class.globe-header--preview]="previewMode">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
+      <ion-button (click)="goBack()" [appAriaLabel]="'common.back' | i18n:null:lang">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -130,7 +130,7 @@
         fill="solid"
         color="dark"
         (click)="zoomIn()"
-        [attr.aria-label]="'globe.zoomIn' | i18n:null:lang"
+        [appAriaLabel]="'globe.zoomIn' | i18n:null:lang"
       >
         <ion-icon name="add" slot="icon-only"></ion-icon>
       </ion-button>
@@ -139,7 +139,7 @@
         fill="solid"
         color="dark"
         (click)="zoomOut()"
-        [attr.aria-label]="'globe.zoomOut' | i18n:null:lang"
+        [appAriaLabel]="'globe.zoomOut' | i18n:null:lang"
       >
         <ion-icon name="remove" slot="icon-only"></ion-icon>
       </ion-button>

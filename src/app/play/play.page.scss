@@ -154,13 +154,16 @@
   position: relative;
   display: flex;
   justify-content: center;
-  width: min(100%, 14rem);
+  width: fit-content;
+  max-width: 100%;
   margin-inline: auto;
 
   img {
     display: block;
-    width: 100%;
+    width: auto;
     height: auto;
+    max-width: min(100%, 19rem);
+    max-height: min(22vh, 11rem);
     border-radius: var(--glass-radius-sm, 14px);
     box-shadow:
       0 1px 0 color-mix(in srgb, #ffffff 35%, transparent) inset,

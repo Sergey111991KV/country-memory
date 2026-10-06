@@ -7,7 +7,7 @@
         class="play-topbar__settings"
         routerLink="/tabs/settings"
         [queryParams]="{ panel: 'learning' }"
-        [attr.aria-label]="'play.gameSettings' | i18n:null:lang"
+        [appAriaLabel]="'play.gameSettings' | i18n:null:lang"
       >
         <ion-icon slot="icon-only" name="settings-outline" aria-hidden="true"></ion-icon>
       </ion-button>
@@ -77,7 +77,7 @@
           >
             <ion-icon name="earth-outline" aria-hidden="true"></ion-icon>
           </button>
-          <img [src]="c.flagUrl" [alt]="promptText" width="220" height="147" />
+          <img [src]="c.flagUrl" [alt]="promptText" (error)="onFlagError($event, c.iso)" />
         </div>
 
         <p *ngIf="c.kind !== 'flag'" class="play-quiz__clue">{{ c.body }}</p>

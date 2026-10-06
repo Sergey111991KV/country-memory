@@ -2,7 +2,7 @@
 <ion-content class="ion-padding home-about-content page-safe-top">
   <div class="about-shell">
     <div class="app-page-toolbar">
-      <ion-button fill="clear" size="small" (click)="goBack()" [attr.aria-label]="'common.back' | i18n:null:lang">
+      <ion-button fill="clear" size="small" (click)="goBack()" [appAriaLabel]="'common.back' | i18n:null:lang">
         <ion-icon slot="icon-only" name="chevron-back" aria-hidden="true"></ion-icon>
       </ion-button>
       <h1 class="app-page-toolbar__title">{{ 'home.aboutGameTitle' | i18n:null:lang}}</h1>
