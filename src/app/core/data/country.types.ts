@@ -39,6 +39,8 @@ export interface LearningEvent {
   correct: boolean;
   at: string;
   usedSearch: boolean;
+  /** ISO2 the player picked instead (wrong answers only) — feeds "weak spots". */
+  confusedWith?: string;
 }
 
 export interface CountryMastery {
@@ -46,6 +48,10 @@ export interface CountryMastery {
   timesSeen: number;
   timesCorrect: number;
   lastAt: string | null;
+  /** Leitner box 0–5 (0 = just missed / new). */
+  box?: number;
+  /** ISO timestamp when the country is due for review again. */
+  dueAt?: string;
 }
 
 /** Standard profile columns shown for every country (not unique trivia). */

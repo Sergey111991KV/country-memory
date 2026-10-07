@@ -73,6 +73,15 @@
 
   <div class="session-result-actions">
     <ion-button
+      *ngIf="missedIsos.length"
+      expand="block"
+      color="warning"
+      size="large"
+      (click)="reviewMistakes()"
+    >
+      {{ 'review.mistakesCta' | i18n:{ n: missedIsos.length }:lang }}
+    </ion-button>
+    <ion-button
       *ngIf="canPlayAgain"
       expand="block"
       color="primary"

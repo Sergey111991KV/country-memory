@@ -60,6 +60,8 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   readonly catalog = inject(CountriesCatalogService);
   readonly locale = inject(LocaleService);
   private readonly learning = inject(UserLearningService);
+  /** Countries already asked this session (no repeats). */
+  private readonly askedIsos = new Set<string>();
   private readonly dailyGoal = inject(DailyGoalService);
   private readonly playSession = inject(PlaySessionService);
   private readonly subscription = inject(SubscriptionService);
@@ -193,7 +195,11 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       this.target.iso2,
       correct,
       this.pickedViaSearch,
+      this.selectedIso,
     );
+    if (!correct) {
+      this.flyToCountry(this.target);
+    }
     this.playSession.recordAnswer(correct);
     if (correct) {
       await this.dailyGoal.bumpProgress();
@@ -346,7 +352,7 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
     requestAnimationFrame(() => this.map?.invalidateSize());
     if (this.target) {
-      this.flyToCountry(this.target, 0);
+      this.showNeutralWorld(0);
     }
   }
 
@@ -417,8 +423,10 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     if (this.playable.length === 0) {
       return;
     }
-    const idx = Math.floor(Math.random() * this.playable.length);
-    this.target = this.playable[idx] ?? null;
+    this.target = this.learning.pickForReview(this.playable, this.askedIsos);
+    if (this.target) {
+      this.askedIsos.add(this.target.iso2);
+    }
     this.selectedIso = null;
     this.pickedViaSearch = false;
     this.phase = 'pick';
@@ -428,9 +436,20 @@ export class MapFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.searchQuery = '';
     this.searchHits = [];
     this.refreshMapStyles();
-    if (this.target) {
-      this.flyToCountry(this.target, 800);
+    // Never centre on the answer — show the whole world from a random longitude.
+    this.showNeutralWorld(800);
+  }
+
+  private showNeutralWorld(durationMs: number): void {
+    if (!this.map) {
+      return;
     }
+    const center: L.LatLngExpression = [20, -150 + Math.random() * 300];
+    if (durationMs <= 0) {
+      this.map.setView(center, MAP_ZOOM_WORLD);
+      return;
+    }
+    this.map.flyTo(center, MAP_ZOOM_WORLD, { duration: durationMs / 1000 });
   }
 
   private flyToCountry(country: Country, durationMs = 1200): void {

@@ -84,6 +84,79 @@
       </p>
     </section>
 
+    <section class="progress-block glass-surface" aria-labelledby="progress-weak-heading">
+      <div class="progress-section-head">
+        <h2 id="progress-weak-heading" class="progress-kicker">{{ 'review.weakTitle' | i18n:null:lang }}</h2>
+        <ion-button
+          *ngIf="weakSpots.length"
+          size="small"
+          fill="solid"
+          color="warning"
+          (click)="practiceWeakSpots()"
+        >
+          {{ 'review.practiceAll' | i18n:null:lang }}
+        </ion-button>
+      </div>
+      <p *ngIf="!weakSpots.length" class="progress-empty">{{ 'review.weakEmpty' | i18n:null:lang }}</p>
+      <ul *ngIf="weakSpots.length" class="weak-list">
+        <li *ngFor="let w of weakSpots; trackBy: trackWeak">
+          <button type="button" class="weak-row" (click)="practiceOne(w)">
+            <app-flag-display
+              class="weak-row__flag"
+              [iso2]="w.iso2"
+              size="card"
+              [animate]="false"
+              [enableCultureHold]="false"
+            ></app-flag-display>
+            <span class="weak-row__text">
+              <strong>{{ w.label }}</strong>
+              <span class="weak-row__meta">{{ 'review.mistakes' | i18n:{ wrong: w.wrong, seen: w.seen }:lang }}</span>
+              <span *ngIf="w.confusedLabel" class="weak-row__meta">
+                {{ 'review.confusedWith' | i18n:{ list: w.confusedLabel }:lang }}
+              </span>
+            </span>
+            <ion-icon name="chevron-forward" aria-hidden="true"></ion-icon>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <section class="progress-block glass-surface" aria-labelledby="progress-ach-heading">
+      <div class="progress-section-head">
+        <h2 id="progress-ach-heading" class="progress-kicker">
+          {{ 'ach.title' | i18n:{ n: achievementsUnlocked, total: achievements.length }:lang }}
+        </h2>
+        <ion-button size="small" fill="clear" (click)="openProgressMap()">
+          <ion-icon name="earth-outline" slot="start" aria-hidden="true"></ion-icon>
+          {{ 'progressMap.open' | i18n:null:lang }}
+        </ion-button>
+      </div>
+      <div class="ach-grid">
+        <article
+          *ngFor="let a of visibleAchievements; trackBy: trackAchievement"
+          class="ach-card"
+          [class.ach-card--locked]="!a.unlocked"
+        >
+          <app-icon [icon]="a.icon" size="md"></app-icon>
+          <p class="ach-card__title">{{ a.titleKey | i18n:(a.titleParams ?? null):lang }}</p>
+          <p class="ach-card__desc">{{ a.descKey | i18n:(a.descParams ?? null):lang }}</p>
+          <div *ngIf="!a.unlocked" class="ach-card__bar" aria-hidden="true">
+            <span [style.width.%]="a.percent"></span>
+          </div>
+          <p *ngIf="!a.unlocked" class="ach-card__count">{{ a.current }}/{{ a.target }}</p>
+        </article>
+      </div>
+      <ion-button
+        *ngIf="achievements.length > 6"
+        expand="block"
+        fill="clear"
+        size="small"
+        (click)="toggleAchievements()"
+      >
+        {{ (showAllAchievements ? 'ach.showLess' : 'ach.showAll') | i18n:null:lang }}
+      </ion-button>
+    </section>
+
     <section class="progress-block glass-surface" aria-labelledby="progress-knowledge-heading">
       <h2 id="progress-knowledge-heading" class="progress-kicker">{{ 'progress.knowledgeSection' | i18n:null:lang}}</h2>
       <p class="progress-summary app-accent-text">

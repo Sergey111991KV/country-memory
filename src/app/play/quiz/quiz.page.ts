@@ -28,6 +28,7 @@ export class QuizPage implements ViewDidEnter {
 
   private readonly router = inject(Router);
   private readonly learning = inject(UserLearningService);
+  private readonly askedIsos = new Set<string>();
   private readonly dailyGoal = inject(DailyGoalService);
   private readonly playSession = inject(PlaySessionService);
   private readonly sessionComplete = inject(PlaySessionCompleteService);
@@ -92,7 +93,7 @@ export class QuizPage implements ViewDidEnter {
     this.feedbackCorrect = correct;
     this.phase = 'feedback';
 
-    await this.learning.recordAttempt('quiz', this.target.iso2, correct, false);
+    await this.learning.recordAttempt('quiz', this.target.iso2, correct, false, choice.country.iso2);
     this.playSession.recordAnswer(correct);
     if (correct) {
       await this.dailyGoal.bumpProgress();
@@ -142,11 +143,11 @@ export class QuizPage implements ViewDidEnter {
     if (this.pool.length < 4) {
       return;
     }
-    const idx = Math.floor(Math.random() * this.pool.length);
-    this.target = this.pool[idx] ?? null;
+    this.target = this.learning.pickForReview(this.pool, this.askedIsos);
     if (!this.target) {
       return;
     }
+    this.askedIsos.add(this.target.iso2);
     this.choices = buildQuizChoices(this.target, this.pool, (c) =>
       this.catalog.localizedName(c, this.locale.language),
     );

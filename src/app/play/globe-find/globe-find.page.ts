@@ -60,6 +60,7 @@ import {
   type DailyStreak,
 } from '../../core/services/daily-country.service';
 import { NeighborsService } from '../../core/services/neighbors.service';
+import { ReminderService } from '../../core/services/reminder.service';
 import { pickDaily } from '../../core/utils/daily-seed';
 import {
   type LngLat,
@@ -158,6 +159,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   private readonly globeTheme = inject(GlobeThemeService);
   private readonly dailyCountry = inject(DailyCountryService);
   private readonly neighbors = inject(NeighborsService);
+  private readonly reminders = inject(ReminderService);
 
   /** Hot/cold: guesses sorted closest-first, plus the chronological log. */
   hotGuesses: HotColdGuessView[] = [];
@@ -170,6 +172,8 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
   /** Neighbours game: land borders of the highlighted target. */
   neighborIsos: string[] = [];
   private readonly customFills = new Map<string, string>();
+  /** Countries already asked this session (no repeats). */
+  private readonly askedIsos = new Set<string>();
   private forceFullColorRefresh = false;
   private readonly borderPoints = new Map<string, LngLat[]>();
 
@@ -389,7 +393,13 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.refreshPolygonColors();
     this.flyToCountry(this.target, 1100, { reveal: true });
 
-    await this.learning.recordAttempt('globe_find', this.target.iso2, correct, false);
+    await this.learning.recordAttempt(
+      'globe_find',
+      this.target.iso2,
+      correct,
+      false,
+      this.selectedIso,
+    );
     this.playSession.recordAnswer(correct);
     if (correct) {
       await this.dailyGoal.bumpProgress();
@@ -639,6 +649,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
         this.dailyState.guesses.push({ iso2: target.iso2, km: 0 });
       }
       this.dailyStreak = await this.dailyCountry.finish(this.dailyState, solved);
+      void this.reminders.reschedule();
     }
   }
 
@@ -706,7 +717,10 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     const candidates = this.playable.filter(
       (c) => this.neighbors.neighborsOf(c.iso2).some((n) => playableIso.has(n)),
     );
-    const target = candidates[Math.floor(Math.random() * candidates.length)] ?? null;
+    const target = this.learning.pickForReview(candidates, this.askedIsos);
+    if (target) {
+      this.askedIsos.add(target.iso2);
+    }
     this.target = target;
     if (!target) {
       return;
@@ -774,7 +788,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
     this.phase = 'feedback';
     this.refreshPolygonColors();
 
-    await this.learning.recordAttempt('globe_find', this.target.iso2, correct, false);
+    await this.learning.recordAttempt('globe_find', this.target.iso2, correct, false, iso2);
     this.playSession.recordAnswer(correct);
     if (correct) {
       await this.dailyGoal.bumpProgress();
@@ -968,6 +982,7 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
 
   private async boot(): Promise<void> {
     const totalSpan = this.perf.span('GlobeQuest', 'boot');
+    this.playSession.startedAt = new Date().toISOString();
     try {
       const catalogSpan = this.perf.span('GlobeQuest', 'catalog');
       await this.catalog.ensureLoaded();
@@ -1292,9 +1307,15 @@ export class GlobeFindPage implements OnDestroy, ViewWillLeave, ViewDidEnter {
       this.pickNeighborsTarget();
       return;
     }
-    const source = this.hotColdMode ? this.mysteryPool() : this.playable;
-    const idx = Math.floor(Math.random() * source.length);
-    this.target = source[idx] ?? null;
+    if (this.hotColdMode) {
+      const source = this.mysteryPool();
+      this.target = source[Math.floor(Math.random() * source.length)] ?? null;
+    } else {
+      this.target = this.learning.pickForReview(this.playable, this.askedIsos);
+    }
+    if (this.target) {
+      this.askedIsos.add(this.target.iso2);
+    }
     if (this.target && this.identifyMode) {
       this.selectedIso = this.target.iso2;
       this.buildIdentifyChoices(this.target);

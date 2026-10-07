@@ -248,6 +248,49 @@
                 <p class="ion-no-margin">{{ 'settings.playModeHint' | i18n:null:lang}}</p>
               </ion-text>
             </ion-item>
+            <ion-item>
+              <ion-select
+                [label]="'settings.difficulty' | i18n:null:lang"
+                [value]="difficulty"
+                (ionChange)="onDifficultyChange($event)"
+                interface="popover"
+              >
+                <ion-select-option value="easy">{{ 'settings.difficultyEasy' | i18n:null:lang }}</ion-select-option>
+                <ion-select-option value="normal">{{ 'settings.difficultyNormal' | i18n:null:lang }}</ion-select-option>
+                <ion-select-option value="hard">{{ 'settings.difficultyHard' | i18n:null:lang }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item lines="none">
+              <ion-text color="medium" class="ion-text-wrap small-hint">
+                <p class="ion-no-margin">{{ 'settings.difficultyHint' | i18n:null:lang }}</p>
+              </ion-text>
+            </ion-item>
+            <ion-item>
+              <ion-toggle
+                [checked]="reminderEnabled"
+                [disabled]="!reminderSupported"
+                (ionChange)="onReminderToggle($event)"
+              >
+                {{ 'settings.reminder' | i18n:null:lang }}
+              </ion-toggle>
+            </ion-item>
+            <ion-item *ngIf="reminderEnabled">
+              <ion-select
+                [label]="'settings.reminderTime' | i18n:null:lang"
+                [value]="reminderHour"
+                (ionChange)="onReminderHourChange($event)"
+                interface="popover"
+              >
+                <ion-select-option *ngFor="let h of reminderHours" [value]="h">{{ h }}:00</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item lines="none">
+              <ion-text color="medium" class="ion-text-wrap small-hint">
+                <p class="ion-no-margin">
+                  {{ (reminderSupported ? 'settings.reminderHint' : 'settings.reminderAppOnly') | i18n:null:lang }}
+                </p>
+              </ion-text>
+            </ion-item>
           </ion-list>
 
           <ion-text color="medium" class="ion-text-wrap settings-learning-intro">

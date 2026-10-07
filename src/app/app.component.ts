@@ -16,6 +16,8 @@ import { ThemeService } from './core/services/theme.service';
 import { UserLearningService } from './core/services/user-learning.service';
 import { VisualQualityService } from './core/services/visual-quality.service';
 import { GlobeThemeService } from './core/services/globe-theme.service';
+import { ReminderService } from './core/services/reminder.service';
+import { DifficultyService } from './core/services/difficulty.service';
 import { isBillingEnabled } from './core/utils/billing-mode';
 import { environment } from '../environments/environment';
 
@@ -37,6 +39,8 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly userLearning = inject(UserLearningService);
   private readonly visualQuality = inject(VisualQualityService);
   private readonly globeTheme = inject(GlobeThemeService);
+  private readonly reminders = inject(ReminderService);
+  private readonly difficulty = inject(DifficultyService);
 
   async ngOnInit(): Promise<void> {
     await this.locale.hydrate();
@@ -47,6 +51,10 @@ export class AppComponent implements OnInit, OnDestroy {
     applyColorPaletteClass(settings.colorPalette);
     await this.visualQuality.hydrate();
     await this.globeTheme.hydrate();
+    // Spaced repetition needs mastery data before the first question is picked.
+    void this.userLearning.hydrate();
+    void this.reminders.init();
+    void this.difficulty.hydrate();
     if (isBillingEnabled()) {
       await this.subscription.init();
       await this.registerBillingResumeListener();
@@ -95,6 +103,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.appStateListener = await App.addListener('appStateChange', ({ isActive }) => {
       if (!isActive) {
         void this.userLearning.flushPersist();
+        void this.reminders.reschedule();
       }
     });
   }

@@ -6,7 +6,7 @@
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ 'play.exploreAtlasTitle' | i18n:null:lang }}</ion-title>
+    <ion-title>{{ (progressMode ? 'progressMap.title' : 'play.exploreAtlasTitle') | i18n:null:lang }}</ion-title>
     <ion-buttons slot="end">
       <ion-button
         fill="outline"
@@ -74,7 +74,9 @@
       </button>
       <div class="atlas-panel__head">
         <div class="atlas-panel__titles">
-          <p class="atlas-panel__kicker">{{ 'atlas.panelKicker' | i18n:null:lang }}</p>
+          <p class="atlas-panel__kicker">
+            {{ (progressMode ? 'progressMap.kicker' : 'atlas.panelKicker') | i18n:null:lang }}
+          </p>
           <h2 class="atlas-panel__title">{{ 'atlas.panelTitle' | i18n:null:lang }}</h2>
         </div>
         <ion-button
@@ -90,6 +92,13 @@
             aria-hidden="true"
           ></ion-icon>
         </ion-button>
+      </div>
+
+      <div *ngIf="progressMode" class="atlas-legend">
+        <span *ngFor="let s of progressStatuses" class="atlas-legend__item">
+          <span class="atlas-legend__swatch" [style.background]="progressFill(s)" aria-hidden="true"></span>
+          {{ ('progressMap.' + s) | i18n:null:lang }} · {{ progressCounts[s] }}
+        </span>
       </div>
 
       <ng-container *ngIf="!panelCollapsed">
@@ -143,11 +152,12 @@
         <button type="button" class="atlas-row__main" (click)="selectRow(row)">
           <span
             class="atlas-row__dot"
-            [style.background]="row.dotColor"
+            [style.background]="progressMode ? progressFill(row.status) : row.dotColor"
             aria-hidden="true"
           ></span>
           <span class="atlas-row__name">{{ row.name }}</span>
-          <span class="atlas-row__pct">{{ row.shareLabel }}%</span>
+          <span *ngIf="!progressMode" class="atlas-row__pct">{{ row.shareLabel }}%</span>
+          <span *ngIf="progressMode" class="atlas-row__pct">{{ ('progressMap.' + row.status) | i18n:null:lang }}</span>
           <ion-icon
             class="atlas-row__chevron"
             [name]="isExpanded(row.country.iso2) ? 'chevron-up' : 'chevron-down'"

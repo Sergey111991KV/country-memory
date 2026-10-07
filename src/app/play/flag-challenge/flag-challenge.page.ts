@@ -31,6 +31,7 @@ import {
 import { buildQuizChoices, type QuizChoice } from '../../core/utils/quiz-options';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import { SessionAccessService } from '../../core/services/session-access.service';
+import { DifficultyService } from '../../core/services/difficulty.service';
 
 type Phase = 'pick' | 'feedback';
 
@@ -56,6 +57,7 @@ export class FlagChallengePage implements ViewDidEnter {
   private readonly learningPath = inject(LearningPathService);
   private readonly subscription = inject(SubscriptionService);
   private readonly sessionAccess = inject(SessionAccessService);
+  private readonly difficulty = inject(DifficultyService);
 
   mode: FreeChallengeMode = 'flag_pick_country';
   loading = true;
@@ -71,6 +73,9 @@ export class FlagChallengePage implements ViewDidEnter {
   round = 1;
   /** Correct answers in a row (solo sessions). */
   streak = 0;
+
+  /** Countries already asked this session (no repeats). */
+  private readonly askedIsos = new Set<string>();
 
   private bootStarted = false;
 
@@ -179,7 +184,7 @@ export class FlagChallengePage implements ViewDidEnter {
     }
     this.selectedIso = choice.country.iso2;
     const correct = choice.country.iso2 === this.target.iso2;
-    await this.finishAnswer(correct, false);
+    await this.finishAnswer(correct, false, choice.country.iso2);
   }
 
   async pickCapital(capital: string): Promise<void> {
@@ -331,7 +336,7 @@ export class FlagChallengePage implements ViewDidEnter {
       return;
     }
     try {
-      await this.catalog.ensureLoaded();
+      await Promise.all([this.catalog.ensureLoaded(), this.difficulty.hydrate()]);
       this.pool = await this.playSession.resolvePool();
       if (this.pool.length < 4 && this.mode !== 'flag_type_country') {
         this.loading = false;
@@ -355,11 +360,11 @@ export class FlagChallengePage implements ViewDidEnter {
         Math.random() < 0.5 ? 'flag_pick_country' : 'capital_pick_country';
       playDebug('FlagChallenge', 'continent_mixed round mode', this.mode);
     }
-    const idx = Math.floor(Math.random() * this.pool.length);
-    this.target = this.pool[idx] ?? null;
+    this.target = this.learning.pickForReview(this.pool, this.askedIsos);
     if (!this.target) {
       return;
     }
+    this.askedIsos.add(this.target.iso2);
     playDebug('FlagChallenge', 'startRound', {
       mode: this.mode,
       target: this.target.iso2,
@@ -377,8 +382,11 @@ export class FlagChallengePage implements ViewDidEnter {
         this.mode === 'flag_pick_country' ||
         this.mode === 'capital_pick_country'
       ) {
-        this.choices = buildQuizChoices(this.target, this.pool, (c) =>
-          this.catalog.localizedName(c, this.locale.language),
+        this.choices = buildQuizChoices(
+          this.target,
+          this.pool,
+          (c) => this.catalog.localizedName(c, this.locale.language),
+          this.difficulty.choiceOptions(this.target, this.mode === 'flag_pick_country'),
         );
       }
       if (this.mode === 'country_pick_capital') {
@@ -443,13 +451,17 @@ export class FlagChallengePage implements ViewDidEnter {
     this.startRound();
   }
 
-  private async finishAnswer(correct: boolean, usedSearch: boolean): Promise<void> {
+  private async finishAnswer(
+    correct: boolean,
+    usedSearch: boolean,
+    pickedIso?: string,
+  ): Promise<void> {
     if (!this.target) {
       return;
     }
     this.feedbackCorrect = correct;
     this.phase = 'feedback';
-    await this.learning.recordAttempt('quiz', this.target.iso2, correct, usedSearch);
+    await this.learning.recordAttempt('quiz', this.target.iso2, correct, usedSearch, pickedIso);
     if (this.passPlay) {
       playDebug('PassPlay', 'round answer', { correct, round: this.round });
     } else {

@@ -51,6 +51,9 @@ import {
 } from '../play/play-mode-catalog';
 import type { PlayModeSlide } from '../play/play-mode.types';
 import { environment } from '../../environments/environment';
+import { DifficultyService } from '../core/services/difficulty.service';
+import { ReminderService } from '../core/services/reminder.service';
+import type { QuizDifficulty } from '../core/utils/quiz-options';
 
 export interface SettingsSupportBlock {
   id: 'privacy' | 'terms' | 'support' | 'logs';
@@ -87,6 +90,14 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   private readonly donatePrompt = inject(DonatePromptService);
   private readonly metricFiltersService = inject(CountryMetricFilterService);
   private readonly playModePreference = inject(PlayModePreferenceService);
+  private readonly reminders = inject(ReminderService);
+  private readonly difficultySvc = inject(DifficultyService);
+
+  readonly reminderSupported = this.reminders.supported;
+  readonly reminderHours = Array.from({ length: 15 }, (_, i) => i + 8);
+  reminderEnabled = false;
+  reminderHour = 19;
+  difficulty: QuizDifficulty = 'normal';
   private readonly playPool = inject(PlayPoolService);
   readonly displayText = inject(DisplayTextService);
   private readonly visualQualityService = inject(VisualQualityService);
@@ -453,6 +464,36 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
     await this.theme.setTheme(checked ? 'dark' : 'light');
   }
 
+  async onReminderToggle(ev: CustomEvent): Promise<void> {
+    const enabled = Boolean(ev.detail.checked);
+    const ok = await this.reminders.setPrefs({ enabled, hour: this.reminderHour });
+    this.reminderEnabled = enabled && ok;
+    this.cdr.markForCheck();
+    if (!ok) {
+      const t = await this.toastCtrl.create({
+        message: this.i18n.translate('settings.reminderDenied'),
+        duration: 2400,
+      });
+      await t.present();
+      return;
+    }
+    await this.toastSaved();
+  }
+
+  async onReminderHourChange(ev: CustomEvent): Promise<void> {
+    this.reminderHour = Number(ev.detail.value) || 19;
+    await this.reminders.setPrefs({ enabled: this.reminderEnabled, hour: this.reminderHour });
+    await this.toastSaved();
+  }
+
+  async onDifficultyChange(ev: CustomEvent): Promise<void> {
+    const v = String(ev.detail.value) as QuizDifficulty;
+    this.difficulty = v === 'easy' || v === 'hard' ? v : 'normal';
+    await this.difficultySvc.set(this.difficulty);
+    this.cdr.markForCheck();
+    await this.toastSaved();
+  }
+
   async onPlayModeChange(ev: CustomEvent): Promise<void> {
     const modeId = String(ev.detail.value ?? '');
     const slide = resolveSettingsPlayMode(modeId, this.hasPlayPremium());
@@ -513,6 +554,11 @@ export class SettingsPage implements OnInit, ViewWillEnter, ViewDidEnter {
   }
 
   async load(): Promise<void> {
+    const prefs = await this.reminders.getPrefs();
+    this.reminderEnabled = prefs.enabled;
+    this.reminderHour = prefs.hour;
+    await this.difficultySvc.hydrate();
+    this.difficulty = this.difficultySvc.level();
     if (this.billingEnabled) {
       await this.sub.init();
       await this.sessionAccess.hydrate();

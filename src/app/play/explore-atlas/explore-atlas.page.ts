@@ -20,6 +20,8 @@ import { CountryKnowledgeService } from '../../core/services/country-knowledge.s
 import { GeoJsonCacheService } from '../../core/services/geo-json-cache.service';
 import { GlobeThemeService } from '../../core/services/globe-theme.service';
 import { LocaleService } from '../../core/services/locale.service';
+import { UserLearningService } from '../../core/services/user-learning.service';
+import { LEARNED_BOX } from '../../core/utils/achievements';
 import {
   ATLAS_CONTINENT_FILTERS,
   atlasContinentDot,
@@ -44,7 +46,19 @@ export interface AtlasListRow {
   shareLabel: string;
   dotColor: string;
   fields: CountryProfileField[];
+  /** Learning status for the progress map. */
+  status: AtlasProgressStatus;
 }
+
+export type AtlasProgressStatus = 'learned' | 'practicing' | 'weak' | 'unseen';
+
+/** Progress-map fills (readable on the light basemap and in dark mode). */
+export const ATLAS_PROGRESS_FILL: Record<AtlasProgressStatus, string> = {
+  learned: '#16a34a',
+  practicing: '#f59e0b',
+  weak: '#dc2626',
+  unseen: '#cbd5e1',
+};
 
 const MAP_ZOOM_WORLD = 2;
 const MAP_ZOOM_COUNTRY = 4;
@@ -75,6 +89,17 @@ export class ExploreAtlasPage implements OnDestroy, ViewWillLeave, ViewDidEnter 
   private readonly geoCache = inject(GeoJsonCacheService);
   private readonly globeTheme = inject(GlobeThemeService);
   private readonly ngZone = inject(NgZone);
+  private readonly learning = inject(UserLearningService);
+
+  /** `?view=progress`: colour countries by what the player has learned. */
+  progressMode = false;
+  readonly progressStatuses: AtlasProgressStatus[] = ['learned', 'practicing', 'weak', 'unseen'];
+  progressCounts: Record<AtlasProgressStatus, number> = {
+    learned: 0,
+    practicing: 0,
+    weak: 0,
+    unseen: 0,
+  };
 
   readonly continentFilters = ATLAS_CONTINENT_FILTERS;
 
@@ -104,6 +129,7 @@ export class ExploreAtlasPage implements OnDestroy, ViewWillLeave, ViewDidEnter 
       .subscribe((params) => {
         this.backToKnowledge =
           (params.get('from') ?? '').toLowerCase() === 'knowledge';
+        this.setProgressMode(params.get('view') === 'progress');
         const focus = normalizeAtlasFocusIso(params.get('focus'));
         if (focus && this.bootStarted && !this.loading) {
           this.focusIso(focus);
@@ -137,6 +163,12 @@ export class ExploreAtlasPage implements OnDestroy, ViewWillLeave, ViewDidEnter 
     }
 
     if (this.bootStarted) {
+      this.setProgressMode(
+        this.route.snapshot.queryParamMap.get('view') === 'progress',
+      );
+      if (this.progressMode) {
+        this.refreshProgressStatuses();
+      }
       this.ensureMapReady();
       if (this.pendingFocusIso) {
         this.focusIso(this.pendingFocusIso);
@@ -155,7 +187,48 @@ export class ExploreAtlasPage implements OnDestroy, ViewWillLeave, ViewDidEnter 
     this.destroyMap();
   }
 
+  progressFill(status: AtlasProgressStatus): string {
+    return ATLAS_PROGRESS_FILL[status];
+  }
+
+  private setProgressMode(on: boolean): void {
+    if (this.progressMode === on) {
+      return;
+    }
+    this.progressMode = on;
+    if (this.rows.length) {
+      this.refreshProgressStatuses();
+    }
+  }
+
+  private statusFor(iso2: string): AtlasProgressStatus {
+    const m = this.learning.getMastery(iso2);
+    if (!m || m.timesSeen === 0) {
+      return 'unseen';
+    }
+    const box = m.box ?? (m.timesCorrect >= m.timesSeen ? 1 : 0);
+    if (box >= LEARNED_BOX) {
+      return 'learned';
+    }
+    return box === 0 ? 'weak' : 'practicing';
+  }
+
+  private refreshProgressStatuses(): void {
+    const counts = { learned: 0, practicing: 0, weak: 0, unseen: 0 };
+    for (const row of this.rows) {
+      row.status = this.statusFor(row.country.iso2);
+      counts[row.status] += 1;
+    }
+    this.progressCounts = counts;
+    this.lastStyleKey = '';
+    this.refreshMapStyles();
+  }
+
   goBack(): void {
+    if (this.progressMode) {
+      void this.router.navigate(['/tabs/progress']);
+      return;
+    }
     if (this.backToKnowledge) {
       void this.router.navigate(['/tabs/knowledge']);
       return;
@@ -253,7 +326,10 @@ export class ExploreAtlasPage implements OnDestroy, ViewWillLeave, ViewDidEnter 
       await Promise.all([
         this.catalog.ensureLoaded(),
         this.knowledge.ensureLoaded(),
+        this.learning.hydrate(),
       ]);
+      this.progressMode =
+        this.route.snapshot.queryParamMap.get('view') === 'progress';
       const allFeatures = await this.geoCache.getPoliticalFeatures();
       const mapIso = new Set(
         allFeatures
@@ -267,6 +343,7 @@ export class ExploreAtlasPage implements OnDestroy, ViewWillLeave, ViewDidEnter 
       );
 
       this.rows = this.buildRows(playable);
+      this.refreshProgressStatuses();
       this.lastLocale = this.locale.language;
       this.applyFilter();
 
@@ -301,6 +378,7 @@ export class ExploreAtlasPage implements OnDestroy, ViewWillLeave, ViewDidEnter 
         shareLabel: '0',
         dotColor: atlasContinentDot(country.continent),
         fields: this.knowledge.getProfileFields(country, lang),
+        status: 'unseen',
       });
     }
     for (const row of draft) {
@@ -318,6 +396,7 @@ export class ExploreAtlasPage implements OnDestroy, ViewWillLeave, ViewDidEnter 
     const selected = this.selectedIso;
     const expanded = this.expandedIso;
     this.rows = this.buildRows(playable);
+    this.refreshProgressStatuses();
     this.selectedIso = selected;
     this.expandedIso = expanded;
     this.applyFilter();
@@ -437,6 +516,15 @@ export class ExploreAtlasPage implements OnDestroy, ViewWillLeave, ViewDidEnter 
     const palette = this.globeTheme.palette();
     const iso = iso2FromNaturalEarth(feature.properties);
     const highlighted = Boolean(iso) && iso === state.selectedIso;
+    if (this.progressMode) {
+      const row = this.rows.find((r) => r.country.iso2 === iso);
+      return {
+        fillColor: ATLAS_PROGRESS_FILL[row?.status ?? 'unseen'],
+        fillOpacity: highlighted ? 0.95 : 0.8,
+        color: highlighted ? '#1e293b' : 'rgba(30, 41, 59, 0.45)',
+        weight: highlighted ? 2.5 : 0.6,
+      };
+    }
     return {
       fillColor: politicalCapColor(feature, state, palette),
       fillOpacity: highlighted ? 0.95 : 0.72,
@@ -446,7 +534,7 @@ export class ExploreAtlasPage implements OnDestroy, ViewWillLeave, ViewDidEnter 
   }
 
   private refreshMapStyles(): void {
-    const styleKey = `${this.globeTheme.theme()}|${this.selectedIso}`;
+    const styleKey = `${this.globeTheme.theme()}|${this.selectedIso}|${this.progressMode}`;
     if (styleKey === this.lastStyleKey) {
       return;
     }

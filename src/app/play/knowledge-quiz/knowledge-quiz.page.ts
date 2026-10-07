@@ -38,6 +38,7 @@ export class KnowledgeQuizPage implements ViewDidEnter {
   private readonly playPool = inject(PlayPoolService);
   private readonly playSession = inject(PlaySessionService);
   private readonly learning = inject(UserLearningService);
+  private readonly askedIsos = new Set<string>();
   private readonly dailyGoal = inject(DailyGoalService);
   private readonly sessionComplete = inject(PlaySessionCompleteService);
   private readonly subscription = inject(SubscriptionService);
@@ -155,11 +156,11 @@ export class KnowledgeQuizPage implements ViewDidEnter {
     if (this.pool.length < 4) {
       return;
     }
-    const idx = Math.floor(Math.random() * this.pool.length);
-    this.target = this.pool[idx] ?? null;
+    this.target = this.learning.pickForReview(this.pool, this.askedIsos);
     if (!this.target) {
       return;
     }
+    this.askedIsos.add(this.target.iso2);
     this.kind = Math.random() < 0.5 ? 'flag' : 'capital';
     this.targetFact = null;
     if (this.kind === 'flag') {

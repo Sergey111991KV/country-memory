@@ -16,19 +16,48 @@ function shuffle<T>(items: T[]): T[] {
   return out;
 }
 
-/** Pick three distractors, preferring same continent when possible. */
+export type QuizDifficulty = 'easy' | 'normal' | 'hard';
+
+export interface QuizChoiceOptions {
+  difficulty?: QuizDifficulty;
+  /** Look-alike ISO2 codes for the target (e.g. similar flags) — preferred on "hard". */
+  similar?: readonly string[];
+}
+
+/**
+ * Pick three distractors.
+ * - easy: other continents (answers are easy to tell apart)
+ * - normal: same continent when possible
+ * - hard: look-alikes first (similar flags), then same continent
+ */
 export function buildQuizChoices(
   target: Country,
   pool: Country[],
   labelFor: (c: Country) => string,
+  options?: QuizChoiceOptions,
 ): QuizChoice[] {
+  const difficulty = options?.difficulty ?? 'normal';
   const targetIso = target.iso2.toUpperCase();
   const others = pool.filter((c) => c.iso2.toUpperCase() !== targetIso);
   const sameContinent = others.filter((c) => c.continent === target.continent);
-  const distractorPool =
-    sameContinent.length >= 3 ? sameContinent : others;
+  const otherContinents = others.filter((c) => c.continent !== target.continent);
+  let distractorPool: Country[];
+  if (difficulty === 'easy') {
+    distractorPool = otherContinents.length >= 3 ? otherContinents : others;
+  } else {
+    distractorPool = sameContinent.length >= 3 ? sameContinent : others;
+  }
 
   const picked: Country[] = [];
+  if (difficulty === 'hard' && options?.similar?.length) {
+    const similar = new Set(options.similar.map((x) => x.toUpperCase()));
+    for (const c of shuffle(others.filter((o) => similar.has(o.iso2.toUpperCase())))) {
+      if (picked.length >= 3) {
+        break;
+      }
+      picked.push(c);
+    }
+  }
   const bag = shuffle(distractorPool);
   for (const c of bag) {
     if (picked.length >= 3) {

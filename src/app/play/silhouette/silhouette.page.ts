@@ -10,6 +10,7 @@ import { GeoJsonCacheService } from '../../core/services/geo-json-cache.service'
 import { LocaleService } from '../../core/services/locale.service';
 import { PlayPoolService } from '../../core/services/play-pool.service';
 import { PlaySessionCompleteService } from '../../core/services/play-session-complete.service';
+import { PlaySessionService } from '../../core/services/play-session.service';
 import { UserLearningService } from '../../core/services/user-learning.service';
 import { type CountrySilhouette, countrySilhouette } from '../../core/utils/country-silhouette';
 import { type GlobeCountryFeature, iso2FromNaturalEarth } from '../../core/utils/globe-geo';
@@ -36,6 +37,7 @@ export class SilhouettePage implements ViewDidEnter {
   private readonly learning = inject(UserLearningService);
   private readonly dailyGoal = inject(DailyGoalService);
   private readonly sessionComplete = inject(PlaySessionCompleteService);
+  private readonly playSession = inject(PlaySessionService);
 
   loading = true;
   loadError = false;
@@ -64,6 +66,7 @@ export class SilhouettePage implements ViewDidEnter {
       return;
     }
     this.bootStarted = true;
+    this.playSession.startedAt = new Date().toISOString();
     try {
       await Promise.all([this.catalog.ensureLoaded(), this.knowledge.ensureLoaded()]);
       const [all, base] = await Promise.all([
@@ -110,7 +113,13 @@ export class SilhouettePage implements ViewDidEnter {
     } else {
       this.streak = 0;
     }
-    await this.learning.recordAttempt('quiz', this.target.iso2, this.feedbackCorrect, false);
+    await this.learning.recordAttempt(
+      'quiz',
+      this.target.iso2,
+      this.feedbackCorrect,
+      false,
+      choice.country.iso2,
+    );
   }
 
   choiceState(iso2: string): 'correct' | 'wrong' | 'default' {
@@ -154,9 +163,7 @@ export class SilhouettePage implements ViewDidEnter {
   }
 
   private startRound(): void {
-    const fresh = this.pool.filter((c) => !this.used.has(c.iso2));
-    const source = fresh.length ? fresh : this.pool;
-    const target = source[Math.floor(Math.random() * source.length)]!;
+    const target = this.learning.pickForReview(this.pool, this.used) ?? this.pool[0]!;
     this.used.add(target.iso2);
     this.target = target;
     this.shape = countrySilhouette(this.features.get(target.iso2)?.geometry);

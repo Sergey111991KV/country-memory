@@ -341,3 +341,24 @@
     padding-top: 12px;
   }
 }
+
+.atlas-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 4px 0 6px;
+  font-size: 0.78rem;
+}
+
+.atlas-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.atlas-legend__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.2);
+}

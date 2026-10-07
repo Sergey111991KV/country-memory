@@ -23,7 +23,19 @@ import { PerfLogService } from '../core/services/perf-log.service';
 import { SessionAccessService } from '../core/services/session-access.service';
 import { SubscriptionService } from '../core/services/subscription.service';
 import { isBillingEnabled } from '../core/utils/billing-mode';
+import { AchievementsService } from '../core/services/achievements.service';
+import { ReviewLaunchService } from '../core/services/review-launch.service';
+import type { AchievementView } from '../core/utils/achievements';
 import { environment } from '../../environments/environment';
+
+export interface WeakSpotRow {
+  iso2: string;
+  label: string;
+  wrong: number;
+  seen: number;
+  confusedLabel: string;
+  confusedIsos: string[];
+}
 
 export interface PathChapterDot {
   id: string;
@@ -54,6 +66,8 @@ export class ProgressPage implements ViewWillEnter, ViewDidEnter {
   private readonly perf = inject(PerfLogService);
   private readonly sessionAccess = inject(SessionAccessService);
   private readonly router = inject(Router);
+  private readonly achievementsSvc = inject(AchievementsService);
+  private readonly reviewLaunch = inject(ReviewLaunchService);
 
   readonly billingEnabled = isBillingEnabled();
   readonly freeGamesLimit = environment.freeGamesLimit;
@@ -72,6 +86,10 @@ export class ProgressPage implements ViewWillEnter, ViewDidEnter {
   statRows: ManifestStatRow[] = [];
   pathDots: PathChapterDot[] = [];
   recent: { label: string; modeLabel: string; correct: boolean }[] = [];
+  weakSpots: WeakSpotRow[] = [];
+  achievements: AchievementView[] = [];
+  achievementsUnlocked = 0;
+  showAllAchievements = false;
 
   private lastRefreshKey: string | null = null;
 
@@ -96,6 +114,7 @@ export class ProgressPage implements ViewWillEnter, ViewDidEnter {
     await this.learningPath.ensureLoaded();
     const goal = await this.dailyGoal.syncFromLearning();
     const lang = this.locale.language;
+    await this.refreshLearningInsights(lang);
     const refreshKey = this.buildRefreshKey(goal.progress, goal.target, lang);
     if (this.lastRefreshKey === refreshKey) {
       span.end({ skipped: true, reason: 'snapshot' });
@@ -146,6 +165,58 @@ export class ProgressPage implements ViewWillEnter, ViewDidEnter {
       practiced: this.practicedCount,
       events: this.learning.getRecentEvents(100).length,
     });
+  }
+
+  /** Weak spots + achievements (cheap; refreshed on every visit). */
+  private async refreshLearningInsights(lang: AppLang): Promise<void> {
+    const nameOf = (iso: string): string => {
+      const c = this.catalog.getByIso(iso);
+      return c ? this.catalog.localizedName(c, lang) : iso;
+    };
+    this.weakSpots = this.learning.getWeakSpots(8).map((w) => ({
+      iso2: w.iso2,
+      label: nameOf(w.iso2),
+      wrong: w.wrong,
+      seen: w.seen,
+      confusedIsos: w.confusedWith,
+      confusedLabel: w.confusedWith.map(nameOf).join(', '),
+    }));
+    this.achievements = await this.achievementsSvc.list();
+    this.achievementsUnlocked = this.achievements.filter((a) => a.unlocked).length;
+    this.cdr.markForCheck();
+  }
+
+  get visibleAchievements(): AchievementView[] {
+    return this.showAllAchievements ? this.achievements : this.achievements.slice(0, 6);
+  }
+
+  toggleAchievements(): void {
+    this.showAllAchievements = !this.showAllAchievements;
+    this.cdr.markForCheck();
+  }
+
+  practiceWeakSpots(): void {
+    const isos = this.weakSpots.map((w) => w.iso2);
+    const confused = ([] as string[]).concat(...this.weakSpots.map((w) => w.confusedIsos));
+    void this.reviewLaunch.practice(isos, confused);
+  }
+
+  practiceOne(row: WeakSpotRow): void {
+    void this.reviewLaunch.practice([row.iso2], row.confusedIsos);
+  }
+
+  openProgressMap(): void {
+    void this.router.navigate(['/tabs/play/explore-atlas'], {
+      queryParams: { view: 'progress' },
+    });
+  }
+
+  trackWeak(_index: number, row: WeakSpotRow): string {
+    return row.iso2;
+  }
+
+  trackAchievement(_index: number, a: AchievementView): string {
+    return a.id;
   }
 
   private buildPathDots(): PathChapterDot[] {

@@ -9,6 +9,7 @@ import { DailyGoalService } from '../../core/services/daily-goal.service';
 import { LocaleService } from '../../core/services/locale.service';
 import { PlayPoolService } from '../../core/services/play-pool.service';
 import { SessionAccessService } from '../../core/services/session-access.service';
+import { DifficultyService } from '../../core/services/difficulty.service';
 import { SubscriptionService } from '../../core/services/subscription.service';
 import { UserLearningService } from '../../core/services/user-learning.service';
 import {
@@ -49,6 +50,7 @@ export class BlitzPage implements ViewDidEnter, ViewWillLeave, OnDestroy {
   private readonly dailyGoal = inject(DailyGoalService);
   private readonly sessionAccess = inject(SessionAccessService);
   private readonly subscription = inject(SubscriptionService);
+  private readonly difficulty = inject(DifficultyService);
 
   mode: BlitzMode = 'flags';
   phase: BlitzPhase = 'ready';
@@ -98,7 +100,7 @@ export class BlitzPage implements ViewDidEnter, ViewWillLeave, OnDestroy {
   async ionViewDidEnter(): Promise<void> {
     const mode = this.route.snapshot.paramMap.get('mode');
     this.mode = mode === 'capitals' ? 'capitals' : 'flags';
-    await this.catalog.ensureLoaded();
+    await Promise.all([this.catalog.ensureLoaded(), this.difficulty.hydrate()]);
     this.pool = await this.playPool.getFilteredFreePool();
     this.best = await this.records.best(this.recordId);
     this.loading = false;
@@ -156,7 +158,7 @@ export class BlitzPage implements ViewDidEnter, ViewWillLeave, OnDestroy {
       this.penaltyPulse = true;
       setTimeout(() => (this.penaltyPulse = false), 600);
     }
-    void this.learning.recordAttempt('quiz', target.iso2, choice.correct, false);
+    void this.learning.recordAttempt('quiz', target.iso2, choice.correct, false, choice.key);
     if (choice.correct) {
       void this.dailyGoal.bumpProgress();
     }
@@ -211,15 +213,17 @@ export class BlitzPage implements ViewDidEnter, ViewWillLeave, OnDestroy {
   }
 
   private nextQuestion(): void {
-    const fresh = this.pool.filter((c) => !this.recentIsos.includes(c.iso2));
-    const source = fresh.length >= 4 ? fresh : this.pool;
-    const target = source[Math.floor(Math.random() * source.length)]!;
+    const target =
+      this.learning.pickForReview(this.pool, new Set(this.recentIsos)) ?? this.pool[0]!;
     this.recentIsos = [...this.recentIsos, target.iso2].slice(-Math.min(20, this.pool.length - 4));
     this.target = target;
     const lang = this.locale.language;
     if (this.mode === 'flags') {
-      this.choices = buildQuizChoices(target, this.pool, (c) =>
-        this.catalog.localizedName(c, lang),
+      this.choices = buildQuizChoices(
+        target,
+        this.pool,
+        (c) => this.catalog.localizedName(c, lang),
+        this.difficulty.choiceOptions(target, true),
       ).map((c) => ({
         key: c.country.iso2,
         label: c.label,
@@ -227,8 +231,11 @@ export class BlitzPage implements ViewDidEnter, ViewWillLeave, OnDestroy {
       }));
       return;
     }
-    this.choices = buildQuizChoices(target, this.pool, (c) =>
-      this.catalog.localizedCapital(c, lang),
+    this.choices = buildQuizChoices(
+      target,
+      this.pool,
+      (c) => this.catalog.localizedCapital(c, lang),
+      this.difficulty.choiceOptions(target, false),
     ).map((c) => ({
       key: c.country.iso2,
       label: c.label,

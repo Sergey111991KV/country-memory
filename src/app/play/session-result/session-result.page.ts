@@ -12,6 +12,7 @@ import { DonatePromptService } from '../../core/services/donate-prompt.service';
 import { LocaleService } from '../../core/services/locale.service';
 import { PlaySessionResultService } from '../../core/services/play-session-result.service';
 import { PlaySessionService } from '../../core/services/play-session.service';
+import { ReviewLaunchService } from '../../core/services/review-launch.service';
 import { createPassPlaySession } from '../../core/services/pass-play-session';
 import { playDebug } from '../../core/utils/play-debug';
 
@@ -30,8 +31,12 @@ export class SessionResultPage implements ViewDidEnter {
   private readonly donatePrompt = inject(DonatePromptService);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  private readonly reviewLaunch = inject(ReviewLaunchService);
+
   result: PlaySessionResultPayload | null = null;
   showDonatePrompt = false;
+  /** Countries missed this session — offered as a short review round. */
+  missedIsos: string[] = [];
 
   ionViewDidEnter(): void {
     this.result = this.results.consume();
@@ -40,7 +45,12 @@ export class SessionResultPage implements ViewDidEnter {
       void this.router.navigate(['/tabs/play'], { replaceUrl: true });
       return;
     }
+    this.missedIsos = this.isPassPlay ? [] : this.reviewLaunch.missedThisSession();
     void this.checkDonatePrompt();
+  }
+
+  reviewMistakes(): void {
+    void this.reviewLaunch.practice(this.missedIsos);
   }
 
   private async checkDonatePrompt(): Promise<void> {

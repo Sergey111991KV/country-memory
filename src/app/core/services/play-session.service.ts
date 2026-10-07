@@ -41,6 +41,8 @@ export class PlaySessionService {
   /** Solo session score (reset in clear). */
   sessionCorrect = 0;
   sessionAnswered = 0;
+  /** ISO time the current session started (for "review mistakes"). */
+  startedAt = new Date().toISOString();
 
   setPool(pool: Country[]): void {
     this.poolOverride = pool;
@@ -92,6 +94,7 @@ export class PlaySessionService {
     this.factsDrillKind = null;
     this.sessionCorrect = 0;
     this.sessionAnswered = 0;
+    this.startedAt = new Date().toISOString();
   }
 
   setPassPlay(session: PassPlaySession): void {
