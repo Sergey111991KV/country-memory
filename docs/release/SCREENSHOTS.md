@@ -71,6 +71,7 @@ npm run cap:sync:release
 Ready-to-upload folders:
 
 - `screenshots/ios/app-store-6.5/` → **1284×2778**
+- `screenshots/ios/app-store-iphone-dynamic-island/` → **1179×2556** (iPhone Dynamic Island, medium display)
 - `screenshots/ios/app-store-ipad-13/` → **2064×2752** (letterboxed)
 
 ## Tips

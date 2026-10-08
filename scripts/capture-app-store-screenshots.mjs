@@ -9,7 +9,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outDir = join(__dirname, '../screenshots/ios/raw-final');
+const mediumOutDir = join(__dirname, '../screenshots/ios/app-store-iphone-dynamic-island');
 mkdirSync(outDir, { recursive: true });
+mkdirSync(mediumOutDir, { recursive: true });
 
 const BASE = process.env.SCREENSHOT_BASE_URL ?? 'http://127.0.0.1:4200';
 const PROFILE = {
@@ -29,8 +31,8 @@ async function seedAuth(page) {
   }, PROFILE);
 }
 
-async function shot(page, name) {
-  const path = join(outDir, `${name}.png`);
+async function shot(page, name, targetDir = outDir) {
+  const path = join(targetDir, `${name}.png`);
   await page.waitForTimeout(800);
   await page.screenshot({ path, fullPage: false });
   console.log('wrote', path);
@@ -105,6 +107,56 @@ async function main() {
   await page.goto(`${BASE}/tabs/play/about-game`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
   await shot(page, '10-about-game');
+
+  const mediumContext = await browser.newContext({
+    ...devices['iPhone 14 Pro'],
+    viewport: { width: 393, height: 852 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+    locale: 'en-US',
+    colorScheme: 'light',
+  });
+  const mediumPage = await mediumContext.newPage();
+  await seedAuth(mediumPage);
+
+  const mediumRoutes = [
+    ['01-play-hub', '/tabs/play', 1500],
+    ['02-knowledge', '/tabs/knowledge', 1500],
+    ['03-globe-quest', '/tabs/play/globe-find', 2500],
+    ['04-map-quest', '/tabs/play/map-find', 2000],
+    ['05-flag-quiz', '/tabs/play/challenge/flag_pick_country', 2000],
+    ['07-progress', '/tabs/progress', 1500],
+    ['08-knowledge-quiz', '/tabs/play/knowledge-quiz', 1800],
+    ['09-learning-path', '/tabs/play/learn', 1500],
+    ['10-about-game', '/tabs/play/about-game', 1200],
+  ];
+  for (const [name, route, delay] of mediumRoutes) {
+    await mediumPage.goto(`${BASE}${route}`, { waitUntil: 'networkidle' });
+    await mediumPage.waitForTimeout(delay);
+    await shot(mediumPage, name, mediumOutDir);
+  }
+  await mediumPage.goto(`${BASE}/tabs/play/challenge/flag_pick_country`, {
+    waitUntil: 'networkidle',
+  });
+  await mediumPage.waitForTimeout(2000);
+  await mediumPage.evaluate(async () => {
+    const el = document.querySelector('app-flag-display');
+    // @ts-ignore
+    const cmp = window.ng?.getComponent(el);
+    if (!cmp) {
+      throw new Error('flag-display not found');
+    }
+    cmp.enableCultureHold = true;
+    cmp.iso2 = 'JP';
+    await cmp.openCultureView();
+  });
+  await mediumPage.waitForTimeout(2000);
+  await mediumPage.addStyleTag({
+    content: '.culture-modal__asset-hint { display: none !important; }',
+  });
+  await shot(mediumPage, '06-country-portrait', mediumOutDir);
+  await mediumContext.close();
 
   await browser.close();
   console.log('Done. Output:', outDir);
