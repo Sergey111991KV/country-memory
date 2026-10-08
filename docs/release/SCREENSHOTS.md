@@ -64,6 +64,9 @@ npm run cap:sync:release
 | 5 | `05-flag-quiz.png` | Flag Quiz | `/tabs/play/challenge/flag_pick_country` — flag + 4 answers |
 | 6 | `06-country-portrait.png` | Country Portrait | Culture modal (long-press flag where enabled) |
 | 7 | `07-progress.png` | Progress | `/tabs/progress` — daily goal + stats |
+| 8 | `08-knowledge-quiz.png` | Knowledge Quiz | `/tabs/play/knowledge-quiz` — country knowledge challenge |
+| 9 | `09-learning-path.png` | Learning Path | `/tabs/play/learn` — guided country-learning levels |
+| 10 | `10-about-game.png` | How It Works | `/tabs/play/about-game` — learning modes and progress overview |
 
 Ready-to-upload folders:
 

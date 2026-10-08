@@ -22,6 +22,10 @@ async function seedAuth(page) {
     localStorage.setItem('flagfield_profile_v1', JSON.stringify(profile));
     localStorage.setItem('app_theme_v1', JSON.stringify('light'));
     localStorage.setItem('app_theme_light_default_v2', JSON.stringify(1));
+    localStorage.setItem(
+      'flagfield_learned_marks_v1',
+      JSON.stringify({ countries: ['US', 'JP', 'FR', 'BR', 'AU'], facts: [] }),
+    );
   }, PROFILE);
 }
 
@@ -89,6 +93,18 @@ async function main() {
   await page.goto(`${BASE}/tabs/progress`, { waitUntil: 'networkidle' });
   await page.waitForTimeout(1500);
   await shot(page, '07-progress');
+
+  await page.goto(`${BASE}/tabs/play/knowledge-quiz`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1800);
+  await shot(page, '08-knowledge-quiz');
+
+  await page.goto(`${BASE}/tabs/play/learn`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
+  await shot(page, '09-learning-path');
+
+  await page.goto(`${BASE}/tabs/play/about-game`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1200);
+  await shot(page, '10-about-game');
 
   await browser.close();
   console.log('Done. Output:', outDir);
