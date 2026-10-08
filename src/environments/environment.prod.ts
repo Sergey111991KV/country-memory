@@ -26,7 +26,7 @@ export const environment = {
   /** Shown on Settings — contact for help */
   supportEmail: 'supp0rt.serg@yandex.com',
 
-  appVersion: '1.0.4',
+  appVersion: '1.0.5',
   donateUrl: 'https://destream.net/live/SergeyKosilov/donate',
   developerWebsiteUrl: 'https://addeo.github.io',
 };
